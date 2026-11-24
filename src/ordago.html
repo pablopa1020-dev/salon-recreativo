@@ -504,6 +504,7 @@ function migrate(s){
   if(!s.stats)s.stats={won:0,lances:0,ordagos:0};
   if(s.racha===undefined)s.racha=0;
   if(s.m&&s.m.bet&&s.m.bet.prev===undefined)s.m.bet.prev=s.m.bet.state==='rivRaise'?2:1;
+  if(!s.read)s.read={env:0,weak:0,faced:0,folds:0};
   if(s.m&&s.m.nerve===undefined)s.m.nerve=60;if(s.m&&s.m.vacas===undefined)s.m.vacas=null;if(!s.stats.faroles)s.stats.faroles=0;
   s.v=3;return s;
 }
@@ -583,22 +584,46 @@ function playerWins(lance,P,R){
 }
 function hasPares(cards,mine){return !!paresOf(cards,mine)}
 function hasJuego(cards,mine){return jsum(cards,mine)>=31}
-function strength(lance,cond){
-  const R=S.m.rh.map(id=>S.m.rcards[id]);
-  if(S.m.boss==='espia'){const P=S.hand.map(DC);return playerWins(lance,P,R)?0:1}
-  const fooled=S.m.belief&&SENAS[S.m.belief].l===lance?0.45:1;
+/* how good a hand looks in one lance, from 0 to 1; used to read what a bet means */
+function handScore(lance,cards){
+  if(lance==='grande'||lance==='chica'){
+    const v=cards.map(c=>gv(c,false,lance)).sort((a,b)=>lance==='grande'?b-a:a-b).map(x=>lance==='grande'?(x-1)/11:(12-x)/11);
+    return v[0]*.55+v[1]*.25+v[2]*.13+v[3]*.07;
+  }
+  if(lance==='pares'){const p=paresOf(cards,false);return p?[0,.3,.55,.8][p.t]+p.r[0]/12*.2:0}
+  if(lance==='juego'){const t=jsum(cards,false);return t<31?0:1-jrank(t,false)/9}
+  return Math.min(1,jsum(cards,false)/30);
+}
+/* the rival's chance of winning a lance. Instead of comparing against any hand, he weighs the hands
+   you could hold given what you did: a bet makes strong hands likelier (minus how often you bluff),
+   a pass makes them a bit less likely, and refusing the mus suggests you are well served */
+function strength(lance,cond,ctx){
+  const m=S.m,R=m.rh.map(id=>m.rcards[id]);
+  if(m.boss==='espia'){const P=S.hand.map(DC);return playerWins(lance,P,R)?0:1}
+  const fooled=m.belief&&SENAS[m.belief].l===lance?0.45:1;
   const pool=[];for(const s of 'oceb')for(const r of RANKS)pool.push({r,s});
-  let win=0,n=0,tries=0;
-  while(n<70&&tries<500){
+  let W=0,win=0,n=0,tries=0;
+  while(n<110&&tries<700){
     tries++;shuffle(pool);const opp=pool.slice(0,4);
     if(cond==='pares'&&!hasPares(opp,false))continue;
     if(cond==='juego'&&!hasJuego(opp,false))continue;
     if(cond==='nojuego'&&hasJuego(opp,false))continue;
-    n++;const c=compare(lance,opp,R,false);
-    if(c<0||(c===0&&S.m.mano==='riv'))win++;
+    n++;
+    const sc=handScore(lance,opp);let w=1;
+    if(ctx&&ctx.mode==='bet')w=ctx.beta+(1-ctx.beta)/(1+Math.exp(-(sc-ctx.theta)/0.08));
+    else if(ctx&&ctx.mode==='passed')w=1-0.55/(1+Math.exp(-(sc-0.7)/0.08));
+    if(m.pCut)w*=0.6+0.8*sc;
+    W+=w;const c=compare(lance,opp,R,false);
+    if(c<0||(c===0&&m.mano==='riv'))win+=w;
   }
-  return (n?win/n:0.5)*fooled;
+  return (W?win/W:0.5)*fooled;
 }
+/* what the rival has learnt about you during the run */
+function readOf(){if(!S.read)S.read={env:0,weak:0,faced:0,folds:0};return S.read}
+const pBluff=()=>{const r=readOf();return Math.max(.1,Math.min(.6,(1+r.weak)/(4+r.env)))};
+const pFolds=()=>{const r=readOf();return (r.folds+1)/(r.faced+3)};
+/* positive when the rival is behind on the scoreboard */
+function behind(){const m=S.m;return m.me/m.tMe-m.riv/m.tRiv}
 
 /* ---------- match flow ---------- */
 function startMatch(){
@@ -608,7 +633,7 @@ function startMatch(){
 }
 function rivalDeck(){const d=[];for(const s of 'oceb')for(const r of RANKS)d.push({r,s});if(S.m.boss==='tramposo')for(const s of 'oceb')d.push({r:12,s});return shuffle(d)}
 function newRound(quiet){
-  const m=S.m;m.senaDone=false;m.belief=null;m.challenge=null;
+  const m=S.m;m.senaDone=false;m.belief=null;m.challenge=null;m.pCut=false;
   m.pdraw=shuffle(S.deck.map(c=>c.id));S.hand=[];S.sel=[];
   m.rdeck=rivalDeck();m.rcards={};m.rh=[];
   for(let i=0;i<4;i++){const c=m.rdeck.pop();const id='r'+i;m.rcards[id]=c;m.rh.push(id)}
@@ -649,7 +674,7 @@ function doMus(){
   if(m.musLeft<=0){m.step='bet';prepLances()}
   save();render();SFX.deal();
 }
-function cortar(){const m=S.m;if(busy||m.step!=='mus')return;say('Vale, a jugar','me');S.sel=[];m.step='bet';prepLances();save();render()}
+function cortar(){const m=S.m;if(busy||m.step!=='mus')return;m.pCut=true;say('Vale, a jugar','me');S.sel=[];m.step='bet';prepLances();save();render()}
 
 function prepLances(){
   const m=S.m,p=P(),r=R();
@@ -673,19 +698,40 @@ function nextLance(){
   if(m.mano==='riv')rivalOpens();
 }
 function condFor(l){return l.k==='pares'?'pares':l.k==='juego'?'juego':l.k==='punto'?'nojuego':null}
-function curS(){const l=S.m.L[S.m.li];return strength(l.k,condFor(l))}
 function aggr(){return S.m.boss==='gallito'?0.25:S.m.boss==='campeon'?0.12:0}
 /* nerves: below 60 the rival gets scared (accepts and bets less), above 60 he gets bold */
 const nadj=()=>((S.m.nerve==null?60:S.m.nerve)-60)/220;
 function nerve(d){const m=S.m;m.nerve=Math.max(0,Math.min(100,(m.nerve==null?60:m.nerve)+d))}
 const maxBet=()=>Math.max(2,Math.ceil((S.m.tMe-S.m.me)/2));
 /* bigger bets make the rival more careful */
-const betPenalty=x=>0.035*Math.max(0,x-2);
+const bold=()=>aggr()+nadj();
+/* the rival's answer to your envite of X stones */
+function answerEnvite(l,X){
+  const m=S.m,fear=has('farolero')?0.15:0,bd=bold();
+  const s=strength(l.k,condFor(l),{mode:'bet',theta:Math.min(0.85,0.42+0.04*(X-2)+(m.pCut?0.06:0)),beta:pBluff()});
+  /* refusing costs 1 stone, accepting risks X: small bets are called more easily than big ones */
+  const thr=0.5-1/(2*X)+0.12+fear-bd;
+  const raiseV=s>0.78-bd*0.5&&Math.random()<0.55;
+  const raiseB=!raiseV&&s<0.3&&Math.random()<bluffRate()*0.45;
+  if(raiseV||raiseB)return {a:'raise',r:raiseV&&s>0.9?3:2,bluff:raiseB,s};
+  return {a:s>thr||(m.boss==='gallito'&&Math.random()<.6)?'accept':'refuse',s};
+}
+/* bluffs more against players who fold a lot, and when he feels bold */
+const bluffRate=()=>Math.max(0,Math.min(.4,0.14+bold()*0.6+(pFolds()-0.35)*0.45));
+function rivalOrdago(l,bluff){const m=S.m;m.bet={state:'rivOrdago',amt:1,prev:1};l.by='riv';l.rbluff=!!bluff;say('¡ÓRDAGO!');ordagoScene('El rival')}
 function rivalOpens(){
-  const m=S.m,s=curS(),l=m.L[m.li];
-  if(s>0.93&&Math.random()<0.22&&canOrdago()){m.bet={state:'rivOrdago',amt:1,prev:1};l.by='riv';say('¡ÓRDAGO!');ordagoScene('El rival');return}
-  if(s>0.68-aggr()-nadj()||Math.random()<0.07+aggr()+Math.max(0,nadj())){
-    const a=s>0.86?rnd([3,4,5]):2;m.bet={state:'rivEnv',amt:a,prev:1};l.by='riv';l.offer=a;say(a===2?'¡Envido!':'¡Envido '+a+'!');return}
+  const m=S.m,l=m.L[m.li];
+  const passed=m.mano==='me';
+  const s=strength(l.k,condFor(l),passed?{mode:'passed'}:null),bd=bold(),bh=behind();
+  if(canOrdago()){
+    if(s>0.9&&Math.random()<0.1+Math.max(0,bh)*0.5+(l.k==='juego'||l.k==='pares'?0.05:0)){rivalOrdago(l,false);return}
+    if(s<0.25&&bh>0.45&&Math.random()<0.06){rivalOrdago(l,true);return}
+  }
+  if(s>0.64-bd){
+    if(s>0.86&&!passed&&Math.random()<0.22){say('Paso');return}
+    const a=s>0.86?rnd([3,4,5]):s>0.75?rnd([2,3]):2;m.bet={state:'rivEnv',amt:a,prev:1};l.by='riv';l.offer=a;l.rbluff=false;say(a===2?'¡Envido!':'¡Envido '+a+'!');return}
+  if(s<0.34&&Math.random()<bluffRate()){
+    const a=Math.random()<0.7?2:3;m.bet={state:'rivEnv',amt:a,prev:1};l.by='riv';l.offer=a;l.rbluff=true;say(a===2?'¡Envido!':'¡Envido '+a+'!');return}
   say('Paso');
 }
 function canOrdago(){return S.m.boss!=='cura'}
@@ -717,14 +763,17 @@ async function act(a,x){
 async function act2(a,x){
   const m=S.m;
   const l=m.L[m.li],b=m.bet;
-  const s=curS();
-  const fear=has('farolero')?0.15:0,fb=has('farolero')?1:0;
+  const fear=has('farolero')?0.15:0,fb=has('farolero')?1:0,bd=bold(),cond=condFor(l);
+  if(['rivEnv','rivRaise','rivOrdago'].includes(b.state)&&(a==='quiero'||a==='noquiero')){const r=readOf();r.faced++;if(a==='noquiero')r.folds++}
   const finish=()=>{if(!checkEnd()){nextLance();save();render()}};
   UI.choose=null;
   if(a==='ordago'){
     if(!canOrdago())return toast('El Padre Ramón no permite órdagos.');
     say('¡Órdago!','me');l.by='me';render();await ordagoScene('Tú');
-    const acc=S.m.boss==='espia'?s>0.5:s>0.7-aggr()-nadj();
+    const s=strength(l.k,cond,{mode:'bet',theta:0.62+(m.pCut?0.05:0),beta:pBluff()*0.8});
+    /* the whole game is at stake: careful when ahead, braver when behind */
+    const thr=Math.max(0.42,Math.min(0.85,0.6-behind()*0.35))+fear-bd*0.5;
+    const acc=m.boss==='espia'?s>0.5:s>thr;
     S.stats.ordagos++;
     if(acc){say('¡Quiero!');render();await wait(600);return resolveOrdago(l)}
     say('No quiero');award('me',Math.max(1,b.state==='open'?1:b.amt)+fb);render();await wait(500);return finish();
@@ -738,10 +787,9 @@ async function act2(a,x){
     if(a==='envido'){
       const X=Math.max(2,Math.min(maxBet(),x||2));
       l.by='me';l.offer=X;say(X===2?'¡Envido!':'¡Envido '+X+'!','me');SFX.chip();render();await wait(450);
-      const pen=betPenalty(X);
-      const raise=s>0.82-aggr()+pen-nadj()&&Math.random()<0.55;
-      if(raise){const r=s>0.9?3:2;m.bet={state:'rivRaise',amt:X+r,prev:X};l.offer=X+r;say('¡'+r+' más!');save();render();return}
-      const acc=s>0.45+fear-aggr()+pen-nadj()||(S.m.boss==='gallito'&&Math.random()<.7-pen);
+      const dec=answerEnvite(l,X);
+      if(dec.a==='raise'){const r=dec.r;l.rbluff=dec.bluff;m.bet={state:'rivRaise',amt:X+r,prev:X};l.offer=X+r;say('¡'+r+' más!');save();render();return}
+      const acc=dec.a==='accept';
       if(acc){l.stake=X;say('¡Quiero!');render();await wait(350);return finish()}
       say('No quiero');award('me',1+fb);render();await wait(400);return finish();
     }
@@ -752,7 +800,8 @@ async function act2(a,x){
     if(a==='subir'&&b.state==='rivEnv'){
       const X=Math.max(2,Math.min(maxBet(),x||2)),tot=b.amt+X;
       l.offer=tot;say('¡'+X+' más!','me');SFX.chip();render();await wait(450);
-      if(s>0.6+fear-aggr()+betPenalty(tot)-nadj()){l.stake=tot;say('¡Quiero!');render();await wait(350);return finish()}
+      const s=strength(l.k,cond,{mode:'bet',theta:Math.min(0.88,0.5+0.035*(tot-2)),beta:pBluff()*0.8})*(l.rbluff?0.6:1);
+      if(s>0.5-b.amt/(2*tot)+0.1+fear-bd){l.stake=tot;say('¡Quiero!');render();await wait(350);return finish()}
       say('No quiero');award('me',b.amt+fb);render();await wait(400);return finish();
     }
   }
@@ -801,6 +850,13 @@ async function runReveal(){
     /* a refused bet of yours that you would have lost is a bluff that worked */
     if(l.deje&&l.deje.side==='me'&&l.by==='me'&&l.mode==='bet'&&!playerWins(l.k,p,r)){
       nerve(-15);S.stats.faroles=(S.stats.faroles||0)+1;m.li=i;render();popupLance(i,'¡Farol colado!','d');SFX.win1();await wait(700)}
+    if(l.mode==='bet'&&(l.stake>0||l.deje)){
+      const pw=playerWins(l.k,p,r),rd=readOf();
+      if(l.by==='me'){rd.env++;if(!pw)rd.weak++}
+      if(l.by==='riv'&&!pw&&l.deje&&l.deje.side==='riv'){}
+      else if(l.by==='riv'&&pw&&l.deje&&l.deje.side==='riv'){m.li=i;render();popupLance(i,'¡Te la coló!','riv');SFX.stone();await wait(650)}
+      else if(l.by==='riv'&&pw&&l.stake>0&&l.rbluff){m.li=i;render();popupLance(i,'Iba de farol','d');await wait(500)}
+    }
     if(l.deje&&!['pares','juego'].includes(l.k))continue;
     m.li=i;render();lit(i);await wait(380);
     let side;
@@ -915,7 +971,7 @@ function pickRome(k){if(!S.rome||!S.rome.includes(k))return;const msg=ROMERIA[k]
 function useCon(i){
   const k=S.cons[i],d=con(k);
   if(d.need){
-    if(S.phase!=='play'||!S.m||!['mus','bet'].includes(S.m.step)||busy)return toast('Las estampas se usan durante una ronda, con cartas de tu mano seleccionadas.');
+    if(S.phase!=='play'||!S.m||S.m.step!=='mus'||busy)return toast('Las estampas se usan durante el mus, antes de los lances, con cartas de tu mano seleccionadas.');
     const cs=S.hand.filter(id=>S.sel.includes(id)).map(DC);
     if(cs.length<d.need[0]||cs.length>d.need[1])return toast(d.need[0]===d.need[1]?'Selecciona exactamente '+d.need[0]+' carta.':'Selecciona entre '+d.need[0]+' y '+d.need[1]+' cartas.');
     d.use(cs);S.sel=[];
@@ -1172,6 +1228,16 @@ function renderPrevia(){
   setScreen('<div class="screen">'+hudHTML()+santosHTML()+toolsHTML()+'<div class="cartel"><b>'+fiestaName(S.fiesta)+'</b><small>'+(S.endless?'Modo infinito':'Fiesta '+S.fiesta+' de 6')+'</small></div><div class="col">'+t+'</div>'+
     '<button class="btn y" data-a="start">¡A jugar!</button></div>');
 }
+const RLAB=v=>({12:'R',11:'C',10:'S',1:'A'})[v]||String(v);
+const RPL=v=>({12:'reyes',11:'caballos',10:'sotas',1:'ases',7:'sietes',6:'seises',5:'cincos',4:'cuatros'})[v]||v;
+/* what a hand is worth in a lance, in words */
+function jugada(k,cards,mine){
+  if(k==='grande'||k==='chica')return cards.map(c=>gv(c,mine,k)).sort((a,b)=>k==='grande'?b-a:a-b).map(RLAB).join(' ');
+  if(k==='pares'){const x=paresOf(cards,mine);if(!x)return 'nada';return x.t===3?'duples de '+RPL(x.r[0])+(x.r[1]!==x.r[0]?' y '+RPL(x.r[1]):''):x.name.toLowerCase()+' de '+RPL(x.r[0])}
+  const t=jsum(cards,mine);
+  if(k==='juego')return t>=31?(mine&&t===40&&has('cuarenta')?'40 (vale 31)':String(t)):'sin juego';
+  return 'punto '+t;
+}
 function lanceRow(l,i){
   const m=S.m,cur=m.step==='bet'&&i===m.li;
   let st='';
@@ -1188,6 +1254,7 @@ function lanceRow(l,i){
     else st='El rival envida <b>'+b.amt+'</b>'}
   else st='—';
   if((l.k==='pares'||l.k==='juego')&&l.dec&&l.mode==='bet')st='Los dos tienen · '+st;
+  if(l.res&&l.res.n!=='TODO'&&m.reveal)st='Tú <b>'+jugada(l.k,P(),true)+'</b> · Él <b>'+jugada(l.k,R(),false)+'</b>';
   let res='';
   if(l.res)res=l.res.n==='TODO'?'¡TODO!':'+'+l.res.n;
   const cls=l.res?(l.res.side==='me'?' won':' lost'):'';
@@ -1196,7 +1263,7 @@ function lanceRow(l,i){
 function infoLine(){
   const m=S.m,p=P();
   const pr=paresOf(p,true),js=jsum(p,true);
-  return 'Tú: '+(pr?'<b>'+pr.name+'</b>':'sin pares')+' · '+(js>=31?'<b>juego de '+js+'</b>':'punto '+js)+' · '+(m.mano==='me'?'<b>eres mano</b>':'el rival es mano');
+  return 'Tú: '+(pr?'<b>'+jugada('pares',p,true)+'</b>':'sin pares')+' · '+(js>=31?'<b>juego de '+js+'</b>':'punto '+js)+' · '+(m.mano==='me'?'<b>eres mano</b>':'el rival es mano');
 }
 function chooserHTML(){
   const c=UI.choose,mx=maxBet();c.amt=Math.max(2,Math.min(mx,c.amt));
@@ -1413,6 +1480,7 @@ addEventListener('pagehide',()=>{if(S&&!busy)save()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&S&&!busy)save()});
 if('serviceWorker' in navigator&&location.protocol==='https:'&&!/claude/.test(location.host)){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 if(location.protocol==='file:')window.__o=()=>S;
+if(location.protocol==='file:')window.__ot={strength,handScore,answerEnvite,rivalOpens,playerWins,jugada,paresOf,jsum,gv};
 renderMenu();
 })();
 </script>
