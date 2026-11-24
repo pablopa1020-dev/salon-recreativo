@@ -20,6 +20,8 @@ GAMES = {
                "bg": "#0f2b3d", "theme": "#0f2b3d"},
     "tramite": {"src": "src/tramite.html", "name": "Último Trámite", "desc": "Papeleo de ultratumba: decide qué ánimas cruzan al Otro Lado.",
                 "bg": "#1d1730", "theme": "#1d1730"},
+    "parchis": {"src": "src/parchis.html", "name": "Parchísimo", "desc": "Parchís con tableros especiales, comodines y salas online.",
+                "bg": "#7b2cff", "theme": "#ff4f9a"},
 }
 
 SW = """const V='%(slug)s-%(ver)s';
@@ -42,7 +44,7 @@ WRAP_CSS = """<style>html{box-sizing:border-box;padding-top:env(safe-area-inset-
 def sync_sources():
     # when the working copies next to this folder exist, they are the newest version
     import shutil
-    for a, b in (("../farol/farol.html", "src/farol.html"), ("../ordago/ordago.html", "src/ordago.html"), ("../cripticos/cripticos.html", "src/cripticos.html"), ("../tramite/tramite.html", "src/tramite.html")):
+    for a, b in (("../farol/farol.html", "src/farol.html"), ("../ordago/ordago.html", "src/ordago.html"), ("../cripticos/cripticos.html", "src/cripticos.html"), ("../tramite/tramite.html", "src/tramite.html"), ("../parchis/parchis.html", "src/parchis.html")):
         if os.path.exists(os.path.join(HERE, a)):
             shutil.copyfile(os.path.join(HERE, a), os.path.join(HERE, b))
 
