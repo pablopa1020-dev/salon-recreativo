@@ -14,6 +14,8 @@ VERSION = sys.argv[1] if len(sys.argv) > 1 else "dev"
 GAMES = {
     "farol": {"src": "src/farol.html", "name": "Farol", "desc": "Roguelike de póker con amuletos, pergaminos y licores.",
               "bg": "#1b1140", "theme": "#1b1140"},
+    "cripticos": {"src": "src/cripticos.html", "name": "Críptico", "desc": "Crípticos en español con pistas de definición, indicador y letras.",
+                  "bg": "#f3ecdf", "theme": "#f3ecdf"},
     "ordago": {"src": "src/ordago.html", "name": "Órdago", "desc": "Roguelike de mus con santos, estampas y vinos.",
                "bg": "#0f2b3d", "theme": "#0f2b3d"},
 }
@@ -38,7 +40,7 @@ WRAP_CSS = """<style>html{box-sizing:border-box;padding-top:env(safe-area-inset-
 def sync_sources():
     # when the working copies next to this folder exist, they are the newest version
     import shutil
-    for a, b in (("../farol/farol.html", "src/farol.html"), ("../ordago/ordago.html", "src/ordago.html")):
+    for a, b in (("../farol/farol.html", "src/farol.html"), ("../ordago/ordago.html", "src/ordago.html"), ("../cripticos/cripticos.html", "src/cripticos.html")):
         if os.path.exists(os.path.join(HERE, a)):
             shutil.copyfile(os.path.join(HERE, a), os.path.join(HERE, b))
 
