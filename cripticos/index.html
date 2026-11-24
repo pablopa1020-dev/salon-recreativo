@@ -100,11 +100,12 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 14px;border-radius:10px;font-weight:700;font-size:14px;z-index:9;transition:opacity .3s;pointer-events:none;max-width:86vw;text-align:center}
 .conf{position:fixed;top:-12px;width:8px;height:12px;z-index:8;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(105vh) rotate(540deg)}}
+@media (min-width:900px) and (min-height:700px){#app{max-width:680px;padding-block:28px 18px}.cluetext{font-size:34px}.tile{--w:min(54px,calc(640px/var(--n) - 6px))}.kb button{height:52px;max-width:48px;font-size:19px}.kb button.w{max-width:86px}.daily .q{font-size:30px}.btn:hover,.hints button:not(:disabled):hover,.kb button:hover{filter:brightness(.95)}}
 @media (max-height:640px){.cluetext{font-size:clamp(19px,5.6vw,24px)}.kb button{height:40px}.hints button{padding:6px 2px}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
 </style>
 <style>html{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<!-- version 5.2 -->
+<!-- version 5.3 -->
 </head>
 <body>
 
@@ -113,7 +114,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <script>
 /* Crípticos originales. Campos: c = pista, a = solución, t = tipo, d = definición (texto de la pista o lista),
    i = indicador (texto de la pista), f/p/o/n/pos/b/r = piezas para comprobar el mecanismo, x = explicación, l = dificultad 1-3 */
-const CLUES=[
+let CLUES=[
  {c:'Sopa revuelta da un movimiento al andar',a:'PASO',t:'anagrama',d:'movimiento al andar',i:'revuelta',f:'Sopa',x:'SOPA revuelta (anagrama) da PASO, un movimiento al andar.',l:1},
  {c:'Jamón mal cortado para una religiosa',a:'MONJA',t:'anagrama',d:'una religiosa',i:'mal cortado',f:'Jamón',x:'Las letras de JAMÓN, mal cortadas, forman MONJA.',l:1},
  {c:'Noel, perdido, se convierte en el rey de la selva',a:'LEON',t:'anagrama',d:'el rey de la selva',i:'perdido',f:'Noel',x:'NOEL perdido (desordenado) da LEÓN, el rey de la selva.',l:1},
@@ -189,6 +190,237 @@ const CLUES=[
  {c:'Herramienta para las uñas y capital del Perú',a:'LIMA',t:'doble',d:['Herramienta para las uñas','capital del Perú'],i:'',x:'Doble definición: la LIMA de uñas y LIMA, capital del Perú.',l:1}
 ].filter(c=>!c.skip);
 
+/* Segunda tanda: crípticos más difíciles. Mismos campos que clues.js; además:
+   of = sinónimo que se invierte (inversas), all = quitar todas las apariciones (eliminaciones). */
+const CLUES2=[
+ /* ---- anagramas de una palabra con definición escondida ---- */
+ {c:'La novia, enloquecida, despega desde Barajas',a:'AVION',t:'anagrama',d:'despega desde Barajas',i:'enloquecida',f:'novia',x:'NOVIA enloquecida da AVIÓN, que despega desde Barajas.',l:2},
+ {c:'Sentido cambiado: lo que está escrito',a:'DESTINO',t:'anagrama',d:'lo que está escrito',i:'cambiado',f:'Sentido',x:'SENTIDO cambiado forma DESTINO: «estaba escrito».',l:2},
+ {c:'Necesario, alterado, para pisar las tablas',a:'ESCENARIO',t:'anagrama',d:'para pisar las tablas',i:'alterado',f:'Necesario',x:'NECESARIO alterado forma ESCENARIO; «pisar las tablas» es actuar.',l:3},
+ {c:'Celebrar desmadrado resulta frío y calculador',a:'CEREBRAL',t:'anagrama',d:'frío y calculador',i:'desmadrado',f:'Celebrar',x:'CELEBRAR desmadrado forma CEREBRAL.',l:3},
+ {c:'Batería desmontada: pataleta infantil',a:'RABIETA',t:'anagrama',d:'pataleta infantil',i:'desmontada',f:'Batería',x:'BATERÍA desmontada forma RABIETA.',l:2},
+ {c:'Galería destartalada te hace estornudar',a:'ALERGIA',t:'anagrama',d:'te hace estornudar',i:'destartalada',f:'Galería',x:'GALERÍA destartalada forma ALERGIA.',l:2},
+ {c:'El hambre, mal llevada, no es macho',a:'HEMBRA',t:'anagrama',d:'no es macho',i:'mal llevada',f:'hambre',x:'HAMBRE mal llevada forma HEMBRA.',l:2},
+ {c:'Alimentar a la tropa en desorden toca a quien manda la flota',a:'ALMIRANTE',t:'anagrama',d:'quien manda la flota',i:'en desorden',f:'Alimentar',x:'ALIMENTAR en desorden forma ALMIRANTE. «A la tropa» solo adorna la frase.',l:3},
+ {c:'Cabello revuelto que te hace llorar en la cocina',a:'CEBOLLA',t:'anagrama',d:'te hace llorar en la cocina',i:'revuelto',f:'Cabello',x:'CABELLO revuelto forma CEBOLLA.',l:2},
+ {c:'Gloria perdida en la selva: un gran simio',a:'GORILA',t:'anagrama',d:'un gran simio',i:'perdida',f:'Gloria',x:'GLORIA perdida forma GORILA.',l:2},
+ {c:'Navidad descolocada: pecado frente al espejo',a:'VANIDAD',t:'anagrama',d:'pecado frente al espejo',i:'descolocada',f:'Navidad',x:'NAVIDAD descolocada forma VANIDAD.',l:2},
+ {c:'Errante, sin rumbo: carne tierna',a:'TERNERA',t:'anagrama',d:'carne tierna',i:'sin rumbo',f:'Errante',x:'ERRANTE sin rumbo forma TERNERA.',l:3},
+ {c:'Tierno, mal envuelto, baja por la nieve',a:'TRINEO',t:'anagrama',d:'baja por la nieve',i:'mal envuelto',f:'Tierno',x:'TIERNO mal envuelto forma TRINEO.',l:2},
+ {c:'Aceptar sin orden lo que guarda los papeles',a:'CARPETA',t:'anagrama',d:'lo que guarda los papeles',i:'sin orden',f:'Aceptar',x:'ACEPTAR sin orden forma CARPETA.',l:2},
+ {c:'Aplicar mal la loción para el pelo',a:'CAPILAR',t:'anagrama',d:'para el pelo',i:'mal',f:'Aplicar',x:'APLICAR mal colocado forma CAPILAR, relativo al pelo. «La loción» despista.',l:3},
+ {c:'Adelanto torcido pesa mil kilos',a:'TONELADA',t:'anagrama',d:'pesa mil kilos',i:'torcido',f:'Adelanto',x:'ADELANTO torcido forma TONELADA.',l:3},
+ {c:'El castillo se derrumba y queda una chuleta',a:'COSTILLA',t:'anagrama',d:'una chuleta',i:'se derrumba',f:'castillo',x:'CASTILLO derrumbado forma COSTILLA.',l:3},
+ {c:'Imagen distorsionada: todo un misterio',a:'ENIGMA',t:'anagrama',d:'todo un misterio',i:'distorsionada',f:'Imagen',x:'IMAGEN distorsionada forma ENIGMA.',l:2},
+ {c:'Sentar mal antes de freír',a:'SARTEN',t:'anagrama',d:'antes de freír',i:'mal',f:'Sentar',x:'SENTAR mal colocado forma SARTÉN, que se pone al fuego antes de freír.',l:2},
+ {c:'Locura desatada, propia del ojo',a:'OCULAR',t:'anagrama',d:'propia del ojo',i:'desatada',f:'Locura',x:'LOCURA desatada forma OCULAR.',l:2},
+ {c:'Lento, desordenado, cae al final de la función',a:'TELON',t:'anagrama',d:'cae al final de la función',i:'desordenado',f:'Lento',x:'LENTO desordenado forma TELÓN.',l:2},
+ {c:'Alguna perdida en la memoria',a:'LAGUNA',t:'anagrama',d:'en la memoria',i:'perdida',f:'Alguna',x:'ALGUNA perdida forma LAGUNA: una laguna en la memoria.',l:3},
+ {c:'Ingenuo, trastocado, resulta auténtico',a:'GENUINO',t:'anagrama',d:'auténtico',i:'trastocado',f:'Ingenuo',x:'INGENUO trastocado forma GENUINO.',l:2},
+ {c:'Escritura alterada para volver de entre los muertos',a:'RESUCITAR',t:'anagrama',d:'volver de entre los muertos',i:'alterada',f:'Escritura',x:'ESCRITURA alterada forma RESUCITAR.',l:3},
+ {c:'Sucedido de mala manera: un despiste',a:'DESCUIDO',t:'anagrama',d:'un despiste',i:'de mala manera',f:'Sucedido',x:'SUCEDIDO de mala manera forma DESCUIDO.',l:3},
+ {c:'Cuerda suelta para enseñar',a:'EDUCAR',t:'anagrama',d:'enseñar',i:'suelta',f:'Cuerda',x:'CUERDA suelta forma EDUCAR.',l:2},
+ {c:'Feria alborotada: bestia salvaje',a:'FIERA',t:'anagrama',d:'bestia salvaje',i:'alborotada',f:'Feria',x:'FERIA alborotada forma FIERA.',l:1},
+ {c:'Liberado, desatado, para hacer lo que quieras',a:'ALBEDRIO',t:'anagrama',d:'para hacer lo que quieras',i:'desatado',f:'Liberado',x:'LIBERADO desatado forma ALBEDRÍO (libre albedrío).',l:3},
+ {c:'Estimado, revuelto: ¡qué humildad!',a:'MODESTIA',t:'anagrama',d:'qué humildad',i:'revuelto',f:'Estimado',x:'ESTIMADO revuelto forma MODESTIA.',l:3},
+ {c:'Cocinar a lo loco lo que cuenta el periodista',a:'CRONICA',t:'anagrama',d:'lo que cuenta el periodista',i:'a lo loco',f:'Cocinar',x:'COCINAR a lo loco forma CRÓNICA.',l:3},
+ {c:'Permiso confundido: formulario en papel',a:'IMPRESO',t:'anagrama',d:'formulario en papel',i:'confundido',f:'Permiso',x:'PERMISO confundido forma IMPRESO.',l:3},
+ {c:'Fuerza descontrolada que huele a infierno',a:'AZUFRE',t:'anagrama',d:'huele a infierno',i:'descontrolada',f:'Fuerza',x:'FUERZA descontrolada forma AZUFRE, el olor que se atribuye al infierno.',l:3},
+ {c:'Traviesa, alborotada, cruza el mar',a:'TRAVESIA',t:'anagrama',d:'cruza el mar',i:'alborotada',f:'Traviesa',x:'TRAVIESA alborotada forma TRAVESÍA.',l:2},
+ {c:'Recordar mal: tumbar al gobierno',a:'DERROCAR',t:'anagrama',d:'tumbar al gobierno',i:'mal',f:'Recordar',x:'RECORDAR mal colocado forma DERROCAR.',l:3},
+ {c:'Contestar con desorden: diferencia notable',a:'CONTRASTE',t:'anagrama',d:'diferencia notable',i:'con desorden',f:'Contestar',x:'CONTESTAR con desorden forma CONTRASTE.',l:3},
+ {c:'Lamentar, sin orden, lo que siente una madre',a:'MATERNAL',t:'anagrama',d:'lo que siente una madre',i:'sin orden',f:'Lamentar',x:'LAMENTAR sin orden forma MATERNAL.',l:3},
+ {c:'Costar revuelto construye presas en el río',a:'CASTOR',t:'anagrama',d:'construye presas en el río',i:'revuelto',f:'Costar',x:'COSTAR revuelto forma CASTOR.',l:2},
+ {c:'Tolerancia perdida: un trastorno',a:'ALTERACION',t:'anagrama',d:'un trastorno',i:'perdida',f:'Tolerancia',x:'TOLERANCIA perdida forma ALTERACIÓN.',l:3},
+ {c:'Hielo derretido sube el globo',a:'HELIO',t:'anagrama',d:'sube el globo',i:'derretido',f:'Hielo',x:'HIELO derretido forma HELIO, el gas que hace subir los globos.',l:3},
+ {c:'Espiar, revuelto, en la estantería',a:'REPISA',t:'anagrama',d:'en la estantería',i:'revuelto',f:'Espiar',x:'ESPIAR revuelto forma REPISA.',l:2},
+ {c:'Tesoro desordenado: la lotería',a:'SORTEO',t:'anagrama',d:'la lotería',i:'desordenado',f:'Tesoro',x:'TESORO desordenado forma SORTEO.',l:2},
+ {c:'Escorpión, alterado, sale en Semana Santa',a:'PROCESION',t:'anagrama',d:'sale en Semana Santa',i:'alterado',f:'Escorpión',x:'ESCORPIÓN alterado forma PROCESIÓN.',l:3},
+ {c:'Frenar en seco y mal: dicho popular',a:'REFRAN',t:'anagrama',d:'dicho popular',i:'mal',f:'Frenar',x:'FRENAR mal colocado forma REFRÁN.',l:2},
+ {c:'Apagón con descontrol: no está bautizado',a:'PAGANO',t:'anagrama',d:'no está bautizado',i:'con descontrol',f:'Apagón',x:'APAGÓN con descontrol forma PAGANO.',l:3},
+ {c:'Cuenta mal al borde de la carretera',a:'CUNETA',t:'anagrama',d:'al borde de la carretera',i:'mal',f:'Cuenta',x:'CUENTA mal colocada forma CUNETA.',l:2},
+ {c:'Triple, mal colocado, se arrastra',a:'REPTIL',t:'anagrama',d:'se arrastra',i:'mal colocado',f:'Triple',x:'TRIPLE mal colocado forma REPTIL.',l:2},
+ {c:'Camarón confuso con corona',a:'MONARCA',t:'anagrama',d:'con corona',i:'confuso',f:'Camarón',x:'CAMARÓN confuso forma MONARCA.',l:3},
+ {c:'Armónica desafinada de otro planeta',a:'MARCIANO',t:'anagrama',d:'de otro planeta',i:'desafinada',f:'Armónica',x:'ARMÓNICA desafinada forma MARCIANO. «Desafinada» encaja con el instrumento y avisa del anagrama.',l:3},
+ {c:'Trance agitado: lo que liba la abeja',a:'NECTAR',t:'anagrama',d:'lo que liba la abeja',i:'agitado',f:'Trance',x:'TRANCE agitado forma NÉCTAR.',l:2},
+ {c:'Paterna sin orden: felino negro',a:'PANTERA',t:'anagrama',d:'felino negro',i:'sin orden',f:'Paterna',x:'PATERNA sin orden forma PANTERA.',l:2},
+ {c:'Agencia en ruinas: un pantano',a:'CIENAGA',t:'anagrama',d:'un pantano',i:'en ruinas',f:'Agencia',x:'AGENCIA en ruinas forma CIÉNAGA.',l:3},
+ {c:'Respecto desordenado: un fantasma',a:'ESPECTRO',t:'anagrama',d:'un fantasma',i:'desordenado',f:'Respecto',x:'RESPECTO desordenado forma ESPECTRO.',l:3},
+ {c:'Guardia desordenada: refugio del lobo',a:'GUARIDA',t:'anagrama',d:'refugio del lobo',i:'desordenada',f:'Guardia',x:'GUARDIA desordenada forma GUARIDA.',l:2},
+ {c:'Coraje perdido en el banco',a:'CAJERO',t:'anagrama',d:'en el banco',i:'perdido',f:'Coraje',x:'CORAJE perdido forma CAJERO, el del banco.',l:3},
+ {c:'Ocaso revuelto: un acoso',a:'ACOSO',t:'anagrama',d:'un acoso',i:'revuelto',f:'Ocaso',x:'OCASO revuelto forma ACOSO.',l:1,skip:true},
+ /* ---- anagramas de dos palabras ---- */
+ {c:'Tome torre en ruinas tras una sacudida del suelo',a:'TERREMOTO',t:'anagrama',d:'sacudida del suelo',i:'en ruinas',f:'Tome torre',x:'TOME TORRE en ruinas forma TERREMOTO.',l:3},
+ {c:'Mira paso alterado: revolotea entre las flores',a:'MARIPOSA',t:'anagrama',d:'revolotea entre las flores',i:'alterado',f:'Mira paso',x:'MIRA PASO alterado forma MARIPOSA.',l:3},
+ {c:'Sana tutora, desorientada, viaja al espacio',a:'ASTRONAUTA',t:'anagrama',d:'viaja al espacio',i:'desorientada',f:'Sana tutora',x:'SANA TUTORA desorientada forma ASTRONAUTA.',l:3},
+ {c:'Amigo cruel, perdido, vuela de noche',a:'MURCIELAGO',t:'anagrama',d:'vuela de noche',i:'perdido',f:'Amigo cruel',x:'AMIGO CRUEL perdido forma MURCIÉLAGO.',l:3},
+ {c:'Cara mal revuelta, en su tinta',a:'CALAMAR',t:'anagrama',d:'en su tinta',i:'revuelta',f:'Cara mal',x:'CARA MAL revuelta forma CALAMAR (en su tinta).',l:3},
+ {c:'Editar piso, todo revuelto: el de la noticia',a:'PERIODISTA',t:'anagrama',d:'el de la noticia',i:'todo revuelto',f:'Editar piso',x:'EDITAR PISO revuelto forma PERIODISTA.',l:3},
+ {c:'Cable tibio, desenchufado, guarda libros',a:'BIBLIOTECA',t:'anagrama',d:'guarda libros',i:'desenchufado',f:'Cable tibio',x:'CABLE TIBIO desenchufado forma BIBLIOTECA.',l:3},
+ {c:'Ruina, sodio, mezclados: se extinguió hace millones de años',a:'DINOSAURIO',t:'anagrama',d:'se extinguió hace millones de años',i:'mezclados',f:'Ruina, sodio',x:'RUINA y SODIO mezclados forman DINOSAURIO.',l:3},
+ {c:'Codo, licor: mezclados, muerden en el río',a:'COCODRILO',t:'anagrama',d:'muerden en el río',i:'mezclados',f:'Codo, licor',x:'CODO y LICOR mezclados forman COCODRILO.',l:3},
+ {c:'Toma tren desviado: rayos y truenos',a:'TORMENTA',t:'anagrama',d:'rayos y truenos',i:'desviado',f:'Toma tren',x:'TOMA TREN desviado forma TORMENTA.',l:3},
+ {c:'Grúa tira, descontrolada, de las cuerdas',a:'GUITARRA',t:'anagrama',d:'de las cuerdas',i:'descontrolada',f:'Grúa tira',x:'GRÚA TIRA descontrolada forma GUITARRA, instrumento de cuerda.',l:3},
+ {c:'Clase era, revuelta, para subir peldaños',a:'ESCALERA',t:'anagrama',d:'para subir peldaños',i:'revuelta',f:'Clase era',x:'CLASE ERA revuelta forma ESCALERA.',l:3},
+ {c:'Pura saga, desordenada, contra la lluvia',a:'PARAGUAS',t:'anagrama',d:'contra la lluvia',i:'desordenada',f:'Pura saga',x:'PURA SAGA desordenada forma PARAGUAS.',l:3},
+ {c:'Lavar can, menudo lío: fiesta de disfraces',a:'CARNAVAL',t:'anagrama',d:'fiesta de disfraces',i:'menudo lío',f:'Lavar can',x:'LAVAR CAN revuelto («menudo lío») forma CARNAVAL.',l:3},
+ {c:'Coche alto, destrozado, se derrite en la boca',a:'CHOCOLATE',t:'anagrama',d:'se derrite en la boca',i:'destrozado',f:'Coche alto',x:'COCHE ALTO destrozado forma CHOCOLATE.',l:3},
+ {c:'Ser culto, retorcido, talla el mármol',a:'ESCULTOR',t:'anagrama',d:'talla el mármol',i:'retorcido',f:'Ser culto',x:'SER CULTO retorcido forma ESCULTOR.',l:3},
+ {c:'Peor lado, revuelto: felino con manchas',a:'LEOPARDO',t:'anagrama',d:'felino con manchas',i:'revuelto',f:'Peor lado',x:'PEOR LADO revuelto forma LEOPARDO.',l:3},
+ {c:'Esto, mar revuelto: el que enseña',a:'MAESTRO',t:'anagrama',d:'el que enseña',i:'revuelto',f:'Esto, mar',x:'ESTO y MAR revueltos forman MAESTRO.',l:3},
+ {c:'Nada, pero, revuelto, saca el pan del horno',a:'PANADERO',t:'anagrama',d:'saca el pan del horno',i:'revuelto',f:'Nada, pero',x:'NADA y PERO revueltos forman PANADERO.',l:3},
+ {c:'Mira, reno, desorientado: lobo de mar',a:'MARINERO',t:'anagrama',d:'lobo de mar',i:'desorientado',f:'Mira, reno',x:'MIRA y RENO desorientados forman MARINERO.',l:3},
+ {c:'Un cisne par, alterado, besa al sapo',a:'PRINCESA',t:'anagrama',d:'besa al sapo',i:'alterado',f:'cisne par',x:'CISNE PAR alterado forma PRINCESA, la del cuento del sapo.',l:3},
+ {c:'Ser letal, revuelto, brilla en el cielo',a:'ESTRELLA',t:'anagrama',d:'brilla en el cielo',i:'revuelto',f:'Ser letal',x:'SER LETAL revuelto forma ESTRELLA.',l:3},
+ {c:'Claro: nadie, revuelto, marca los días',a:'CALENDARIO',t:'anagrama',d:'marca los días',i:'revuelto',f:'Claro: nadie',x:'CLARO y NADIE revueltos forman CALENDARIO.',l:3},
+ {c:'Carta del, alterada: templo mayor',a:'CATEDRAL',t:'anagrama',d:'templo mayor',i:'alterada',f:'Carta del',x:'CARTA DEL alterada forma CATEDRAL.',l:3},
+ {c:'Ala, pico, todo revuelto: residencia del rey',a:'PALACIO',t:'anagrama',d:'residencia del rey',i:'todo revuelto',f:'Ala, pico',x:'ALA y PICO revueltos forman PALACIO.',l:3},
+ {c:'Subir mano, mal hecho, navega bajo el agua',a:'SUBMARINO',t:'anagrama',d:'navega bajo el agua',i:'mal hecho',f:'Subir mano',x:'SUBIR MANO mal hecho forma SUBMARINO.',l:3},
+ {c:'Átomo, color, revuelto, tira del tren',a:'LOCOMOTORA',t:'anagrama',d:'tira del tren',i:'revuelto',f:'Átomo, color',x:'ÁTOMO y COLOR revueltos forman LOCOMOTORA.',l:3},
+ {c:'Mesa, foro, revueltos, en el cruce',a:'SEMAFORO',t:'anagrama',d:'en el cruce',i:'revueltos',f:'Mesa, foro',x:'MESA y FORO revueltos forman SEMÁFORO.',l:3},
+ {c:'Crear arte, desordenado, por la nacional',a:'CARRETERA',t:'anagrama',d:'la nacional',i:'desordenado',f:'Crear arte',x:'CREAR ARTE desordenado forma CARRETERA; «la nacional» es una carretera.',l:3},
+ {c:'Ata envío desordenado: vuela pequeña',a:'AVIONETA',t:'anagrama',d:'vuela pequeña',i:'desordenado',f:'Ata envío',x:'ATA ENVÍO desordenado forma AVIONETA.',l:3},
+ {c:'Alba, col, revueltas: relincha',a:'CABALLO',t:'anagrama',d:'relincha',i:'revueltas',f:'Alba, col',x:'ALBA y COL revueltas forman CABALLO.',l:3},
+ {c:'Peste: guía revuelta para un plato de pasta',a:'ESPAGUETI',t:'anagrama',d:'un plato de pasta',i:'revuelta',f:'Peste: guía',x:'PESTE y GUÍA revueltas forman ESPAGUETI.',l:3},
+ {c:'Aria con, alterada, canta en la jaula',a:'CANARIO',t:'anagrama',d:'canta en la jaula',i:'alterada',f:'Aria con',x:'ARIA CON alterada forma CANARIO.',l:3},
+ {c:'Coma red, revuelta, en la plaza de abastos',a:'MERCADO',t:'anagrama',d:'la plaza de abastos',i:'revuelta',f:'Coma red',x:'COMA RED revuelta forma MERCADO.',l:3},
+ {c:'Ana, mes: mezclados, siete días',a:'SEMANA',t:'anagrama',d:'siete días',i:'mezclados',f:'Ana, mes',x:'ANA y MES mezclados forman SEMANA.',l:2},
+ {c:'Pan, tela, revueltos: gira alrededor del sol',a:'PLANETA',t:'anagrama',d:'gira alrededor del sol',i:'revueltos',f:'Pan, tela',x:'PAN y TELA revueltos forman PLANETA.',l:2},
+ {c:'Che, mapa revuelto: lava la comida antes de comer',a:'MAPACHE',t:'anagrama',d:'lava la comida antes de comer',i:'revuelto',f:'Che, mapa',x:'CHE y MAPA revueltos forman MAPACHE, que lava la comida.',l:3},
+ /* ---- charadas con sinónimos y abreviaturas ---- */
+ {c:'Astro con años encima: la compañía que falta',a:'SOLEDAD',t:'charada',d:'la compañía que falta',i:'',p:['SOL','EDAD'],x:'Astro = SOL, años = EDAD: SOLEDAD, que es justo la compañía que falta.',l:3},
+ {c:'Perro en la bañera: aquí se bebe',a:'CANTINA',t:'charada',d:'aquí se bebe',i:'',p:['CAN','TINA'],x:'Perro = CAN, bañera = TINA: CANTINA.',l:3},
+ {c:'Perro y cubo de la suerte cierran la puerta',a:'CANDADO',t:'charada',d:'cierran la puerta',i:'',p:['CAN','DADO'],x:'Perro = CAN, cubo de la suerte = DADO: CANDADO.',l:3},
+ {c:'Perro, a lo lejos, resulta un sinvergüenza',a:'CANALLA',t:'charada',d:'un sinvergüenza',i:'',p:['CAN','ALLA'],x:'Perro = CAN, a lo lejos = ALLÁ: CANALLA.',l:3},
+ {c:'Hogaza y medida de ropa: se mira en el cine',a:'PANTALLA',t:'charada',d:'se mira en el cine',i:'',p:['PAN','TALLA'],x:'Hogaza = PAN, medida de ropa = TALLA: PANTALLA.',l:3},
+ {c:'Pistola y corriente para guardar la ropa',a:'ARMARIO',t:'charada',d:'para guardar la ropa',i:'',p:['ARMA','RIO'],x:'Pistola = ARMA, corriente = RÍO: ARMARIO.',l:2},
+ {c:'Estancia y corriente que cobras a fin de mes',a:'SALARIO',t:'charada',d:'que cobras a fin de mes',i:'',p:['SALA','RIO'],x:'Estancia = SALA, corriente = RÍO: SALARIO.',l:2},
+ {c:'Flor y corriente que se reza',a:'ROSARIO',t:'charada',d:'que se reza',i:'',p:['ROSA','RIO'],x:'Flor = ROSA, corriente = RÍO: ROSARIO.',l:2},
+ {c:'Sesenta minutos sobre el Ebro: tabla de trenes',a:'HORARIO',t:'charada',d:'tabla de trenes',i:'',p:['HORA','RIO'],x:'Sesenta minutos = HORA, el Ebro = un RÍO: HORARIO.',l:3},
+ {c:'Calificación y caudal ante quien se firma',a:'NOTARIO',t:'charada',d:'ante quien se firma',i:'',p:['NOTA','RIO'],x:'Calificación = NOTA, caudal = RÍO: NOTARIO.',l:3},
+ {c:'Esta cosa y un brujo: donde acaba la comida',a:'ESTOMAGO',t:'charada',d:'donde acaba la comida',i:'',p:['ESTO','MAGO'],x:'Esta cosa = ESTO, brujo = MAGO: ESTÓMAGO.',l:3},
+ {c:'A favor del mueble: palabra dada',a:'PROMESA',t:'charada',d:'palabra dada',i:'',p:['PRO','MESA'],x:'A favor = PRO, el mueble = MESA: PROMESA.',l:3},
+ {c:'Ritmo cubano y carcajada en los labios',a:'SONRISA',t:'charada',d:'en los labios',i:'',p:['SON','RISA'],x:'Ritmo cubano = SON, carcajada = RISA: SONRISA.',l:3},
+ {c:'Capacidad de plantígrado muy fuerte',a:'PODEROSO',t:'charada',d:'muy fuerte',i:'',p:['PODER','OSO'],x:'Capacidad = PODER, plantígrado = OSO: PODEROSO.',l:2},
+ {c:'Cada vez que vas a ver al difunto',a:'CADAVER',t:'charada',d:'difunto',i:'',p:['CADA','VER'],x:'CADA + VER = CADÁVER, el difunto. La frase se lee casi tal cual.',l:3},
+ {c:'Más rostro para el carnaval',a:'MASCARA',t:'charada',d:'para el carnaval',i:'',p:['MAS','CARA'],x:'MÁS + rostro (CARA) = MÁSCARA.',l:2},
+ {c:'Falto de nada, franco',a:'SINCERO',t:'charada',d:'franco',i:'',p:['SIN','CERO'],x:'Falto de = SIN, nada = CERO: SINCERO.',l:3},
+ {c:'Un poco de talento para la camiseta',a:'ALGODON',t:'charada',d:'para la camiseta',i:'',p:['ALGO','DON'],x:'Un poco = ALGO, talento = DON: ALGODÓN.',l:3},
+ {c:'Así sea la suerte: intimidar',a:'AMENAZAR',t:'charada',d:'intimidar',i:'',p:['AMEN','AZAR'],x:'Así sea = AMÉN, la suerte = AZAR: AMENAZAR.',l:3},
+ {c:'Herramienta de cavar y regalar: el gusto',a:'PALADAR',t:'charada',d:'el gusto',i:'',p:['PALA','DAR'],x:'Herramienta de cavar = PALA, regalar = DAR: PALADAR.',l:3},
+ {c:'Espíritu que come de noche: acumular',a:'ALMACENAR',t:'charada',d:'acumular',i:'',p:['ALMA','CENAR'],x:'Espíritu = ALMA, comer de noche = CENAR: ALMACENAR.',l:3},
+ {c:'Manto y sentido común protegen a la tortuga',a:'CAPARAZON',t:'charada',d:'protegen a la tortuga',i:'',p:['CAPA','RAZON'],x:'Manto = CAPA, sentido común = RAZÓN: CAPARAZÓN.',l:3},
+ {c:'Cantores y país en la ceremonia del rey',a:'CORONACION',t:'charada',d:'la ceremonia del rey',i:'',p:['CORO','NACION'],x:'Cantores = CORO, país = NACIÓN: CORONACIÓN.',l:3},
+ {c:'Una tercera parte de cabello: tela suave',a:'TERCIOPELO',t:'charada',d:'tela suave',i:'',p:['TERCIO','PELO'],x:'Una tercera parte = TERCIO, cabello = PELO: TERCIOPELO.',l:3},
+ {c:'Familia con suerte, a escondidas',a:'CLANDESTINO',t:'charada',d:'a escondidas',i:'',p:['CLAN','DESTINO'],x:'Familia = CLAN, suerte = DESTINO: CLANDESTINO.',l:3},
+ {c:'Correctamente, permanecer a gusto',a:'BIENESTAR',t:'charada',d:'a gusto',i:'',p:['BIEN','ESTAR'],x:'Correctamente = BIEN, permanecer = ESTAR: BIENESTAR.',l:2},
+ {c:'Mil gramos en el subterráneo hacen una distancia',a:'KILOMETRO',t:'charada',d:'una distancia',i:'',p:['KILO','METRO'],x:'Mil gramos = KILO, el subterráneo = METRO: KILÓMETRO.',l:2},
+ {c:'Jornada en el suburbano atraviesa el círculo',a:'DIAMETRO',t:'charada',d:'atraviesa el círculo',i:'',p:['DIA','METRO'],x:'Jornada = DÍA, el suburbano = METRO: DIÁMETRO.',l:3},
+ {c:'Dos y una queja: donde se legisla',a:'PARLAMENTO',t:'charada',d:'donde se legisla',i:'',p:['PAR','LAMENTO'],x:'Dos = PAR, una queja = LAMENTO: PARLAMENTO.',l:3},
+ {c:'Desafío sabroso para el orador',a:'RETORICA',t:'charada',d:'para el orador',i:'',p:['RETO','RICA'],x:'Desafío = RETO, sabroso = RICA: RETÓRICA, el arte del orador.',l:3},
+ {c:'Cacahuete para el sacerdote: arreglo de uñas',a:'MANICURA',t:'charada',d:'arreglo de uñas',i:'',p:['MANI','CURA'],x:'Cacahuete = MANÍ, sacerdote = CURA: MANICURA.',l:3},
+ {c:'Taberna y montería: embarcación de carga',a:'BARCAZA',t:'charada',d:'embarcación de carga',i:'',p:['BAR','CAZA'],x:'Taberna = BAR, montería = CAZA: BARCAZA.',l:3},
+ {c:'Uva seca y clima: un entretenimiento',a:'PASATIEMPO',t:'charada',d:'un entretenimiento',i:'',p:['PASA','TIEMPO'],x:'Uva seca = PASA, clima = TIEMPO: PASATIEMPO.',l:3},
+ {c:'Frente al partido, mercancía ilegal',a:'CONTRABANDO',t:'charada',d:'mercancía ilegal',i:'',p:['CONTRA','BANDO'],x:'Frente a = CONTRA, partido = BANDO: CONTRABANDO.',l:3},
+ {c:'Detrás de la máquina del alfarero: un desarreglo',a:'TRASTORNO',t:'charada',d:'un desarreglo',i:'',p:['TRAS','TORNO'],x:'Detrás = TRAS, la máquina del alfarero = TORNO: TRASTORNO.',l:3},
+ {c:'Incendio resistente que deja marca en la piel',a:'QUEMADURA',t:'charada',d:'deja marca en la piel',i:'',p:['QUEMA','DURA'],x:'Incendio = QUEMA, resistente = DURA: QUEMADURA.',l:3},
+ {c:'Lanza firme: la que deja el mosquito',a:'PICADURA',t:'charada',d:'la que deja el mosquito',i:'',p:['PICA','DURA'],x:'Lanza = PICA, firme = DURA: PICADURA.',l:3},
+ {c:'Encaja lo de las abejas en la parte alta de la cama',a:'CABECERA',t:'charada',d:'la parte alta de la cama',i:'',p:['CABE','CERA'],x:'Encaja = CABE, lo de las abejas = CERA: CABECERA.',l:3},
+ {c:'Lecho y bebida pirata: un marisco',a:'CAMARON',t:'charada',d:'un marisco',i:'',p:['CAMA','RON'],x:'Lecho = CAMA, bebida pirata = RON: CAMARÓN.',l:3},
+ {c:'Folio de una época: aquí acaba la basura',a:'PAPELERA',t:'charada',d:'aquí acaba la basura',i:'',p:['PAPEL','ERA'],x:'Folio = PAPEL, época = ERA: PAPELERA.',l:3},
+ {c:'Océano con infusiones: día de mala suerte',a:'MARTES',t:'charada',d:'día de mala suerte',i:'',p:['MAR','TES'],x:'Océano = MAR, infusiones = TÉS: MARTES (el martes y trece).',l:3},
+ {c:'Seis regalan la existencia',a:'VIDA',t:'charada',d:'la existencia',i:'',p:['VI','DA'],x:'Seis en números romanos = VI, regala = DA: VIDA.',l:3},
+ {c:'Mil y una nota: medida inglesa',a:'MILLA',t:'charada',d:'medida inglesa',i:'',p:['MIL','LA'],x:'MIL más una nota (LA): MILLA.',l:3},
+ {c:'Cien que friegue: es la contraseña',a:'CLAVE',t:'charada',d:'la contraseña',i:'',p:['C','LAVE'],x:'Cien en romanos = C, que friegue = LAVE: CLAVE.',l:3},
+ {c:'Quinientos uno se marcha: la gran soprano',a:'DIVA',t:'charada',d:'la gran soprano',i:'',p:['D','I','VA'],x:'Quinientos = D, uno = I (romanos), se marcha = VA: DIVA.',l:3},
+ {c:'Nota y nada: en soledad',a:'SOLO',t:'charada',d:'en soledad',i:'',p:['SOL','O'],x:'Nota = SOL, nada = O (cero): SOLO.',l:3},
+ {c:'Mil y el campo: un prodigio',a:'MILAGRO',t:'charada',d:'un prodigio',i:'',p:['MIL','AGRO'],x:'MIL más el campo (AGRO): MILAGRO.',l:3},
+ {c:'Afirmación posesiva: el mono',a:'SIMIO',t:'charada',d:'el mono',i:'',p:['SI','MIO'],x:'Afirmación = SÍ, posesivo = MÍO: SIMIO.',l:3},
+ {c:'Se entrega la tela del gusano',a:'SEDA',t:'charada',d:'la tela del gusano',i:'',p:['SE','DA'],x:'Se entrega = SE DA: SEDA, la tela del gusano.',l:3},
+ /* ---- contenedores ---- */
+ {c:'Una ocasión dentro de lo de las abejas: ¡ponme una caña!',a:'CERVEZA',t:'contenedor',d:'ponme una caña',i:'dentro de',o:'CERA',n:'VEZ',pos:3,x:'Una ocasión = VEZ, lo de las abejas = CERA. VEZ dentro de CERA: CER·VEZ·A = CERVEZA.',l:3},
+ {c:'Semejante dentro del proyectil: un combate',a:'BATALLA',t:'contenedor',d:'un combate',i:'dentro del',o:'BALA',n:'TAL',pos:2,x:'Semejante = TAL, proyectil = BALA. BA·TAL·LA = BATALLA.',l:3},
+ {c:'Hogaza en el lecho que suena en la torre',a:'CAMPANA',t:'contenedor',d:'suena en la torre',i:'en el',o:'CAMA',n:'PAN',pos:3,x:'Hogaza = PAN, lecho = CAMA. CAM·PAN·A = CAMPANA.',l:3},
+ {c:'Película dentro del grupo de cantantes: el chef',a:'COCINERO',t:'contenedor',d:'el chef',i:'dentro del',o:'CORO',n:'CINE',pos:2,x:'Película = CINE, grupo de cantantes = CORO. CO·CINE·RO = COCINERO.',l:3},
+ {c:'Ferrocarril dentro de aquello: la primera función',a:'ESTRENO',t:'contenedor',d:'la primera función',i:'dentro de',o:'ESO',n:'TREN',pos:2,x:'Ferrocarril = TREN, aquello = ESO. ES·TREN·O = ESTRENO.',l:3},
+ {c:'Una barra dentro de esto: ¡qué horror!',a:'ESPANTO',t:'contenedor',d:'qué horror',i:'dentro de',o:'ESTO',n:'PAN',pos:2,x:'Una barra = PAN, metida en ESTO: ES·PAN·TO = ESPANTO.',l:3},
+ {c:'Océano dentro de un refresco de cola: región',a:'COMARCA',t:'contenedor',d:'región',i:'dentro de',o:'COCA',n:'MAR',pos:2,x:'Océano = MAR, refresco de cola = COCA. CO·MAR·CA = COMARCA.',l:3},
+ {c:'Extremidad dentro del pedazo: casi te caes',a:'TROPIEZO',t:'contenedor',d:'casi te caes',i:'dentro del',o:'TROZO',n:'PIE',pos:3,x:'Extremidad = PIE, pedazo = TROZO. TRO·PIE·ZO = TROPIEZO.',l:3},
+ {c:'Sur en la comida de la noche: tijera del editor',a:'CENSURA',t:'contenedor',d:'tijera del editor',i:'en la',o:'CENA',n:'SUR',pos:3,x:'SUR dentro de CENA: CEN·SUR·A = CENSURA.',l:3},
+ {c:'Centenar dentro de un ser mágico al que pagas impuestos',a:'HACIENDA',t:'contenedor',d:'al que pagas impuestos',i:'dentro de',o:'HADA',n:'CIEN',pos:2,x:'Centenar = CIEN, ser mágico = HADA. HA·CIEN·DA = HACIENDA.',l:3},
+ {c:'Cobija dentro de querer: dar el pecho',a:'AMAMANTAR',t:'contenedor',d:'dar el pecho',i:'dentro de',o:'AMAR',n:'MANTA',pos:3,x:'Cobija = MANTA, querer = AMAR. AMA·MANTA·R = AMAMANTAR.',l:3},
+ {c:'Senda dentro del lastre: lleno de pecado',a:'PECAMINOSO',t:'contenedor',d:'lleno de pecado',i:'dentro del',o:'PESO',n:'CAMINO',pos:2,x:'Senda = CAMINO, lastre = PESO. PE·CAMINO·SO = PECAMINOSO.',l:3},
+ {c:'Órgano de la vista en la vivienda: con liendres',a:'PIOJOSO',t:'contenedor',d:'con liendres',i:'en la',o:'PISO',n:'OJO',pos:2,x:'Órgano de la vista = OJO, vivienda = PISO. PI·OJO·SO = PIOJOSO.',l:3},
+ {c:'Treinta días con una comida dentro: el que paga el arte',a:'MECENAS',t:'contenedor',d:'el que paga el arte',i:'dentro',o:'MES',n:'CENA',pos:2,x:'Treinta días = MES, una comida = CENA. ME·CENA·S = MECENAS.',l:3},
+ {c:'Hogar de pájaro dentro del vaso: presumido',a:'VANIDOSO',t:'contenedor',d:'presumido',i:'dentro del',o:'VASO',n:'NIDO',pos:2,x:'Hogar de pájaro = NIDO, dentro de VASO: VA·NIDO·SO = VANIDOSO.',l:3},
+ {c:'Mamá dentro de la que cojea: cazadora del gallinero',a:'COMADREJA',t:'contenedor',d:'cazadora del gallinero',i:'dentro de',o:'COJA',n:'MADRE',pos:2,x:'Mamá = MADRE, la que cojea = COJA. CO·MADRE·JA = COMADREJA.',l:3},
+ {c:'Querer dentro de cada uno: compañero',a:'CAMARADA',t:'contenedor',d:'compañero',i:'dentro de',o:'CADA',n:'AMAR',pos:1,x:'Querer = AMAR, metido en CADA: C·AMAR·ADA = CAMARADA.',l:3},
+ {c:'Semejante dentro del esférico: la tropa',a:'BATALLON',t:'contenedor',d:'la tropa',i:'dentro del',o:'BALON',n:'TAL',pos:2,x:'Semejante = TAL, esférico = BALÓN. BA·TAL·LÓN = BATALLÓN.',l:3},
+ {c:'Así dentro del alumbramiento: vive a costa de otro',a:'PARASITO',t:'contenedor',d:'vive a costa de otro',i:'dentro del',o:'PARTO',n:'ASI',pos:3,x:'ASÍ dentro de PARTO (alumbramiento): PAR·ASI·TO = PARÁSITO.',l:3},
+ {c:'Firme dentro del océano: ponerse en sazón',a:'MADURAR',t:'contenedor',d:'ponerse en sazón',i:'dentro del',o:'MAR',n:'DURA',pos:2,x:'Firme = DURA, océano = MAR. MA·DURA·R = MADURAR.',l:3},
+ {c:'Toma dentro del amarrado: un ataque',a:'ATENTADO',t:'contenedor',d:'un ataque',i:'dentro del',o:'ATADO',n:'TEN',pos:1,x:'Toma = TEN (de tener), amarrado = ATADO. A·TEN·TADO = ATENTADO.',l:3},
+ {c:'Una mina dentro del formal: allí estudian los curas',a:'SEMINARIO',t:'contenedor',d:'allí estudian los curas',i:'dentro del',o:'SERIO',n:'MINA',pos:2,x:'MINA dentro de SERIO (formal): SE·MINA·RIO = SEMINARIO.',l:3},
+ {c:'Dos dentro del desafío: los actores de la película',a:'REPARTO',t:'contenedor',d:'los actores de la película',i:'dentro del',o:'RETO',n:'PAR',pos:2,x:'Dos = PAR, desafío = RETO. RE·PAR·TO = REPARTO.',l:3},
+ {c:'Apodo con el norte dentro: la sierra',a:'MONTE',t:'contenedor',d:'la sierra',i:'dentro',o:'MOTE',n:'N',pos:2,x:'Apodo = MOTE, norte = N. MO·N·TE = MONTE.',l:3},
+ {c:'Ave con el sur dentro: la hierba del ganado',a:'PASTO',t:'contenedor',d:'la hierba del ganado',i:'dentro',o:'PATO',n:'S',pos:2,x:'Ave = PATO, sur = S. PA·S·TO = PASTO.',l:3},
+ /* ---- inversiones de un sinónimo ---- */
+ {c:'Rencor, de vuelta, por el que oyes',a:'OIDO',t:'inversa',d:'por el que oyes',i:'de vuelta',f:'Rencor',of:'ODIO',x:'Rencor = ODIO, que de vuelta (al revés) es OÍDO.',l:3},
+ {c:'La raposa, de vuelta, en la paella',a:'ARROZ',t:'inversa',d:'en la paella',i:'de vuelta',f:'raposa',of:'ZORRA',x:'Raposa = ZORRA; leída de vuelta es ARROZ.',l:3},
+ {c:'La suerte regresa: una estirpe',a:'RAZA',t:'inversa',d:'una estirpe',i:'regresa',f:'suerte',of:'AZAR',x:'Suerte = AZAR; regresa (al revés): RAZA.',l:3},
+ {c:'Ligero de vuelta: la competición',a:'LIGA',t:'inversa',d:'la competición',i:'de vuelta',f:'Ligero',of:'AGIL',x:'Ligero = ÁGIL; de vuelta: LIGA.',l:3},
+ {c:'Detrás, al revés, una ristra',a:'SARTA',t:'inversa',d:'una ristra',i:'al revés',f:'Detrás',of:'ATRAS',x:'Detrás = ATRÁS; al revés: SARTA.',l:3},
+ {c:'Bestia de vuelta: una hoja delgada',a:'LAMINA',t:'inversa',d:'una hoja delgada',i:'de vuelta',f:'Bestia',of:'ANIMAL',x:'Bestia = ANIMAL; de vuelta: LÁMINA.',l:3},
+ {c:'Garantía devuelta que sale del volcán',a:'LAVA',t:'inversa',d:'que sale del volcán',i:'devuelta',f:'Garantía',of:'AVAL',x:'Garantía = AVAL; devuelta (al revés): LAVA.',l:3},
+ /* ---- palabras ocultas ---- */
+ {c:'El lapicero guarda la nada',a:'CERO',t:'oculta',d:'la nada',i:'guarda',f:'lapicero',x:'En «lapiCERO» se guarda CERO.',l:2},
+ {c:'El alemán ordenado esconde una extremidad',a:'MANO',t:'oculta',d:'una extremidad',i:'esconde',f:'alemán ordenado',x:'En «aleMÁN Ordenado» se esconde MANO.',l:2},
+ {c:'Una copia no autorizada esconde un instrumento',a:'PIANO',t:'oculta',d:'un instrumento',i:'esconde',f:'copia no',x:'En «coPIA NO» se esconde PIANO.',l:3},
+ {c:'Muy unido guarda el hogar del pájaro',a:'NIDO',t:'oculta',d:'el hogar del pájaro',i:'guarda',f:'unido',x:'En «uNIDO» se guarda NIDO.',l:2},
+ {c:'Un extremo esconde lo que mueve la barca',a:'REMO',t:'oculta',d:'lo que mueve la barca',i:'esconde',f:'extremo',x:'En «extREMO» se esconde REMO.',l:2},
+ {c:'La estela del barco esconde un tejido',a:'TELA',t:'oculta',d:'un tejido',i:'esconde',f:'estela',x:'En «esTELA» se esconde TELA.',l:2},
+ {c:'Trasnochar oculta a un burro',a:'ASNO',t:'oculta',d:'un burro',i:'oculta',f:'Trasnochar',x:'En «trASNOchar» se oculta ASNO.',l:3},
+ {c:'Al usar paraguas se esconde un instrumento',a:'ARPA',t:'oculta',d:'un instrumento',i:'se esconde',f:'usar paraguas',x:'En «usAR PAraguas» se esconde ARPA.',l:3},
+ /* ---- eliminaciones ---- */
+ {c:'Paloma sin nada: la mano abierta',a:'PALMA',t:'eliminacion',d:'la mano abierta',i:'sin nada',b:'PALOMA',r:'O',x:'Nada = O (cero). PALOMA sin la O: PALMA.',l:3},
+ {c:'Colmena sin la verdura: el mineral',a:'MENA',t:'eliminacion',d:'el mineral',i:'sin la verdura',b:'COLMENA',r:'COL',x:'Verdura = COL. COLMENA sin COL: MENA, el mineral.',l:3},
+ {c:'Militar que pierde la estrella: cubo de juego',a:'DADO',t:'eliminacion',d:'cubo de juego',i:'pierde la estrella',b:'SOLDADO',r:'SOL',x:'Militar = SOLDADO, estrella = SOL. Sin SOL queda DADO.',l:3},
+ {c:'Treinta pierde sus tes y se corona',a:'REINA',t:'eliminacion',d:'se corona',i:'pierde sus tes',b:'TREINTA',r:'T',all:true,x:'TREINTA sin sus dos T: REINA.',l:3},
+ {c:'Estación que pierde a la prima: la orilla',a:'VERA',t:'eliminacion',d:'la orilla',i:'pierde a la prima',b:'PRIMAVERA',r:'PRIMA',x:'Estación = PRIMAVERA. Sin PRIMA queda VERA, la orilla.',l:3},
+ {c:'Molusco sin rostro: verdura',a:'COL',t:'eliminacion',d:'verdura',i:'sin rostro',b:'CARACOL',r:'CARA',x:'Molusco = CARACOL, rostro = CARA. Sin CARA queda COL.',l:3},
+ {c:'Primera comida sin negación: no probar bocado',a:'AYUNO',t:'eliminacion',d:'no probar bocado',i:'sin negación',b:'DESAYUNO',r:'DES',x:'Primera comida = DESAYUNO. Sin el prefijo negativo DES queda AYUNO.',l:3},
+ /* ---- homófonos ---- */
+ {c:'Arrojo que suena a suceso',a:'ECHO',t:'homofono',d:'Arrojo',i:'suena a',x:'HECHO (suceso) suena igual que ECHO, de echar: arrojo.',l:3},
+ {c:'Elegir en las urnas suena a rebotar',a:'VOTAR',t:'homofono',d:'Elegir en las urnas',i:'suena a',x:'BOTAR (rebotar) suena igual que VOTAR.',l:2},
+ {c:'Inmenso suena a tosco',a:'VASTO',t:'homofono',d:'Inmenso',i:'suena a',x:'BASTO (tosco) suena igual que VASTO (inmenso).',l:3},
+ {c:'Propiedades que suenan a «llegas»',a:'BIENES',t:'homofono',d:'Propiedades',i:'suenan a',x:'VIENES (llegas) suena igual que BIENES.',l:3},
+ {c:'Árbol que suena a «allá»',a:'HAYA',t:'homofono',d:'Árbol',i:'suena a',x:'Pronunciadas igual en casi toda España, HAYA (el árbol) suena a ALLÁ.',l:3},
+ {c:'Fruto pequeño que suena a cerca',a:'BAYA',t:'homofono',d:'Fruto pequeño',i:'suena a',x:'VALLA (una cerca) suena igual que BAYA.',l:3},
+ {c:'Mostrar un secreto suena a sublevarse',a:'REVELAR',t:'homofono',d:'Mostrar un secreto',i:'suena a',x:'REBELAR (sublevarse) suena igual que REVELAR.',l:3},
+ {c:'Poner un impuesto suena a registrar un disco',a:'GRAVAR',t:'homofono',d:'Poner un impuesto',i:'suena a',x:'GRABAR (un disco) suena igual que GRAVAR (con un impuesto).',l:3},
+ /* ---- dobles definiciones con trampa ---- */
+ {c:'Se lee en el restaurante y la trae el cartero',a:'CARTA',t:'doble',d:['Se lee en el restaurante','la trae el cartero'],i:'',x:'La CARTA del restaurante y la CARTA del correo.',l:2},
+ {c:'Abre la puerta o inmoviliza en el tatami',a:'LLAVE',t:'doble',d:['Abre la puerta','inmoviliza en el tatami'],i:'',x:'La LLAVE de la puerta y la LLAVE de judo.',l:2},
+ {c:'Da energía al mando o sirve de fregadero',a:'PILA',t:'doble',d:['Da energía al mando','sirve de fregadero'],i:'',x:'La PILA del mando y la PILA de fregar.',l:2},
+ {c:'Primate que se pone el mecánico',a:'MONO',t:'doble',d:['Primate','se pone el mecánico'],i:'',x:'El MONO animal y el MONO de trabajo.',l:2},
+ {c:'Cruza el río y alarga el fin de semana',a:'PUENTE',t:'doble',d:['Cruza el río','alarga el fin de semana'],i:'',x:'El PUENTE sobre el río y el PUENTE festivo.',l:2},
+ {c:'Calzado del que se bebe vino',a:'BOTA',t:'doble',d:['Calzado','se bebe vino'],i:'',x:'La BOTA calzado y la BOTA de vino.',l:2},
+ {c:'Se levanta en la final y la tiene el pino',a:'COPA',t:'doble',d:['Se levanta en la final','la tiene el pino'],i:'',x:'La COPA del trofeo y la COPA del árbol.',l:2},
+ {c:'Madrid lo es, y también el dinero del inversor',a:'CAPITAL',t:'doble',d:['Madrid lo es','el dinero del inversor'],i:'',x:'Madrid es la CAPITAL; el dinero invertido es CAPITAL.',l:3},
+ {c:'Rango de cuartel que se adentra en el mar',a:'CABO',t:'doble',d:['Rango de cuartel','se adentra en el mar'],i:'',x:'El CABO militar y el CABO geográfico.',l:3},
+ {c:'Lo marca el termómetro y se obtiene en la universidad',a:'GRADO',t:'doble',d:['Lo marca el termómetro','se obtiene en la universidad'],i:'',x:'Los GRADOS de temperatura y el GRADO universitario.',l:2},
+ {c:'Fruta tropical por la que agarras la sartén',a:'MANGO',t:'doble',d:['Fruta tropical','por la que agarras la sartén'],i:'',x:'El MANGO fruta y el MANGO de la sartén.',l:2},
+ {c:'Encima del papel que lleva la carta',a:'SOBRE',t:'doble',d:['Encima','del papel que lleva la carta'],i:'',x:'SOBRE significa encima, y el SOBRE lleva la carta dentro.',l:3},
+ {c:'Brilla en el cielo y en la alfombra roja',a:'ESTRELLA',t:'doble',d:['Brilla en el cielo','en la alfombra roja'],i:'',x:'La ESTRELLA del cielo y la ESTRELLA famosa.',l:2,skip:true},
+ {c:'La lleva el torero y la tiene la cebolla',a:'CAPA',t:'doble',d:['La lleva el torero','la tiene la cebolla'],i:'',x:'La CAPA del torero y las CAPAS de la cebolla.',l:2},
+ {c:'Rebota en el colchón y amarra el barco',a:'MUELLE',t:'doble',d:['Rebota en el colchón','amarra el barco'],i:'',x:'El MUELLE del colchón y el MUELLE del puerto.',l:2},
+ {c:'Nada especial, aunque te puede dar calambre',a:'CORRIENTE',t:'doble',d:['Nada especial','te puede dar calambre'],i:'',x:'CORRIENTE es común, y la CORRIENTE eléctrica da calambre.',l:3},
+ {c:'Toca en la verbena o asalta el banco',a:'BANDA',t:'doble',d:['Toca en la verbena','asalta el banco'],i:'',x:'La BANDA de música y la BANDA de ladrones.',l:2},
+ {c:'Macarrones que se gastan',a:'PASTA',t:'doble',d:['Macarrones','que se gastan'],i:'',x:'La PASTA de comer y la PASTA (el dinero).',l:3},
+ {c:'Color de la nieve al que apunta el arquero',a:'BLANCO',t:'doble',d:['Color de la nieve','al que apunta el arquero'],i:'',x:'El color BLANCO y el BLANCO de la diana.',l:2}
+].filter(c=>!c.skip);
+
+
+CLUES=CLUES.concat(CLUES2);
 
 (function(){
 "use strict";
@@ -206,6 +438,7 @@ const TYPES={
   doble:{n:'Doble definición',d:'La pista son dos definiciones distintas de la misma palabra, pegadas.',ind:'No hay indicador: cada mitad de la pista define la solución.'}
 };
 const N=CLUES.length;
+const HARD=[...Array(N).keys()].filter(k=>CLUES[k].l>=2);
 /* ---------- storage ---------- */
 const KEY='cripticos-v1';
 let ST={done:{},prog:{},last:0,days:{}};
@@ -213,34 +446,33 @@ try{const t=JSON.parse(localStorage.getItem(KEY)||'null');if(t)ST=Object.assign(
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}};
 /* daily order: a fixed shuffle, so everyone gets the same críptico each day */
 function seeded(n){let x=n;return()=>{x=(x*1103515245+12345)%2147483648;return x/2147483648}}
-const ORDER=(()=>{const a=[...Array(N).keys()],r=seeded(20261124);for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a})();
+const ORDER=(()=>{const a=HARD.slice(),r=seeded(20261124);for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a})();
 const today=()=>{const d=new Date();return Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(2026,0,1))/864e5)};
-const dailyIdx=()=>ORDER[((today()%N)+N)%N];
+const dailyIdx=()=>ORDER[((today()%ORDER.length)+ORDER.length)%ORDER.length];
 const dateES=()=>new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
 /* ---------- state of the current puzzle ---------- */
 let cur=null;
 function P(k){if(!ST.prog[k])ST.prog[k]={def:false,ind:false,giv:[],fill:[],rev:false};return ST.prog[k]}
-function stars(k){const p=P(k);return Math.max(0,3-(p.def?1:0)-(p.ind?1:0)-p.giv.length)}
 function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>{e.style.opacity=0;setTimeout(()=>e.hidden=true,300)},2000)}
 /* ---------- screens ---------- */
 function home(){
   app.classList.remove('fix');
-  const solved=Object.keys(ST.done).length,stars=Object.values(ST.done).reduce((a,d)=>a+d.s,0),dk=dailyIdx(),dd=ST.done[dk];
+  const solved=Object.values(ST.done).filter(d=>!d.rev).length,shown=Object.values(ST.done).filter(d=>d.rev).length,dk=dailyIdx(),dd=ST.done[dk];
   const c=CLUES[dk];
   app.innerHTML='<div class="mast"><h1>Críptico</h1><small>'+esc(dateES())+'</small></div><div class="home">'+
     '<div class="daily"><span class="lbl">El críptico del día · n.º '+(dk+1)+'</span><div class="q">'+esc(c.c)+' <em>('+NN(c.a).length+')</em></div>'+
-    (dd?'<p style="margin:0;color:var(--soft)">'+(dd.rev?'Lo resolviste con la solución a la vista.':'Resuelto con '+dd.s+' de 3 estrellas.')+' Mañana hay otro.</p>':'')+
+    (dd?'<p style="margin:0;color:var(--soft)">'+(dd.rev?'Viste la solución.':'Resuelto.')+' Mañana hay otro.</p>':'')+
     '<button class="btn pri" data-a="play" data-k="'+dk+'">'+(dd?'Volver a verlo':'Resolverlo')+'</button></div>'+
     '<div class="col"><button class="btn" data-a="next">Siguiente sin resolver</button><button class="btn" data-a="rand">Uno al azar</button>'+
     '<div class="row"><button class="btn grow" data-a="list">Todos ('+N+')</button><button class="btn grow" data-a="help">Cómo funcionan</button></div></div>'+
-    '<div class="stats"><div><span class="lbl">Resueltos</span><b>'+solved+'/'+N+'</b></div><div><span class="lbl">Estrellas</span><b>'+stars+'</b></div><div><span class="lbl">Sin ayuda</span><b>'+Object.values(ST.done).filter(d=>d.s===3).length+'</b></div></div>'+
+    '<div class="stats"><div><span class="lbl">Resueltos</span><b>'+solved+'</b></div><div><span class="lbl">Desvelados</span><b>'+shown+'</b></div><div><span class="lbl">Por hacer</span><b>'+(N-solved-shown)+'</b></div></div>'+
     '</div>';
 }
 function list(){
   app.classList.remove('fix');
   app.innerHTML='<div class="mast"><h1>Todos</h1><button class="btn" style="padding:6px 12px" data-a="home">Volver</button></div>'+
-    '<p class="lbl" style="margin:10px 0 0">Ordenados de más fácil a más difícil</p><div class="list">'+
-    [...Array(N).keys()].sort((a,b)=>CLUES[a].l-CLUES[b].l||a-b).map(k=>{const d=ST.done[k];return '<button data-a="play" data-k="'+k+'" class="'+(d?(d.rev?'rev':'done'):'')+'">'+(k+1)+'<small>'+(d&&!d.rev?'★'.repeat(d.s):'·'.repeat(CLUES[k].l))+'</small></button>'}).join('')+'</div>';
+    '<p class="lbl" style="margin:10px 0 0">Ordenados de más fácil (·) a más difícil (···)</p><div class="list">'+
+    [...Array(N).keys()].sort((a,b)=>CLUES[a].l-CLUES[b].l||a-b).map(k=>{const d=ST.done[k];return '<button data-a="play" data-k="'+k+'" class="'+(d?(d.rev?'rev':'done'):'')+'">'+(k+1)+'<small>'+'·'.repeat(CLUES[k].l)+'</small></button>'}).join('')+'</div>';
 }
 function help(){
   app.classList.remove('fix');
@@ -249,7 +481,7 @@ function help(){
     '<div class="ex">Sopa <span style="background:var(--mark);border-radius:4px;padding:0 3px">revuelta</span> da un <span style="text-decoration:underline;text-decoration-color:var(--accent2);text-decoration-thickness:3px">movimiento al andar</span> (4)</div>'+
     '<p>«Movimiento al andar» es la definición. «Revuelta» indica un anagrama: las letras de SOPA se reordenan. Solución: <b>PASO</b>.</p></div>'+
     Object.values(TYPES).map(t=>'<div class="sec"><h3>'+t.n+'</h3><p>'+t.d+'</p><p style="color:var(--soft)"><b>Indicadores:</b> '+t.ind+'</p></div>').join('')+
-    '<div class="sec"><h3>Las ayudas</h3><p><b>Definición</b> subraya la parte que define la solución. <b>Indicador</b> marca el indicador y te explica el mecanismo. <b>Letra</b> te da una letra. Cada ayuda cuesta una estrella. <b>Ver</b> muestra la solución.</p></div></div>';
+    '<div class="sec"><h3>Las ayudas</h3><p><b>Definición</b> subraya la parte que define la solución. <b>Indicador</b> marca el indicador y te explica el mecanismo. <b>Letra</b> te da una letra, y puedes pedir todas las que quieras. <b>Ver</b> muestra la solución (hay que pulsarlo dos veces).</p></div></div>';
 }
 function play(k){
   cur=k;const c=CLUES[k],p=P(k),a=NN(c.a);
@@ -273,7 +505,7 @@ function indNote(c){
   const T=TYPES[c.t],i=c.i?'<b>«'+esc(c.i)+'»</b>':'';
   const how={anagrama:i+' indica un anagrama: reordena las letras de <b>«'+esc(c.f||'')+'»</b>.',
     oculta:i+' indica una palabra oculta: busca la solución escrita dentro de <b>«'+esc(c.f||'')+'»</b>, leyendo las letras seguidas.',
-    inversa:i+' indica una inversión: lee <b>«'+esc(c.f||'')+'»</b> al revés.',
+    inversa:c.of?i+' indica una inversión: busca un sinónimo de <b>«'+esc(c.f)+'»</b> y léelo al revés.':i+' indica una inversión: lee <b>«'+esc(c.f||'')+'»</b> al revés.',
     charada:'Es una <b>charada</b>: la solución se forma con '+(c.p?c.p.length:2)+' trozos, cada uno definido en la pista.',
     contenedor:i+' indica un contenedor: hay que meter una pieza dentro de otra.',
     eliminacion:i+' indica una eliminación: hay que quitar letras a una palabra de la pista.',
@@ -286,25 +518,23 @@ function render(){
   app.classList.add('fix');
   const c=CLUES[cur],p=P(cur),a=NN(c.a),done=ST.done[cur];
   const sel=p.sel==null?Math.max(0,p.fill.findIndex((x,i)=>!x&&!p.giv.includes(i))):p.sel;
-  const st=done?done.s:stars(cur);
   const tiles='<div class="tiles" id="tiles" style="--n:'+Math.max(a.length,7)+'">'+a.split('').map((ch,i)=>'<button class="tile'+(done?' ok':'')+(p.giv.includes(i)?' given':'')+(!done&&i===sel?' cur':'')+'" data-a="tile" data-i="'+i+'" style="animation-delay:'+(i*.05)+'s" aria-label="Letra '+(i+1)+'">'+(done?ch:esc(p.fill[i]||''))+'</button>').join('')+'</div>';
   const notes=(p.def||done?'<div class="note">'+defNote(c)+'</div>':'')+(p.ind||done?'<div class="note i">'+indNote(c)+'</div>':'');
   let bottom;
   if(done){
-    bottom='<div class="solved"><h2>'+(done.rev?'Era '+c.a:['¡Por los pelos!','¡Bien visto!','¡Muy bien!','¡Impecable!'][done.s])+'</h2>'+
-      '<div class="stars">'+'★'.repeat(done.s)+'<i>'+'★'.repeat(3-done.s)+'</i></div><p>'+esc(c.x)+'</p>'+
+    bottom='<div class="solved"><h2>'+(done.rev?'Era '+c.a:'¡Resuelto!')+'</h2><p>'+esc(c.x)+'</p>'+
       '<div class="row"><button class="btn grow" data-a="home">Inicio</button><button class="btn pri grow" data-a="next">Siguiente</button></div></div>';
   }else{
-    const allLetters=p.giv.length>=a.length-1;
+    const allLetters=p.giv.length>=a.length;
     bottom='<div class="hints">'+
-      '<button data-a="hdef"'+(p.def?' disabled':'')+'>Definición<small>−1 ★</small></button>'+
-      '<button data-a="hind"'+(p.ind?' disabled':'')+'>Indicador<small>−1 ★</small></button>'+
-      '<button data-a="hlet"'+(allLetters?' disabled':'')+'>Letra<small>−1 ★</small></button>'+
+      '<button data-a="hdef"'+(p.def?' disabled':'')+'>Definición<small>'+(p.def?'vista':'subrayar')+'</small></button>'+
+      '<button data-a="hind"'+(p.ind?' disabled':'')+'>Indicador<small>'+(p.ind?'visto':'explicar')+'</small></button>'+
+      '<button data-a="hlet"'+(allLetters?' disabled':'')+'>Letra<small>'+(p.giv.length?p.giv.length+' dada'+(p.giv.length>1?'s':''):'una más')+'</small></button>'+
       '<button data-a="hrev">Ver<small>solución</small></button></div>'+
       '<div class="kb">'+['QWERTYUIOP','ASDFGHJKLÑ'].map(r=>'<div class="r">'+[...r].map(L=>'<button data-a="key" data-k="'+L+'">'+L+'</button>').join('')+'</div>').join('')+
       '<div class="r"><button class="w" data-a="del" aria-label="Borrar">⌫</button>'+[...'ZXCVBNM'].map(L=>'<button data-a="key" data-k="'+L+'">'+L+'</button>').join('')+'<button class="w" data-a="check">Comprobar</button></div></div>';
   }
-  app.innerHTML='<div class="top"><button class="btn" style="padding:6px 12px" data-a="home">‹ Inicio</button><span class="n">n.º '+(cur+1)+' · '+'●'.repeat(c.l)+'○'.repeat(3-c.l)+'</span><span class="stars">'+'★'.repeat(st)+'<i>'+'★'.repeat(3-st)+'</i></span></div>'+
+  app.innerHTML='<div class="top"><button class="btn" style="padding:6px 12px" data-a="home">‹ Inicio</button><span class="n">n.º '+(cur+1)+' · '+'●'.repeat(c.l)+'○'.repeat(3-c.l)+'</span><span class="n">'+NN(c.a).length+' letras</span></div>'+
     '<div class="clue"><div class="cluetext">'+clueHTML(c,p)+'</div><div class="notes">'+notes+'</div></div>'+tiles+bottom;
 }
 /* ---------- input ---------- */
@@ -326,7 +556,7 @@ function del(){
 function check(auto){
   const p=P(cur),a=NN(CLUES[cur].a);
   if(p.fill.some(x=>!x)){if(!auto)toast('Faltan letras');return}
-  if(p.fill.join('')===a){ST.done[cur]={s:stars(cur),rev:false};save();render();celebrate()}
+  if(p.fill.join('')===a){ST.done[cur]={rev:false};save();render();celebrate()}
   else{const t=$('#tiles');if(t){t.classList.remove('bad');void t.offsetWidth;t.classList.add('bad')}if(!auto)toast('No es esa');else toast('Casi… no es esa')}
 }
 function celebrate(){const cols=['#c2412d','#2f6f62','#b8860b','#1d1a16'];for(let i=0;i<36;i++){const c=document.createElement('i');c.className='conf';c.style.left=Math.random()*100+'vw';c.style.background=cols[i%4];c.style.animationDuration=(1+Math.random()*1.2)+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),2500)}}
@@ -339,12 +569,12 @@ function hint(kind){
     let i=p.sel!=null&&!p.giv.includes(p.sel)&&p.fill[p.sel]!==a[p.sel]?p.sel:p.fill.findIndex((x,j)=>!p.giv.includes(j)&&x!==a[j]);
     if(i<0)i=p.fill.findIndex((x,j)=>!p.giv.includes(j));if(i<0)return;
     p.giv.push(i);p.fill[i]=a[i];p.sel=nextFree(p,i,1)<0?i:nextFree(p,i,1);
-    if(p.fill.every((x,j)=>x===a[j])){ST.done[cur]={s:stars(cur),rev:false};save();render();return celebrate()}
+    if(p.fill.every((x,j)=>x===a[j])){const all=p.giv.length>=a.length;ST.done[cur]={rev:all};save();render();return all?null:celebrate()}
   }
   save();render();
 }
 function reveal(){const p=P(cur);if(p.confirmRev!==true){p.confirmRev=true;toast('Toca «Ver» otra vez para ver la solución');setTimeout(()=>{p.confirmRev=false},2500);return}
-  p.rev=true;ST.done[cur]={s:0,rev:true};save();render()}
+  p.rev=true;ST.done[cur]={rev:true};save();render()}
 function nextUnsolved(){const s=ST.last||0;for(let d=1;d<=N;d++){const k=(s+d)%N;if(!ST.done[k])return k}return null}
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;

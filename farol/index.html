@@ -232,6 +232,25 @@ h1,h2,h3{font-family:var(--display);font-weight:700;margin:0;text-wrap:balance;l
   .screen{max-width:760px;margin:0 auto;width:100%}
   .grid2.shop3{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
+@media (min-width:1000px) and (min-height:600px){
+  #app.fix{max-width:1280px}
+  .playwrap{grid-template-columns:340px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto auto;
+    grid-template-areas:"hud top" "panel table" "panel hand" "panel act";gap:10px 18px}
+  .pa-panel{display:flex;flex-direction:column}
+  .pa-panel .panel{flex:1;justify-content:center;gap:12px}
+  .pv{font-size:48px;min-width:120px} .ptotal{font-size:44px;min-height:44px} .pname{font-size:15px}
+  .jc{--jh:clamp(80px,15vh,140px)} .jc .nm{font-size:9px} .jc .art{font-size:clamp(28px,5vh,48px)}
+  .hand{--cw:clamp(60px,min(calc((100vw - 420px)/9),15vh),118px);padding-top:22px}
+  .table{--cw:clamp(56px,13vh,108px)}
+  .actions .btn{font-size:14px;padding:14px 6px}
+  .hand .card:not(.sel):hover{translate:0 -8px}
+  .btn:hover:not(:disabled),.mini:hover{filter:brightness(1.12)}
+  .jc:hover,.bigc:hover{filter:brightness(1.06)}
+  #app:not(.fix){max-width:960px}
+  .grid2{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+  .kbhelp{display:block}
+}
+.kbhelp{display:none;font-size:11px;color:var(--muted);text-align:center;font-family:var(--display);letter-spacing:.05em}
 @media (max-height:600px) and (orientation:portrait){
   .pv{font-size:30px;min-width:80px} .ptotal{font-size:26px;min-height:24px} .hud .money{font-size:26px}
   .tool{min-height:28px} .actions .btn{padding:9px 3px}
@@ -332,7 +351,7 @@ table.lv td:nth-child(n+2){text-align:right;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 <style>html{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<!-- version 5.2 -->
+<!-- version 5.3 -->
 </head>
 <body>
 
@@ -1553,7 +1572,7 @@ function renderPlay(){
     '<div class="pa-act"><div class="actions"><button class="btn m" data-a="discard"'+(busy||!S.sel.length||!S.discLeft?' disabled':'')+'>Descartar</button>'+
     '<button class="btn dark" data-a="clear"'+(busy||!S.sel.length?' disabled':'')+'>Soltar</button>'+
     '<button class="btn dark" data-a="sort"'+(busy?' disabled':'')+'>'+(S.sort==='rank'?'Valor':'Palo')+'</button>'+
-    '<button class="btn c" data-a="play"'+(busy||!S.sel.length?' disabled':'')+'>Jugar</button></div></div></div>';
+    '<button class="btn c" data-a="play"'+(busy||!S.sel.length?' disabled':'')+'>Jugar</button></div><div class="kbhelp">Teclado: 1–9 elegir cartas · Intro jugar · D descartar · Esc soltar · O ordenar</div></div></div>';
   fitHand();
 }
 function fitHand(){
@@ -1767,7 +1786,16 @@ document.addEventListener('click',e=>{
     case 'endless':S.endless=true;S.phase='cobro';save();render();break;
   }
 });
-document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.card[data-a]')){e.preventDefault();e.target.click()}});
+document.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches('.card[data-a]')){e.preventDefault();e.target.click();return}
+  if(!S||S.phase!=='play'||busy||!$('#sheet').hidden||e.metaKey||e.ctrlKey||e.altKey)return;
+  const n=Number(e.key);
+  if(n>=1&&n<=9&&S.hand[n-1]!=null){toggleCard(S.hand[n-1]);return}
+  if(e.key==='Enter'){e.preventDefault();playHand()}
+  else if(e.key==='d'||e.key==='D')discard();
+  else if(e.key==='Escape'){S.sel=[];render()}
+  else if(e.key==='o'||e.key==='O'){S.sort=S.sort==='rank'?'suit':'rank';sortHand();save();render()}
+});
 addEventListener('resize',()=>{if(S&&S.phase==='play')fitHand()});
 /* leaving the app: write the last settled state */
 addEventListener('pagehide',()=>{if(S&&!busy)save()});

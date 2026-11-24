@@ -222,6 +222,25 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
   .screen{max-width:760px;margin:0 auto;width:100%}
   .info{align-self:center}
 }
+@media (min-width:1000px) and (min-height:600px){
+  #app.fix{max-width:1280px}
+  .playwrap{grid-template-columns:400px minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;
+    grid-template-areas:"hud top" "lances riv" "lances hand" "info act";gap:10px 18px}
+  .lances{grid-template-rows:repeat(4,minmax(40px,90px))} .lance .ln{font-size:16px} .lance .st{font-size:14px} .lance .res{font-size:32px}
+  .jc{--jh:clamp(70px,13vh,120px)} .jc .nm{font-size:9px}
+  .hand{--cw:clamp(70px,min(calc((100vw - 520px)/5),24vh),150px);padding-top:22px;gap:14px}
+  .rivhand{--cw:clamp(40px,9vh,74px)}
+  .rivface{font-size:40px}
+  .actions .btn,.chooser .btn{font-size:16px;padding:14px 6px}
+  .hand .card:not(.sel):hover{translate:0 -8px}
+  .btn:hover:not(:disabled),.mini:hover{filter:brightness(1.12)}
+  #app:not(.fix){max-width:960px}
+  .grid2{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+  .bowl .bw{width:80px;height:36px}
+  .info{font-size:14px;align-self:center}
+  .pa-hand{align-self:end} .pa-riv{align-self:center}
+  .lances{grid-template-rows:repeat(4,minmax(40px,120px))}
+}
 @media (max-height:600px) and (orientation:portrait){
   .lance .ln{font-size:12px} .lance .ln small{display:none} .lance .st{font-size:11px} .lance .res{font-size:22px} .actions .btn,.chooser .btn{padding:8px 3px}
   .bowl .val{font-size:24px} .bowl .bw{height:24px;width:54px} .jc{--jh:48px} .hand{--cw:clamp(44px,11vh,84px);padding-top:12px}
@@ -294,7 +313,7 @@ table.lv td:nth-child(n+2){text-align:right;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 <style>html{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<!-- version 5.2 -->
+<!-- version 5.3 -->
 </head>
 <body>
 
@@ -1481,7 +1500,15 @@ document.addEventListener('click',e=>{
     case 'endless':S.endless=true;S.phase='cobro';save();render();break;
   }
 });
-document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.card[data-a]')){e.preventDefault();e.target.click()}});
+document.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches('.card[data-a]')){e.preventDefault();e.target.click();return}
+  if(!S||S.phase!=='play'||!S.m||busy||!$('#sheet').hidden||e.metaKey||e.ctrlKey||e.altKey)return;
+  const n=Number(e.key);
+  if(n>=1&&n<=4&&S.hand[n-1]!=null&&['mus','bet'].includes(S.m.step)){const id=S.hand[n-1],k=S.sel.indexOf(id);if(k>=0)S.sel.splice(k,1);else S.sel.push(id);render();return}
+  const k=e.key.toLowerCase();
+  if(S.m.step==='mus'){if(k==='m')doMus();else if(k==='c')cortar()}
+  else if(S.m.step==='roundEnd'&&(k==='enter'||k===' ')){e.preventDefault();nextRound()}
+});
 function resume(){
   BG.setFiesta(S.fiesta);
   if(S.phase==='play'&&S.m){

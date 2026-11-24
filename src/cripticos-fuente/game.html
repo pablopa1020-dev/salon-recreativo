@@ -92,6 +92,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 14px;border-radius:10px;font-weight:700;font-size:14px;z-index:9;transition:opacity .3s;pointer-events:none;max-width:86vw;text-align:center}
 .conf{position:fixed;top:-12px;width:8px;height:12px;z-index:8;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(105vh) rotate(540deg)}}
+@media (min-width:900px) and (min-height:700px){#app{max-width:680px;padding-block:28px 18px}.cluetext{font-size:34px}.tile{--w:min(54px,calc(640px/var(--n) - 6px))}.kb button{height:52px;max-width:48px;font-size:19px}.kb button.w{max-width:86px}.daily .q{font-size:30px}.btn:hover,.hints button:not(:disabled):hover,.kb button:hover{filter:brightness(.95)}}
 @media (max-height:640px){.cluetext{font-size:clamp(19px,5.6vw,24px)}.kb button{height:40px}.hints button{padding:6px 2px}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
 </style>
@@ -115,6 +116,7 @@ const TYPES={
   doble:{n:'Doble definición',d:'La pista son dos definiciones distintas de la misma palabra, pegadas.',ind:'No hay indicador: cada mitad de la pista define la solución.'}
 };
 const N=CLUES.length;
+const HARD=[...Array(N).keys()].filter(k=>CLUES[k].l>=2);
 /* ---------- storage ---------- */
 const KEY='cripticos-v1';
 let ST={done:{},prog:{},last:0,days:{}};
@@ -122,34 +124,33 @@ try{const t=JSON.parse(localStorage.getItem(KEY)||'null');if(t)ST=Object.assign(
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}};
 /* daily order: a fixed shuffle, so everyone gets the same críptico each day */
 function seeded(n){let x=n;return()=>{x=(x*1103515245+12345)%2147483648;return x/2147483648}}
-const ORDER=(()=>{const a=[...Array(N).keys()],r=seeded(20261124);for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a})();
+const ORDER=(()=>{const a=HARD.slice(),r=seeded(20261124);for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a})();
 const today=()=>{const d=new Date();return Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(2026,0,1))/864e5)};
-const dailyIdx=()=>ORDER[((today()%N)+N)%N];
+const dailyIdx=()=>ORDER[((today()%ORDER.length)+ORDER.length)%ORDER.length];
 const dateES=()=>new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
 /* ---------- state of the current puzzle ---------- */
 let cur=null;
 function P(k){if(!ST.prog[k])ST.prog[k]={def:false,ind:false,giv:[],fill:[],rev:false};return ST.prog[k]}
-function stars(k){const p=P(k);return Math.max(0,3-(p.def?1:0)-(p.ind?1:0)-p.giv.length)}
 function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>{e.style.opacity=0;setTimeout(()=>e.hidden=true,300)},2000)}
 /* ---------- screens ---------- */
 function home(){
   app.classList.remove('fix');
-  const solved=Object.keys(ST.done).length,stars=Object.values(ST.done).reduce((a,d)=>a+d.s,0),dk=dailyIdx(),dd=ST.done[dk];
+  const solved=Object.values(ST.done).filter(d=>!d.rev).length,shown=Object.values(ST.done).filter(d=>d.rev).length,dk=dailyIdx(),dd=ST.done[dk];
   const c=CLUES[dk];
   app.innerHTML='<div class="mast"><h1>Críptico</h1><small>'+esc(dateES())+'</small></div><div class="home">'+
     '<div class="daily"><span class="lbl">El críptico del día · n.º '+(dk+1)+'</span><div class="q">'+esc(c.c)+' <em>('+NN(c.a).length+')</em></div>'+
-    (dd?'<p style="margin:0;color:var(--soft)">'+(dd.rev?'Lo resolviste con la solución a la vista.':'Resuelto con '+dd.s+' de 3 estrellas.')+' Mañana hay otro.</p>':'')+
+    (dd?'<p style="margin:0;color:var(--soft)">'+(dd.rev?'Viste la solución.':'Resuelto.')+' Mañana hay otro.</p>':'')+
     '<button class="btn pri" data-a="play" data-k="'+dk+'">'+(dd?'Volver a verlo':'Resolverlo')+'</button></div>'+
     '<div class="col"><button class="btn" data-a="next">Siguiente sin resolver</button><button class="btn" data-a="rand">Uno al azar</button>'+
     '<div class="row"><button class="btn grow" data-a="list">Todos ('+N+')</button><button class="btn grow" data-a="help">Cómo funcionan</button></div></div>'+
-    '<div class="stats"><div><span class="lbl">Resueltos</span><b>'+solved+'/'+N+'</b></div><div><span class="lbl">Estrellas</span><b>'+stars+'</b></div><div><span class="lbl">Sin ayuda</span><b>'+Object.values(ST.done).filter(d=>d.s===3).length+'</b></div></div>'+
+    '<div class="stats"><div><span class="lbl">Resueltos</span><b>'+solved+'</b></div><div><span class="lbl">Desvelados</span><b>'+shown+'</b></div><div><span class="lbl">Por hacer</span><b>'+(N-solved-shown)+'</b></div></div>'+
     '</div>';
 }
 function list(){
   app.classList.remove('fix');
   app.innerHTML='<div class="mast"><h1>Todos</h1><button class="btn" style="padding:6px 12px" data-a="home">Volver</button></div>'+
-    '<p class="lbl" style="margin:10px 0 0">Ordenados de más fácil a más difícil</p><div class="list">'+
-    [...Array(N).keys()].sort((a,b)=>CLUES[a].l-CLUES[b].l||a-b).map(k=>{const d=ST.done[k];return '<button data-a="play" data-k="'+k+'" class="'+(d?(d.rev?'rev':'done'):'')+'">'+(k+1)+'<small>'+(d&&!d.rev?'★'.repeat(d.s):'·'.repeat(CLUES[k].l))+'</small></button>'}).join('')+'</div>';
+    '<p class="lbl" style="margin:10px 0 0">Ordenados de más fácil (·) a más difícil (···)</p><div class="list">'+
+    [...Array(N).keys()].sort((a,b)=>CLUES[a].l-CLUES[b].l||a-b).map(k=>{const d=ST.done[k];return '<button data-a="play" data-k="'+k+'" class="'+(d?(d.rev?'rev':'done'):'')+'">'+(k+1)+'<small>'+'·'.repeat(CLUES[k].l)+'</small></button>'}).join('')+'</div>';
 }
 function help(){
   app.classList.remove('fix');
@@ -158,7 +159,7 @@ function help(){
     '<div class="ex">Sopa <span style="background:var(--mark);border-radius:4px;padding:0 3px">revuelta</span> da un <span style="text-decoration:underline;text-decoration-color:var(--accent2);text-decoration-thickness:3px">movimiento al andar</span> (4)</div>'+
     '<p>«Movimiento al andar» es la definición. «Revuelta» indica un anagrama: las letras de SOPA se reordenan. Solución: <b>PASO</b>.</p></div>'+
     Object.values(TYPES).map(t=>'<div class="sec"><h3>'+t.n+'</h3><p>'+t.d+'</p><p style="color:var(--soft)"><b>Indicadores:</b> '+t.ind+'</p></div>').join('')+
-    '<div class="sec"><h3>Las ayudas</h3><p><b>Definición</b> subraya la parte que define la solución. <b>Indicador</b> marca el indicador y te explica el mecanismo. <b>Letra</b> te da una letra. Cada ayuda cuesta una estrella. <b>Ver</b> muestra la solución.</p></div></div>';
+    '<div class="sec"><h3>Las ayudas</h3><p><b>Definición</b> subraya la parte que define la solución. <b>Indicador</b> marca el indicador y te explica el mecanismo. <b>Letra</b> te da una letra, y puedes pedir todas las que quieras. <b>Ver</b> muestra la solución (hay que pulsarlo dos veces).</p></div></div>';
 }
 function play(k){
   cur=k;const c=CLUES[k],p=P(k),a=NN(c.a);
@@ -182,7 +183,7 @@ function indNote(c){
   const T=TYPES[c.t],i=c.i?'<b>«'+esc(c.i)+'»</b>':'';
   const how={anagrama:i+' indica un anagrama: reordena las letras de <b>«'+esc(c.f||'')+'»</b>.',
     oculta:i+' indica una palabra oculta: busca la solución escrita dentro de <b>«'+esc(c.f||'')+'»</b>, leyendo las letras seguidas.',
-    inversa:i+' indica una inversión: lee <b>«'+esc(c.f||'')+'»</b> al revés.',
+    inversa:c.of?i+' indica una inversión: busca un sinónimo de <b>«'+esc(c.f)+'»</b> y léelo al revés.':i+' indica una inversión: lee <b>«'+esc(c.f||'')+'»</b> al revés.',
     charada:'Es una <b>charada</b>: la solución se forma con '+(c.p?c.p.length:2)+' trozos, cada uno definido en la pista.',
     contenedor:i+' indica un contenedor: hay que meter una pieza dentro de otra.',
     eliminacion:i+' indica una eliminación: hay que quitar letras a una palabra de la pista.',
@@ -195,25 +196,23 @@ function render(){
   app.classList.add('fix');
   const c=CLUES[cur],p=P(cur),a=NN(c.a),done=ST.done[cur];
   const sel=p.sel==null?Math.max(0,p.fill.findIndex((x,i)=>!x&&!p.giv.includes(i))):p.sel;
-  const st=done?done.s:stars(cur);
   const tiles='<div class="tiles" id="tiles" style="--n:'+Math.max(a.length,7)+'">'+a.split('').map((ch,i)=>'<button class="tile'+(done?' ok':'')+(p.giv.includes(i)?' given':'')+(!done&&i===sel?' cur':'')+'" data-a="tile" data-i="'+i+'" style="animation-delay:'+(i*.05)+'s" aria-label="Letra '+(i+1)+'">'+(done?ch:esc(p.fill[i]||''))+'</button>').join('')+'</div>';
   const notes=(p.def||done?'<div class="note">'+defNote(c)+'</div>':'')+(p.ind||done?'<div class="note i">'+indNote(c)+'</div>':'');
   let bottom;
   if(done){
-    bottom='<div class="solved"><h2>'+(done.rev?'Era '+c.a:['¡Por los pelos!','¡Bien visto!','¡Muy bien!','¡Impecable!'][done.s])+'</h2>'+
-      '<div class="stars">'+'★'.repeat(done.s)+'<i>'+'★'.repeat(3-done.s)+'</i></div><p>'+esc(c.x)+'</p>'+
+    bottom='<div class="solved"><h2>'+(done.rev?'Era '+c.a:'¡Resuelto!')+'</h2><p>'+esc(c.x)+'</p>'+
       '<div class="row"><button class="btn grow" data-a="home">Inicio</button><button class="btn pri grow" data-a="next">Siguiente</button></div></div>';
   }else{
-    const allLetters=p.giv.length>=a.length-1;
+    const allLetters=p.giv.length>=a.length;
     bottom='<div class="hints">'+
-      '<button data-a="hdef"'+(p.def?' disabled':'')+'>Definición<small>−1 ★</small></button>'+
-      '<button data-a="hind"'+(p.ind?' disabled':'')+'>Indicador<small>−1 ★</small></button>'+
-      '<button data-a="hlet"'+(allLetters?' disabled':'')+'>Letra<small>−1 ★</small></button>'+
+      '<button data-a="hdef"'+(p.def?' disabled':'')+'>Definición<small>'+(p.def?'vista':'subrayar')+'</small></button>'+
+      '<button data-a="hind"'+(p.ind?' disabled':'')+'>Indicador<small>'+(p.ind?'visto':'explicar')+'</small></button>'+
+      '<button data-a="hlet"'+(allLetters?' disabled':'')+'>Letra<small>'+(p.giv.length?p.giv.length+' dada'+(p.giv.length>1?'s':''):'una más')+'</small></button>'+
       '<button data-a="hrev">Ver<small>solución</small></button></div>'+
       '<div class="kb">'+['QWERTYUIOP','ASDFGHJKLÑ'].map(r=>'<div class="r">'+[...r].map(L=>'<button data-a="key" data-k="'+L+'">'+L+'</button>').join('')+'</div>').join('')+
       '<div class="r"><button class="w" data-a="del" aria-label="Borrar">⌫</button>'+[...'ZXCVBNM'].map(L=>'<button data-a="key" data-k="'+L+'">'+L+'</button>').join('')+'<button class="w" data-a="check">Comprobar</button></div></div>';
   }
-  app.innerHTML='<div class="top"><button class="btn" style="padding:6px 12px" data-a="home">‹ Inicio</button><span class="n">n.º '+(cur+1)+' · '+'●'.repeat(c.l)+'○'.repeat(3-c.l)+'</span><span class="stars">'+'★'.repeat(st)+'<i>'+'★'.repeat(3-st)+'</i></span></div>'+
+  app.innerHTML='<div class="top"><button class="btn" style="padding:6px 12px" data-a="home">‹ Inicio</button><span class="n">n.º '+(cur+1)+' · '+'●'.repeat(c.l)+'○'.repeat(3-c.l)+'</span><span class="n">'+NN(c.a).length+' letras</span></div>'+
     '<div class="clue"><div class="cluetext">'+clueHTML(c,p)+'</div><div class="notes">'+notes+'</div></div>'+tiles+bottom;
 }
 /* ---------- input ---------- */
@@ -235,7 +234,7 @@ function del(){
 function check(auto){
   const p=P(cur),a=NN(CLUES[cur].a);
   if(p.fill.some(x=>!x)){if(!auto)toast('Faltan letras');return}
-  if(p.fill.join('')===a){ST.done[cur]={s:stars(cur),rev:false};save();render();celebrate()}
+  if(p.fill.join('')===a){ST.done[cur]={rev:false};save();render();celebrate()}
   else{const t=$('#tiles');if(t){t.classList.remove('bad');void t.offsetWidth;t.classList.add('bad')}if(!auto)toast('No es esa');else toast('Casi… no es esa')}
 }
 function celebrate(){const cols=['#c2412d','#2f6f62','#b8860b','#1d1a16'];for(let i=0;i<36;i++){const c=document.createElement('i');c.className='conf';c.style.left=Math.random()*100+'vw';c.style.background=cols[i%4];c.style.animationDuration=(1+Math.random()*1.2)+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),2500)}}
@@ -248,12 +247,12 @@ function hint(kind){
     let i=p.sel!=null&&!p.giv.includes(p.sel)&&p.fill[p.sel]!==a[p.sel]?p.sel:p.fill.findIndex((x,j)=>!p.giv.includes(j)&&x!==a[j]);
     if(i<0)i=p.fill.findIndex((x,j)=>!p.giv.includes(j));if(i<0)return;
     p.giv.push(i);p.fill[i]=a[i];p.sel=nextFree(p,i,1)<0?i:nextFree(p,i,1);
-    if(p.fill.every((x,j)=>x===a[j])){ST.done[cur]={s:stars(cur),rev:false};save();render();return celebrate()}
+    if(p.fill.every((x,j)=>x===a[j])){const all=p.giv.length>=a.length;ST.done[cur]={rev:all};save();render();return all?null:celebrate()}
   }
   save();render();
 }
 function reveal(){const p=P(cur);if(p.confirmRev!==true){p.confirmRev=true;toast('Toca «Ver» otra vez para ver la solución');setTimeout(()=>{p.confirmRev=false},2500);return}
-  p.rev=true;ST.done[cur]={s:0,rev:true};save();render()}
+  p.rev=true;ST.done[cur]={rev:true};save();render()}
 function nextUnsolved(){const s=ST.last||0;for(let d=1;d<=N;d++){const k=(s+d)%N;if(!ST.done[k])return k}return null}
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
