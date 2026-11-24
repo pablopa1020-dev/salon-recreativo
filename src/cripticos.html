@@ -95,6 +95,12 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (min-width:900px) and (min-height:700px){#app{max-width:680px;padding-block:28px 18px}.cluetext{font-size:34px}.tile{--w:min(54px,calc(640px/var(--n) - 6px))}.kb button{height:52px;max-width:48px;font-size:19px}.kb button.w{max-width:86px}.daily .q{font-size:30px}.btn:hover,.hints button:not(:disabled):hover,.kb button:hover{filter:brightness(.95)}}
 @media (max-height:640px){.cluetext{font-size:clamp(19px,5.6vw,24px)}.kb button{height:40px}.hints button{padding:6px 2px}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
+.kk{display:none}
+@media (hover:hover) and (pointer:fine){
+  .kk{display:inline-block;margin-left:7px;padding:1px 5px;border-radius:4px;border:1px solid currentColor;font:600 10px/1.3 ui-monospace,Menlo,monospace;opacity:.55;vertical-align:middle;letter-spacing:0;text-transform:none;text-shadow:none;white-space:nowrap}
+  .card>.kk{position:absolute;left:50%;top:-17px;transform:translateX(-50%);margin:0;background:rgba(0,0,0,.55);color:#fff;border-color:rgba(255,255,255,.4);opacity:.85;z-index:6}
+  .tile>.kk,.list .kk{display:none}
+}
 </style>
 <div id="app"></div>
 <div id="toast" hidden></div>
@@ -449,26 +455,27 @@ function home(){
   app.innerHTML='<div class="mast"><h1>Críptico</h1><small>'+esc(dateES())+'</small></div><div class="home">'+
     '<div class="daily"><span class="lbl">El críptico del día · n.º '+(dk+1)+'</span><div class="q">'+esc(c.c)+' <em>('+NN(c.a).length+')</em></div>'+
     (dd?'<p style="margin:0;color:var(--soft)">'+(dd.rev?'Viste la solución.':'Resuelto.')+' Mañana hay otro.</p>':'')+
-    '<button class="btn pri" data-a="play" data-k="'+dk+'">'+(dd?'Volver a verlo':'Resolverlo')+'</button></div>'+
-    '<div class="col"><button class="btn" data-a="next">Siguiente sin resolver</button><button class="btn" data-a="rand">Uno al azar</button>'+
-    '<div class="row"><button class="btn grow" data-a="list">Todos ('+N+')</button><button class="btn grow" data-a="help">Cómo funcionan</button></div></div>'+
+    '<button class="btn pri" data-a="play" data-key="enter" data-k="'+dk+'">'+(dd?'Volver a verlo':'Resolverlo')+'</button></div>'+
+    '<div class="col"><button class="btn" data-a="next" data-key="s">Siguiente sin resolver</button><button class="btn" data-a="rand" data-key="a">Uno al azar</button>'+
+    '<div class="row"><button class="btn grow" data-a="list" data-key="t">Todos ('+N+')</button><button class="btn grow" data-a="help" data-key="c">Cómo funcionan</button></div></div>'+
     '<div class="stats"><div><span class="lbl">Resueltos</span><b>'+solved+'</b></div><div><span class="lbl">Desvelados</span><b>'+shown+'</b></div><div><span class="lbl">Por hacer</span><b>'+(N-solved-shown)+'</b></div></div>'+
     '</div>';
 }
 function list(){
   app.classList.remove('fix');
-  app.innerHTML='<div class="mast"><h1>Todos</h1><button class="btn" style="padding:6px 12px" data-a="home">Volver</button></div>'+
+  app.innerHTML='<div class="mast"><h1>Todos</h1><button class="btn" style="padding:6px 12px" data-a="home" data-key="esc">Volver</button></div>'+
     '<p class="lbl" style="margin:10px 0 0">Ordenados de más fácil (·) a más difícil (···)</p><div class="list">'+
-    [...Array(N).keys()].sort((a,b)=>CLUES[a].l-CLUES[b].l||a-b).map(k=>{const d=ST.done[k];return '<button data-a="play" data-k="'+k+'" class="'+(d?(d.rev?'rev':'done'):'')+'">'+(k+1)+'<small>'+'·'.repeat(CLUES[k].l)+'</small></button>'}).join('')+'</div>';
+    [...Array(N).keys()].sort((a,b)=>CLUES[a].l-CLUES[b].l||a-b).map(k=>{const d=ST.done[k];return '<button data-a="play" data-key="enter" data-k="'+k+'" class="'+(d?(d.rev?'rev':'done'):'')+'">'+(k+1)+'<small>'+'·'.repeat(CLUES[k].l)+'</small></button>'}).join('')+'</div>';
 }
 function help(){
   app.classList.remove('fix');
-  app.innerHTML='<div class="mast"><h1>Cómo funcionan</h1><button class="btn" style="padding:6px 12px" data-a="back">Volver</button></div><div class="home">'+
+  app.innerHTML='<div class="mast"><h1>Cómo funcionan</h1><button class="btn" style="padding:6px 12px" data-a="back" data-key="esc">Volver</button></div><div class="home">'+
     '<div class="sec"><p>Un críptico es una frase con trampa. Casi siempre tiene dos partes: una <b>definición</b> normal de la solución, al principio o al final, y un <b>juego de palabras</b> que lleva a la misma palabra. Un <b>indicador</b> te dice qué tipo de juego es. El número entre paréntesis es el número de letras.</p>'+
     '<div class="ex">Sopa <span style="background:var(--mark);border-radius:4px;padding:0 3px">revuelta</span> da un <span style="text-decoration:underline;text-decoration-color:var(--accent2);text-decoration-thickness:3px">movimiento al andar</span> (4)</div>'+
     '<p>«Movimiento al andar» es la definición. «Revuelta» indica un anagrama: las letras de SOPA se reordenan. Solución: <b>PASO</b>.</p></div>'+
     Object.values(TYPES).map(t=>'<div class="sec"><h3>'+t.n+'</h3><p>'+t.d+'</p><p style="color:var(--soft)"><b>Indicadores:</b> '+t.ind+'</p></div>').join('')+
-    '<div class="sec"><h3>Las ayudas</h3><p><b>Definición</b> subraya la parte que define la solución. <b>Indicador</b> marca el indicador y te explica el mecanismo. <b>Letra</b> te da una letra, y puedes pedir todas las que quieras. <b>Ver</b> muestra la solución (hay que pulsarlo dos veces).</p></div></div>';
+    '<div class="sec"><h3>Las ayudas</h3><p><b>Definición</b> subraya la parte que define la solución. <b>Indicador</b> marca el indicador y te explica el mecanismo. <b>Letra</b> te da una letra, y puedes pedir todas las que quieras. <b>Ver</b> muestra la solución (hay que pulsarlo dos veces).</p></div>'+
+    '<div class="sec"><h3>En el ordenador</h3><p>Escribe las letras con tu teclado; <b>⌫</b> borra, las <b>flechas</b> mueven la casilla e <b>Intro</b> comprueba. <b>1</b> definición, <b>2</b> indicador, <b>3</b> letra y <b>4</b> ver la solución. <b>Esc</b> vuelve al inicio. Cada botón muestra su tecla.</p></div></div>';
 }
 function play(k){
   cur=k;const c=CLUES[k],p=P(k),a=NN(c.a);
@@ -510,18 +517,18 @@ function render(){
   let bottom;
   if(done){
     bottom='<div class="solved"><h2>'+(done.rev?'Era '+c.a:'¡Resuelto!')+'</h2><p>'+esc(c.x)+'</p>'+
-      '<div class="row"><button class="btn grow" data-a="home">Inicio</button><button class="btn pri grow" data-a="next">Siguiente</button></div></div>';
+      '<div class="row"><button class="btn grow" data-a="home" data-key="esc">Inicio</button><button class="btn pri grow" data-a="next" data-key="enter">Siguiente</button></div></div>';
   }else{
     const allLetters=p.giv.length>=a.length;
     bottom='<div class="hints">'+
-      '<button data-a="hdef"'+(p.def?' disabled':'')+'>Definición<small>'+(p.def?'vista':'subrayar')+'</small></button>'+
-      '<button data-a="hind"'+(p.ind?' disabled':'')+'>Indicador<small>'+(p.ind?'visto':'explicar')+'</small></button>'+
-      '<button data-a="hlet"'+(allLetters?' disabled':'')+'>Letra<small>'+(p.giv.length?p.giv.length+' dada'+(p.giv.length>1?'s':''):'una más')+'</small></button>'+
-      '<button data-a="hrev">Ver<small>solución</small></button></div>'+
+      '<button data-a="hdef" data-key="1"'+(p.def?' disabled':'')+'>Definición<small>'+(p.def?'vista':'subrayar')+'</small></button>'+
+      '<button data-a="hind" data-key="2"'+(p.ind?' disabled':'')+'>Indicador<small>'+(p.ind?'visto':'explicar')+'</small></button>'+
+      '<button data-a="hlet" data-key="3"'+(allLetters?' disabled':'')+'>Letra<small>'+(p.giv.length?p.giv.length+' dada'+(p.giv.length>1?'s':''):'una más')+'</small></button>'+
+      '<button data-a="hrev" data-key="4">Ver<small>solución</small></button></div>'+
       '<div class="kb">'+['QWERTYUIOP','ASDFGHJKLÑ'].map(r=>'<div class="r">'+[...r].map(L=>'<button data-a="key" data-k="'+L+'">'+L+'</button>').join('')+'</div>').join('')+
-      '<div class="r"><button class="w" data-a="del" aria-label="Borrar">⌫</button>'+[...'ZXCVBNM'].map(L=>'<button data-a="key" data-k="'+L+'">'+L+'</button>').join('')+'<button class="w" data-a="check">Comprobar</button></div></div>';
+      '<div class="r"><button class="w" data-a="del" aria-label="Borrar">⌫</button>'+[...'ZXCVBNM'].map(L=>'<button data-a="key" data-k="'+L+'">'+L+'</button>').join('')+'<button class="w" data-a="check" data-key="enter">Comprobar</button></div></div>';
   }
-  app.innerHTML='<div class="top"><button class="btn" style="padding:6px 12px" data-a="home">‹ Inicio</button><span class="n">n.º '+(cur+1)+' · '+'●'.repeat(c.l)+'○'.repeat(3-c.l)+'</span><span class="n">'+NN(c.a).length+' letras</span></div>'+
+  app.innerHTML='<div class="top"><button class="btn" style="padding:6px 12px" data-a="home" data-key="esc">‹ Inicio</button><span class="n">n.º '+(cur+1)+' · '+'●'.repeat(c.l)+'○'.repeat(3-c.l)+'</span><span class="n">'+NN(c.a).length+' letras</span></div>'+
     '<div class="clue"><div class="cluetext">'+clueHTML(c,p)+'</div><div class="notes">'+notes+'</div></div>'+tiles+bottom;
 }
 /* ---------- input ---------- */
@@ -584,6 +591,7 @@ document.addEventListener('click',e=>{
   }
 });
 document.addEventListener('keydown',e=>{
+  if(cur==null||ST.done[cur]||/^[1-9]$/.test(e.key)||e.key==='Escape'||e.key==='Enter'){if(window.__keyclick&&window.__keyclick(e))return}
   if(cur==null||ST.done[cur])return;
   if(e.key==='Backspace'){e.preventDefault();del()}
   else if(e.key==='Enter'){check(false)}
@@ -593,5 +601,22 @@ document.addEventListener('keydown',e=>{
 });
 if('serviceWorker' in navigator&&location.protocol==='https:'&&!/claude/.test(location.host)){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 home();
+})();
+</script>
+
+<script>
+/* keyboard shortcuts shown on the buttons themselves (computers only) */
+(function(){
+  const NAMES={enter:'↵ Intro',esc:'Esc',space:'Espacio',backspace:'⌫','-':'−','+':'+'};
+  const fine=matchMedia('(hover:hover) and (pointer:fine)');
+  function deco(){if(!fine.matches)return;document.querySelectorAll('[data-key]').forEach(b=>{if(b.querySelector(':scope>.kk'))return;const k=document.createElement('kbd');k.className='kk';k.textContent=NAMES[b.dataset.key]||b.dataset.key.toUpperCase();b.appendChild(k)})}
+  new MutationObserver(deco).observe(document.body,{childList:true,subtree:true});deco();
+  window.__keyclick=e=>{
+    if(e.metaKey||e.ctrlKey||e.altKey)return false;
+    const n=({Enter:'enter',Escape:'esc',' ':'space',Backspace:'backspace'})[e.key]||e.key.toLowerCase();
+    const sh=document.getElementById('sheet'),root=sh&&!sh.hidden?sh:document.getElementById('app');
+    const b=[...root.querySelectorAll('[data-key]')].find(x=>x.dataset.key===n&&!x.disabled&&x.offsetParent!==null);
+    if(!b)return false;e.preventDefault();b.click();return true;
+  };
 })();
 </script>

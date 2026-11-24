@@ -349,9 +349,15 @@ table.lv td:nth-child(n+2){text-align:right;white-space:nowrap}
 @keyframes unroll{from{clip-path:inset(0 0 92% 0);transform:scaleY(.4)}to{clip-path:inset(0 0 0 0);transform:none}}
 .reduce *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+.kk{display:none}
+@media (hover:hover) and (pointer:fine){
+  .kk{display:inline-block;margin-left:7px;padding:1px 5px;border-radius:4px;border:1px solid currentColor;font:600 10px/1.3 ui-monospace,Menlo,monospace;opacity:.55;vertical-align:middle;letter-spacing:0;text-transform:none;text-shadow:none;white-space:nowrap}
+  .card>.kk{position:absolute;left:50%;top:-17px;transform:translateX(-50%);margin:0;background:rgba(0,0,0,.55);color:#fff;border-color:rgba(255,255,255,.4);opacity:.85;z-index:6}
+  .tile>.kk,.list .kk{display:none}
+}
 </style>
 <style>html{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<!-- version 5.3 -->
+<!-- version 5.4 -->
 </head>
 <body>
 
@@ -1467,7 +1473,7 @@ async function consumeFx(d){
 
 /* ---------- rendering ---------- */
 function cardHTML(c,cls,act,i){
-  const a=act?' data-a="card" data-id="'+c.id+'" role="button" tabindex="0"':' data-id="'+c.id+'"';
+  const a=act?' data-a="card" data-id="'+c.id+'" role="button" tabindex="0"'+(i!==undefined&&i<9?' data-key="'+(i+1)+'"':''):' data-id="'+c.id+'"';
   const dl=act&&fresh.has(c.id)?' deal':'';
   const first=dl?(i*0.05)+'s, ':(cls||'').includes('sel')?'0s, ':'';
   const st=i!==undefined?' style="--i:'+i+';--dx:'+(160-i*18)+'px;animation-delay:'+first+(-i*.45).toFixed(2)+'s"':'';
@@ -1496,7 +1502,7 @@ function amHTML(){
 function toolsHTML(){
   let h='<div class="tools">';
   for(let i=0;i<Math.max(scSlots(),S.scrolls.length);i++){const k=S.scrolls[i];if(k){const d=con(k);h+='<button class="tool '+d.cls+'" data-a="sc" data-i="'+i+'"><i>'+(d.art||d.e)+'</i><span>'+d.n+'</span></button>'}else h+='<div class="tool empty">Consumible</div>'}
-  return h+'<button class="mini" data-a="levels">Manos</button><button class="mini" data-a="deck">Mazo</button><button class="mini" data-a="settings" aria-label="Ajustes">⚙︎</button></div>';
+  return h+'<button class="mini" data-a="levels" data-key="m">Manos</button><button class="mini" data-a="deck" data-key="z">Mazo</button><button class="mini" data-a="settings" aria-label="Ajustes">⚙︎</button></div>';
 }
 function hudHTML(){
   const boss=S.mesa===2?bossOf(S.night):null;
@@ -1524,9 +1530,9 @@ function renderMenu(){
   const fan=[{r:14,s:'s'},{r:13,s:'h'},{r:12,s:'c',enh:'oro'},{r:11,s:'d'},{r:10,s:'s',enh:'rubi'}].map((c,i)=>cardHTML(Object.assign({id:'f'+i},c))).join('');
   setScreen('<div class="screen"><div class="logo"><h1>FAROL</h1><p>PÓKER · AMULETOS · FAROLES</p></div>'+
     '<div class="fan">'+fan+'</div><div class="col">'+
-    (ok?'<button class="btn y" data-a="continue">Continuar · Noche '+sv.night+'</button>':'')+
-    '<button class="btn '+(ok?'c':'y')+'" data-a="decks">Nueva partida</button>'+
-    '<div class="row"><button class="btn dark grow" data-a="records">Récords</button><button class="btn dark grow" data-a="help">Cómo se juega</button></div>'+
+    (ok?'<button class="btn y" data-a="continue" data-key="enter">Continuar · Noche '+sv.night+'</button>':'')+
+    '<button class="btn '+(ok?'c':'y')+'" data-a="decks" data-key="n">Nueva partida</button>'+
+    '<div class="row"><button class="btn dark grow" data-a="records">Récords</button><button class="btn dark grow" data-a="help" data-key="h">Cómo se juega</button></div>'+
     '<button class="btn dark" data-a="settings">Ajustes</button></div></div>');
 }
 function renderDecks(){
@@ -1536,7 +1542,7 @@ function renderDecks(){
 }
 function renderStakes(deck){
   const mx=REC.stakeMax||1;
-  setScreen('<div class="screen"><div class="sec-h"><h2>Elige apuesta</h2><button class="mini" data-a="decks">Volver</button></div><p class="lbl">Baraja '+DECKS[deck].n+' · cada apuesta suma su cambio a los anteriores. Gana con una para desbloquear la siguiente.</p><div class="col">'+
+  setScreen('<div class="screen"><div class="sec-h"><h2>Elige apuesta</h2><button class="mini" data-a="decks" data-key="n">Volver</button></div><p class="lbl">Baraja '+DECKS[deck].n+' · cada apuesta suma su cambio a los anteriores. Gana con una para desbloquear la siguiente.</p><div class="col">'+
     STAKES.slice(1).map((st,i)=>{const n=i+1;return n<=mx?'<button class="tile box stake" data-a="pickstake" data-k="'+deck+'" data-v="'+n+'"><span class="sn">'+n+'</span><div><h3>'+st.n+'</h3><p>'+st.d+'</p></div></button>'
       :'<div class="tile box stake locked"><span class="sn">🔒</span><div><h3>'+st.n+'</h3><p>'+st.d+'</p></div></div>'}).join('')+'</div></div>');
 }
@@ -1551,10 +1557,10 @@ function renderPrevia(){
     const sk=m===S.mesa?SKIPS[skipOf(S.night,m)]:null;
     t+='<div class="tile box'+st+'"><div class="kv"><span class="lbl">Mesa '+(m+1)+'</span><span>'+(m<S.mesa?'✔ Superada o saltada':'Premio <b>$'+rewardFor(m)+'</b>')+'</span></div>'+
       '<h3>'+mesaEmoji(S.night,m)+' '+mesaName(S.night,m)+'</h3><div class="kv"><span>Objetivo</span><b class="num">'+fm(targetFor(S.night,m))+'</b></div>'+
-      (sk?'<div class="skipbtn"><span>Si la saltas: '+sk.e+' '+sk.n+'</span><button class="btn dark sm" data-a="skipmesa">Saltar</button></div>':'')+'</div>';
+      (sk?'<div class="skipbtn"><span>Si la saltas: '+sk.e+' '+sk.n+'</span><button class="btn dark sm" data-a="skipmesa" data-key="s">Saltar</button></div>':'')+'</div>';
   }
   setScreen('<div class="screen">'+hudHTML()+amHTML()+toolsHTML()+'<div class="sec-h"><h2>Noche '+S.night+'</h2><span class="lbl">'+(S.endless?'Modo infinito':'de 8')+' · Apuesta '+(S.stake||1)+'</span></div>'+
-    '<div class="col">'+t+'</div><button class="btn y" data-a="start">¡A la mesa!</button></div>');
+    '<div class="col">'+t+'</div><button class="btn y" data-a="start" data-key="enter">¡A la mesa!</button></div>');
 }
 function renderPlay(){
   const selC=selOrdered().map(C);
@@ -1564,15 +1570,15 @@ function renderPlay(){
   app.innerHTML='<div class="playwrap">'+
     '<div class="pa-hud">'+hudHTML()+'</div>'+
     '<div class="pa-top">'+amHTML()+toolsHTML()+'</div>'+
-    '<div class="pa-panel"><div class="panel box"><button class="bluffbtn'+(S.bluff?' on':'')+'" id="bluffBtn" data-a="bluff"'+(busy?' disabled':'')+'>'+(S.bluff?'🎭 $'+S.bluff.stake+' a '+fm(S.bluff.need):'🎭 Farol')+'</button><div class="pname" id="pName">'+pname+'</div><div class="pvals num">'+
+    '<div class="pa-panel"><div class="panel box"><button class="bluffbtn'+(S.bluff?' on':'')+'" id="bluffBtn" data-a="bluff" data-key="f"'+(busy?' disabled':'')+'>'+(S.bluff?'🎭 $'+S.bluff.stake+' a '+fm(S.bluff.need):'🎭 Farol')+'</button><div class="pname" id="pName">'+pname+'</div><div class="pvals num">'+
       '<div class="pv chips"><div class="chipstack" id="chipStack">'+chipStack(pc)+'</div><span id="pChips">'+fm(pc)+'</span></div><b>×</b>'+
       '<div class="pv mult'+(pm>=10?' hot':'')+(pm>=25?' fire':'')+'" id="multBox"><span id="pMult">'+fm(pm)+'</span></div></div><div class="ptotal num" id="pTotal"></div></div></div>'+
     '<div class="pa-table"><div class="table">'+(played.length?played.map((c,i)=>cardHTML(c,'toss')).join(''):'<div class="hint">Toca cartas para probar manos. «Soltar» las deselecciona todas de golpe.</div>')+'</div></div>'+
     '<div class="pa-hand"><div class="hand">'+S.hand.map((id,i)=>cardHTML(C(id),S.sel.includes(id)?'sel':'',true,i)).join('')+'</div></div>'+
-    '<div class="pa-act"><div class="actions"><button class="btn m" data-a="discard"'+(busy||!S.sel.length||!S.discLeft?' disabled':'')+'>Descartar</button>'+
-    '<button class="btn dark" data-a="clear"'+(busy||!S.sel.length?' disabled':'')+'>Soltar</button>'+
-    '<button class="btn dark" data-a="sort"'+(busy?' disabled':'')+'>'+(S.sort==='rank'?'Valor':'Palo')+'</button>'+
-    '<button class="btn c" data-a="play"'+(busy||!S.sel.length?' disabled':'')+'>Jugar</button></div><div class="kbhelp">Teclado: 1–9 elegir cartas · Intro jugar · D descartar · Esc soltar · O ordenar</div></div></div>';
+    '<div class="pa-act"><div class="actions"><button class="btn m" data-a="discard" data-key="d"'+(busy||!S.sel.length||!S.discLeft?' disabled':'')+'>Descartar</button>'+
+    '<button class="btn dark" data-a="clear" data-key="esc"'+(busy||!S.sel.length?' disabled':'')+'>Soltar</button>'+
+    '<button class="btn dark" data-a="sort" data-key="o"'+(busy?' disabled':'')+'>'+(S.sort==='rank'?'Valor':'Palo')+'</button>'+
+    '<button class="btn c" data-a="play" data-key="enter"'+(busy||!S.sel.length?' disabled':'')+'>Jugar</button></div></div></div>';
   fitHand();
 }
 function fitHand(){
@@ -1585,7 +1591,7 @@ async function renderCobro(){
   setScreen('<div class="screen">'+hudHTML()+'<div class="sign"><div class="neon c">¡A COBRAR!</div></div><div class="tile box cur" id="cobroBox">'+
     S.cobro.lines.map((l,i)=>'<div class="kv cobro-l"><span>'+l[0]+'</span><b class="num" data-v="'+l[1]+'"'+(l[1]<0?' style="color:var(--red)"':'')+'>'+(l[1]<0?'-$'+(-l[1]):l[1]?'+$0':'')+'</b></div>').join('')+
     '<div class="kv cobro-l" style="border-top:2px solid var(--edge);padding-top:8px"><span>Total</span><b class="num" id="cobroTot" style="color:var(--amber);font-size:30px">$0</b></div></div>'+
-    '<button class="btn y" data-a="cobrar">Cobrar $'+S.cobro.total+'</button></div>');
+    '<button class="btn y" data-a="cobrar" data-key="enter">Cobrar $'+S.cobro.total+'</button></div>');
   const rows=[...app.querySelectorAll('.cobro-l')];let acc=0;
   for(let r=0;r<rows.length;r++){
     if(!app.contains(rows[r]))return;
@@ -1607,36 +1613,36 @@ const rerollCost=()=>S.shop.free?0:Math.max(0,S.shop.rr-has('regateador'));
 function renderShop(){
   const sh=S.shop,v=S.vale,rr=rerollCost();
   const vale=v?'<div class="vale" id="valeBox"'+(v.sold?' style="opacity:.4"':'')+'><span class="ve">'+VALES[v.k].e+'</span><div class="grow"><span class="lbl">Vale de la noche</span><h4>'+VALES[v.k].n+'</h4><p>'+VALES[v.k].d+'</p></div>'+
-    '<button class="btn '+(v.sold?'dark':'y')+' sm" data-a="vale"'+(v.sold?' disabled':'')+'>'+(v.sold?'Tuyo':valePrice()?'$'+valePrice():'Gratis')+'</button></div>':'';
+    '<button class="btn '+(v.sold?'dark':'y')+' sm" data-a="vale" data-key="v"'+(v.sold?' disabled':'')+'>'+(v.sold?'Tuyo':valePrice()?'$'+valePrice():'Gratis')+'</button></div>':'';
   const due=(S.mesa===2?S.night+1:S.night)+(hasV('plazo')?1:0);
   const loan='<div class="loan"><h4>🕴️ El prestamista</h4>'+(S.debt?'<p>Le debes <b>$'+S.debt+'</b>. Te lo cobra al ganar al rival de la noche '+S.debtDue+'. <b>Si entonces no te llega, pierdes la partida.</b></p><button class="btn y sm" data-a="payloan"'+(S.money<S.debt?' disabled':'')+'>Pagar ahora $'+S.debt+'</button>'
     :'<p>Dinero ahora, a devolver con un '+Math.round(loanRate()*100)+' % más al ganar al rival de la noche '+due+'. <b>Si entonces no puedes pagar, pierdes la partida.</b></p>'+loanSizes().map(v=>'<button class="btn m sm" data-a="loan" data-v="'+v+'">$'+v+' → debes $'+Math.ceil(v*(1+loanRate()))+'</button>').join(''))+'</div>';
   setScreen('<div class="screen">'+hudHTML()+amHTML()+toolsHTML()+
     '<div class="sign"><div class="neon a">TRASTIENDA</div><small>Abierto toda la noche'+(disc()?' · descuento del '+disc()*100+' %':'')+'</small></div>'+
-    '<div class="sec-h"><span class="lbl">Amuletos</span><button class="btn m sm" data-a="reroll">'+(rr?'Cambiar $'+rr:'Cambiar gratis')+'</button></div>'+
+    '<div class="sec-h"><span class="lbl">Amuletos</span><button class="btn m sm" data-a="reroll" data-key="r">'+(rr?'Cambiar $'+rr:'Cambiar gratis')+'</button></div>'+
     '<div class="grid2">'+sh.am.map((it,i)=>itemHTML('am',i,it)).join('')+'</div>'+vale+
     '<span class="lbl">Consumibles</span><div class="grid2">'+sh.sc.map((it,i)=>itemHTML('sc',i,it)).join('')+'</div>'+
     '<span class="lbl">Cartas sueltas</span><div class="grid2">'+sh.cd.map((it,i)=>itemHTML('cd',i,it)).join('')+'</div>'+
     '<span class="lbl">Sobres</span><div class="grid2">'+sh.pk.map((it,i)=>itemHTML('pk',i,it)).join('')+'</div>'+loan+
-    '<button class="btn c" data-a="next">Siguiente: '+(S.mesa<2?mesaName(S.night,S.mesa+1):'Noche '+(S.night+1))+'</button></div>');
+    '<button class="btn c" data-a="next" data-key="enter">Siguiente: '+(S.mesa<2?mesaName(S.night,S.mesa+1):'Noche '+(S.night+1))+'</button></div>');
 }
 function renderPack(){
   const p=S.pack;let opts;
   const vis=(i,h)=>p.opts[i]==null?'':h;
-  if(p.k==='cartas')opts=p.opts.map((c,i)=>vis(i,'<button class="tile box" data-a="pick" data-i="'+i+'" style="align-items:center;--cw:72px">'+cardHTML(Object.assign({id:'p'+i},c))+'<p>'+RN(c.r)+' de '+SUITN[c.s]+' · <b>'+ENH[c.enh].n+'</b>: '+kw(ENH[c.enh].d)+(c.seal?' <b>Sello de '+SEALS[c.seal].n.toLowerCase()+'</b>: '+kw(SEALS[c.seal].d):'')+'</p></button>')).join('');
-  else if(p.k==='amul')opts=p.opts.map((k,i)=>vis(i,'<button class="item" data-a="pick" data-i="'+i+'">'+amBig({k})+'</button>')).join('');
-  else opts=p.opts.map((k,i)=>vis(i,'<button class="item" data-a="pick" data-i="'+i+'">'+conBig(k)+'</button>')).join('');
-  setScreen('<div class="screen">'+hudHTML()+'<div class="sign"><div class="neon c">'+PK[p.k].e+' '+PK[p.k].n.toUpperCase()+'</div><small>'+(p.left>1?'Elige '+p.left:'Elige 1')+'</small></div><div class="'+(p.k==='cartas'?'col':'grid2')+'">'+opts+'</div><button class="btn dark" data-a="skip">'+(p.left<(hasV('doblesobre')&&p.k!=='amul'?2:1)?'Ya está':'No quiero ninguna')+'</button></div>');
+  if(p.k==='cartas')opts=p.opts.map((c,i)=>vis(i,'<button class="tile box" data-a="pick" data-i="'+i+'" data-key="'+(i+1)+'" style="align-items:center;--cw:72px">'+cardHTML(Object.assign({id:'p'+i},c))+'<p>'+RN(c.r)+' de '+SUITN[c.s]+' · <b>'+ENH[c.enh].n+'</b>: '+kw(ENH[c.enh].d)+(c.seal?' <b>Sello de '+SEALS[c.seal].n.toLowerCase()+'</b>: '+kw(SEALS[c.seal].d):'')+'</p></button>')).join('');
+  else if(p.k==='amul')opts=p.opts.map((k,i)=>vis(i,'<button class="item" data-a="pick" data-i="'+i+'" data-key="'+(i+1)+'">'+amBig({k})+'</button>')).join('');
+  else opts=p.opts.map((k,i)=>vis(i,'<button class="item" data-a="pick" data-i="'+i+'" data-key="'+(i+1)+'">'+conBig(k)+'</button>')).join('');
+  setScreen('<div class="screen">'+hudHTML()+'<div class="sign"><div class="neon c">'+PK[p.k].e+' '+PK[p.k].n.toUpperCase()+'</div><small>'+(p.left>1?'Elige '+p.left:'Elige 1')+'</small></div><div class="'+(p.k==='cartas'?'col':'grid2')+'">'+opts+'</div><button class="btn dark" data-a="skip" data-key="esc">'+(p.left<(hasV('doblesobre')&&p.k!=='amul'?2:1)?'Ya está':'No quiero ninguna')+'</button></div>');
 }
 function statsHTML(){return '<div class="kv"><span>Noche alcanzada</span><b>'+S.night+'</b></div><div class="kv"><span>Mejor mano</span><b class="num">'+fm(S.stats.best)+'</b></div>'+(S.stats.bestName?'<div class="kv"><span></span><span>'+S.stats.bestName+'</span></div>':'')+'<div class="kv"><span>Manos jugadas</span><b>'+S.stats.hands+'</b></div><div class="kv"><span>Baraja</span><span style="color:#fff">'+DECKS[S.deck].n+'</span></div>'}
 function renderOver(){
   const why=S.overReason==='loan'?'No has podido pagar al prestamista a tiempo y te ha echado del club.':mesaName(S.night,S.mesa)+' se queda con tus fichas: '+fm(S.score)+' de '+fm(S.target)+'.';
   setScreen('<div class="screen"><div class="logo"><h1 style="font-size:40px;color:#c9b8d6;text-shadow:0 4px 0 var(--edge);animation:none">SIN BLANCA</h1><p style="color:var(--muted);text-shadow:none">'+why+'</p></div><div class="tile box">'+statsHTML()+'</div>'+
-    '<button class="btn y" data-a="decks">Otra partida</button><button class="btn dark" data-a="menu">Menú</button></div>');
+    '<button class="btn y" data-a="decks" data-key="n">Otra partida</button><button class="btn dark" data-a="menu">Menú</button></div>');
 }
 async function renderWin(){
   setScreen('<div class="screen"><div class="logo"><h1 style="font-size:40px">¡BANCA ROTA!</h1><p>Has desplumado a La Banca. El club es tuyo.</p></div><div class="tile box cur">'+statsHTML()+'</div>'+
-    '<button class="btn y" data-a="endless">Seguir (modo infinito)</button><button class="btn c" data-a="decks">Nueva partida</button></div>');
+    '<button class="btn y" data-a="endless" data-key="enter">Seguir (modo infinito)</button><button class="btn c" data-a="decks" data-key="n">Nueva partida</button></div>');
   if(S.winShown||!motionOK())return;S.winShown=true;
   const b=$('#banner');b.className='';b.hidden=false;
   const lines=['LA BANCA','HA','QUEBRADO','¡EL CLUB<br>ES TUYO!'];
@@ -1653,18 +1659,18 @@ function sheetAm(i){
   const a=S.amulets[i],sell=sellValue(a);
   sheet(amBig(a,true)+'<p style="font-size:13px;color:var(--muted);text-align:center">Los amuletos actúan de izquierda a derecha.</p>'+
     '<div class="row">'+(i>0?'<button class="btn dark sm" data-a="moveam" data-i="'+i+'" data-d="-1">◀</button>':'')+
-    '<button class="btn dark grow" data-a="close">Cerrar</button><button class="btn m grow" data-a="sellam" data-i="'+i+'"'+(busy?' disabled':'')+'>Vender $'+sell+'</button>'+
+    '<button class="btn dark grow" data-a="close" data-key="esc">Cerrar</button><button class="btn m grow" data-a="sellam" data-i="'+i+'"'+(busy?' disabled':'')+'>Vender $'+sell+'</button>'+
     (i<S.amulets.length-1?'<button class="btn dark sm" data-a="moveam" data-i="'+i+'" data-d="1">▶</button>':'')+'</div>');
 }
 function sheetSc(i){
   const d=con(S.scrolls[i]);
   sheet(conBig(S.scrolls[i],true)+(d.need?'<p style="font-size:13px;color:var(--muted);text-align:center">Selecciona primero las cartas en tu mano y luego pulsa Usar.</p>':'')+
-    '<div class="row"><button class="btn dark grow" data-a="sellsc" data-i="'+i+'">Vender $1</button><button class="btn y grow" data-a="usesc" data-i="'+i+'">'+(isLic(S.scrolls[i])?'Beber':'Usar')+'</button></div><button class="btn dark" data-a="close">Cerrar</button>');
+    '<div class="row"><button class="btn dark grow" data-a="sellsc" data-i="'+i+'">Vender $1</button><button class="btn y grow" data-a="usesc" data-key="enter" data-i="'+i+'">'+(isLic(S.scrolls[i])?'Beber':'Usar')+'</button></div><button class="btn dark" data-a="close" data-key="esc">Cerrar</button>');
 }
 function sheetLevels(){
   sheet('<h2>Tus manos</h2><p style="font-size:14px;color:var(--muted)">Las manos solo suben de nivel con licores, talismanes y algunos amuletos.</p><table class="lv num"><thead><tr><th></th><th>Nivel</th><th>Fichas × Multi</th><th>Jugadas</th></tr></thead><tbody>'+
     HTK.filter((k,i)=>i<10||S.levels[k].t>0||S.levels[k].l>1).map(k=>{const b=baseOf(k),L=S.levels[k];return '<tr><td>'+LIC[k][1]+' '+HT[k].n+'</td><td>nv '+b.l+'</td><td><span style="color:var(--cyan)">'+b.c+'</span> × <span style="color:var(--mag)">'+b.m+'</span></td><td style="color:var(--muted)">'+(L.t||0)+'</td></tr>'}).join('')+
-    '</tbody></table>'+(S.vales.length?'<h2>Vales</h2>'+S.vales.map(k=>'<p>'+VALES[k].e+' <b>'+VALES[k].n+'</b>: '+VALES[k].d+'</p>').join(''):'')+'<button class="btn dark" data-a="close">Cerrar</button>');
+    '</tbody></table>'+(S.vales.length?'<h2>Vales</h2>'+S.vales.map(k=>'<p>'+VALES[k].e+' <b>'+VALES[k].n+'</b>: '+VALES[k].d+'</p>').join(''):'')+'<button class="btn dark" data-a="close" data-key="esc">Cerrar</button>');
 }
 let deckMode='left';
 function sheetDeck(){
@@ -1685,12 +1691,12 @@ function sheetDeck(){
     '<span class="lbl">Palo × valor · borde ámbar: carta grabada</span>'+grid+
     (enhList.length?'<span class="lbl">Cartas especiales</span><p style="font-size:13px">'+enhList.map(c=>'<span class="s-'+c.s+'" style="color:var(--suit)">'+RN(c.r)+G[c.s]+'</span> '+(c.enh?ENH[c.enh].n:'')+(c.seal?' · sello de '+SEALS[c.seal].n.toLowerCase():'')+(c.b?' +'+c.b+' Fichas':'')).join(' · ')+'</p>':'')+
     '<span class="lbl">Grabados</span>'+Object.values(ENH).map(e=>'<p style="font-size:13px"><b>'+e.n+':</b> '+e.d+'</p>').join('')+
-    '<span class="lbl">Sellos</span>'+Object.values(SEALS).map(e=>'<p style="font-size:13px"><b>'+e.n+':</b> '+e.d+'</p>').join('')+'<button class="btn dark" data-a="close">Cerrar</button>');
+    '<span class="lbl">Sellos</span>'+Object.values(SEALS).map(e=>'<p style="font-size:13px"><b>'+e.n+':</b> '+e.d+'</p>').join('')+'<button class="btn dark" data-a="close" data-key="esc">Cerrar</button>');
 }
 function sheetSettings(){
   sheet('<h2>Ajustes</h2><span class="lbl">Velocidad de la puntuación</span><div class="seg">'+[1,2,4].map(v=>'<button data-a="speed" data-v="'+v+'" class="'+(CFG.speed===v?'on':'')+'">×'+v+'</button>').join('')+'</div>'+
     '<span class="lbl">Sonido</span><div class="seg"><button data-a="sound" data-v="1" class="'+(CFG.sound?'on':'')+'">Activado</button><button data-a="sound" data-v="0" class="'+(CFG.sound?'':'on')+'">Silencio</button></div>'+
-    '<button class="btn dark" data-a="help">Cómo se juega</button>'+(S?'<button class="btn dark" data-a="tomenu">Volver al menú (se guarda)</button><button class="btn m" data-a="abandon">Abandonar partida</button>':'')+'<button class="btn dark" data-a="close">Cerrar</button>');
+    '<button class="btn dark" data-a="help" data-key="h">Cómo se juega</button>'+(S?'<button class="btn dark" data-a="tomenu">Volver al menú (se guarda)</button><button class="btn m" data-a="abandon">Abandonar partida</button>':'')+'<button class="btn dark" data-a="close" data-key="esc">Cerrar</button>');
 }
 function sheetBluff(){
   if(S.phase!=='play'||busy)return;
@@ -1700,7 +1706,7 @@ function sheetBluff(){
     (S.bluff?'':'<div class="seg">'+Object.entries(BLUFF).map(([k,o])=>'<button data-a="blufftier" data-v="'+k+'" class="'+(k===t?'on':'')+'">'+o.n+' ×'+fm(bluffPay(k))+'</button>').join('')+'</div>')+
     '<div class="kv"><span>Ritmo de esta mesa</span><b>'+fm(Math.round(tablePace()))+'</b></div><div class="kv"><span>Tu mano típica (mediana de las últimas)</span><b>'+(typ?fm(Math.round(typ)):'—')+'</b></div>'+
     '<div class="row" style="flex-wrap:wrap;justify-content:center">'+[1,2,3,5,10].map(v=>'<button class="btn '+(S.bluff&&S.bluff.stake===v?'y':'m')+' sm" data-a="bluffset" data-v="'+v+'"'+(S.money+(S.bluff?S.bluff.stake:0)<v?' disabled':'')+'>$'+v+'</button>').join('')+'</div>'+
-    (S.bluff?'<button class="btn dark" data-a="bluffset" data-v="0">Retirar el farol (te devuelven $'+S.bluff.stake+')</button>':'')+'<button class="btn dark" data-a="close">Cerrar</button>');
+    (S.bluff?'<button class="btn dark" data-a="bluffset" data-v="0">Retirar el farol (te devuelven $'+S.bluff.stake+')</button>':'')+'<button class="btn dark" data-a="close" data-key="esc">Cerrar</button>');
 }
 
 function sheetLoan(){}
@@ -1709,7 +1715,7 @@ function sheetCollection(){
   const locks=Object.entries(LOCKS.am).filter(([k])=>!okAm(k)).map(([k,l])=>'<p style="font-size:13px">🔒 <b>'+AM[k].n+'</b>: '+l.d+'</p>').join('')+
     Object.entries(LOCKS.deck).filter(([k])=>!okDeck(k)).map(([k,l])=>'<p style="font-size:13px">🔒 Baraja <b>'+DECKS[k].n+'</b>: '+l.d+'</p>').join('');
   sheet('<h2>Colección</h2><p style="font-size:13px;color:var(--muted)">'+Object.keys(AM).filter(okAm).length+' de '+Object.keys(AM).length+' amuletos · '+Object.keys(DECKS).filter(okDeck).length+' de '+Object.keys(DECKS).length+' barajas · apuesta máxima '+(REC.stakeMax||1)+'</p>'+
-    '<div class="coll">'+am+'</div>'+(locks?'<span class="lbl">Por desbloquear</span>'+locks:'<p>¡Lo tienes todo!</p>')+'<button class="btn dark" data-a="close">Cerrar</button>');
+    '<div class="coll">'+am+'</div>'+(locks?'<span class="lbl">Por desbloquear</span>'+locks:'<p>¡Lo tienes todo!</p>')+'<button class="btn dark" data-a="close" data-key="esc">Cerrar</button>');
 }
 function sheetRecords(){
   const r=REC;
@@ -1718,7 +1724,7 @@ function sheetRecords(){
     '<div class="kv"><span>Apuesta máxima desbloqueada</span><b>'+(r.stakeMax||1)+'</b></div><div class="kv"><span>Mesas ganadas</span><b>'+r.mesas+'</b></div><div class="kv"><span>Faroles ganados</span><b>'+r.faroles+'</b></div>'+
     '<button class="btn c sm" data-a="collection">Ver colección y desbloqueos</button>'+
     (r.history.length?'<span class="lbl">Últimas partidas</span><table class="lv"><tbody>'+r.history.map(h=>'<tr><td>'+h.d+' · '+(DECKS[h.deck]?DECKS[h.deck].n:h.deck)+'</td><td>'+(h.win?'🏆':'Noche '+h.night)+'</td><td>'+fm(h.best)+'</td></tr>').join('')+'</tbody></table>':'<p>Aún no has terminado ninguna partida.</p>')+
-    '<button class="btn dark" data-a="close">Cerrar</button>');
+    '<button class="btn dark" data-a="close" data-key="esc">Cerrar</button>');
 }
 function sheetHelp(){
   sheet('<h2>Cómo se juega</h2>'+
@@ -1729,7 +1735,8 @@ function sheetHelp(){
   '<p>Al ganar cobras el premio, $1 por mano sin usar e <b>interés</b> ($1 por cada $5). En la trastienda compras:</p>'+
   '<p>🃏 <b>Amuletos</b>: efectos permanentes, a veces en edición especial (Charol, Neón, Prisma, Fantasma). Actúan de izquierda a derecha.<br>📜 <b>Pergaminos</b>: graban, tiñen, copian o destruyen cartas.<br>🍷 <b>Licores</b>: suben de nivel un tipo de mano.<br>🔯 <b>Talismanes</b>: muy poderosos, pero con un precio.<br>🎫 <b>Vales</b>: una mejora permanente distinta cada noche.<br>🂠 <b>Cartas sueltas</b> y 🎁 <b>sobres</b>.</p>'+
   '<p>🎭 <b>Farol</b>: antes de jugar puedes apostar a que tu mano llegará a una cifra. Si llega, cobras el doble (o ×1,5 en Seguro y ×3 en Atrevido). Uno por mesa; la cifra combina el ritmo de la mesa con tu mano típica.<br>🕴️ <b>Prestamista</b>: en la trastienda te presta dinero, a devolver con un 50 % más al ganar al rival de la noche. Si entonces no puedes pagar, pierdes la partida.<br>⏭️ <b>Saltar mesa</b>: las mesas 1 y 2 se pueden saltar a cambio de una recompensa, sin cobro ni trastienda.<br>🔖 <b>Sellos</b>: algunas cartas llevan un sello que actúa aunque se quede en tu mano.</p>'+
-  '<p>Supera la Noche 8 para ganar. Cada victoria desbloquea una <b>apuesta</b> más difícil, y al jugar desbloqueas amuletos y barajas nuevas (Récords → Colección).</p><button class="btn y" data-a="close">¡Entendido!</button>');
+  '<h2 style="font-size:15px">En el ordenador</h2><p>Cada botón muestra su tecla. <b>1–9</b> eligen las cartas de la mano, <b>Intro</b> juega (o pulsa el botón principal de cada pantalla), <b>D</b> descarta, <b>Esc</b> suelta las cartas o cierra una ventana, <b>O</b> ordena, <b>F</b> abre el farol, <b>M</b> tus manos y <b>Z</b> el mazo. En la tienda, <b>R</b> cambia el género y <b>V</b> compra el vale; en la previa, <b>S</b> salta la mesa.</p>'+
+  '<p>Supera la Noche 8 para ganar. Cada victoria desbloquea una <b>apuesta</b> más difícil, y al jugar desbloqueas amuletos y barajas nuevas (Récords → Colección).</p><button class="btn y" data-a="close" data-key="esc">¡Entendido!</button>');
 }
 
 /* ---------- events ---------- */
@@ -1767,14 +1774,14 @@ document.addEventListener('click',e=>{
     case 'sellam':{if(busy)break;const a=S.amulets[i];S.money+=sellValue(a);S.amulets.splice(i,1);S.sold=(S.sold||0)+1;fire('sell',a);closeSheet();SFX.coin();save();render();break}
     case 'sellsc':if(busy)break;S.money+=1;S.scrolls.splice(i,1);closeSheet();save();render();break;
     case 'usesc':useScroll(i);break;
-    case 'boss':{const bo=bossOf(S.night);sheet('<div class="sign"><div class="neon">'+BOSSES[bo.k].e+' '+BOSSES[bo.k].n+'</div><small>'+bossDesc(bo)+'</small></div><button class="btn dark" data-a="close">Cerrar</button>');break}
+    case 'boss':{const bo=bossOf(S.night);sheet('<div class="sign"><div class="neon">'+BOSSES[bo.k].e+' '+BOSSES[bo.k].n+'</div><small>'+bossDesc(bo)+'</small></div><button class="btn dark" data-a="close" data-key="esc">Cerrar</button>');break}
     case 'levels':sheetLevels();break;
     case 'deck':sheetDeck();break;
     case 'deckmode':deckMode=b.dataset.v;sheetDeck();break;
     case 'settings':sheetSettings();break;
     case 'speed':CFG.speed=Number(b.dataset.v);saveCfg();sheetSettings();break;
     case 'sound':CFG.sound=b.dataset.v==='1';saveCfg();sheetSettings();SFX.click();break;
-    case 'abandon':sheet('<h2>¿Abandonar?</h2><p>Perderás esta partida para siempre.</p><div class="row"><button class="btn dark grow" data-a="close">No</button><button class="btn m grow" data-a="abandon2">Sí, abandonar</button></div>');break;
+    case 'abandon':sheet('<h2>¿Abandonar?</h2><p>Perderás esta partida para siempre.</p><div class="row"><button class="btn dark grow" data-a="close" data-key="esc">No</button><button class="btn m grow" data-a="abandon2" data-key="enter">Sí, abandonar</button></div>');break;
     case 'abandon2':closeSheet();if(S)recordRun(false);clearSave();S=null;busy=false;renderMenu();break;
     case 'cobrar':cobrar();break;
     case 'buy':buy(b.dataset.k,i);break;
@@ -1788,13 +1795,8 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{
   if((e.key==='Enter'||e.key===' ')&&e.target.matches('.card[data-a]')){e.preventDefault();e.target.click();return}
-  if(!S||S.phase!=='play'||busy||!$('#sheet').hidden||e.metaKey||e.ctrlKey||e.altKey)return;
-  const n=Number(e.key);
-  if(n>=1&&n<=9&&S.hand[n-1]!=null){toggleCard(S.hand[n-1]);return}
-  if(e.key==='Enter'){e.preventDefault();playHand()}
-  else if(e.key==='d'||e.key==='D')discard();
-  else if(e.key==='Escape'){S.sel=[];render()}
-  else if(e.key==='o'||e.key==='O'){S.sort=S.sort==='rank'?'suit':'rank';sortHand();save();render()}
+  if(busy)return;
+  if(window.__keyclick)window.__keyclick(e);
 });
 addEventListener('resize',()=>{if(S&&S.phase==='play')fitHand()});
 /* leaving the app: write the last settled state */
@@ -1804,6 +1806,23 @@ if('serviceWorker' in navigator&&location.protocol==='https:'&&!/claude/.test(lo
 
 checkUnlocks(true);
 renderMenu();
+})();
+</script>
+
+<script>
+/* keyboard shortcuts shown on the buttons themselves (computers only) */
+(function(){
+  const NAMES={enter:'↵ Intro',esc:'Esc',space:'Espacio',backspace:'⌫','-':'−','+':'+'};
+  const fine=matchMedia('(hover:hover) and (pointer:fine)');
+  function deco(){if(!fine.matches)return;document.querySelectorAll('[data-key]').forEach(b=>{if(b.querySelector(':scope>.kk'))return;const k=document.createElement('kbd');k.className='kk';k.textContent=NAMES[b.dataset.key]||b.dataset.key.toUpperCase();b.appendChild(k)})}
+  new MutationObserver(deco).observe(document.body,{childList:true,subtree:true});deco();
+  window.__keyclick=e=>{
+    if(e.metaKey||e.ctrlKey||e.altKey)return false;
+    const n=({Enter:'enter',Escape:'esc',' ':'space',Backspace:'backspace'})[e.key]||e.key.toLowerCase();
+    const sh=document.getElementById('sheet'),root=sh&&!sh.hidden?sh:document.getElementById('app');
+    const b=[...root.querySelectorAll('[data-key]')].find(x=>x.dataset.key===n&&!x.disabled&&x.offsetParent!==null);
+    if(!b)return false;e.preventDefault();b.click();return true;
+  };
 })();
 </script>
 

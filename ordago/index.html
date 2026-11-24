@@ -311,9 +311,15 @@ table.lv td:nth-child(n+2){text-align:right;white-space:nowrap}
 .seg button{flex:1;padding:9px;font-family:var(--display);font-size:13px}
 .seg button.on{background:var(--mustard);color:var(--ink)}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+.kk{display:none}
+@media (hover:hover) and (pointer:fine){
+  .kk{display:inline-block;margin-left:7px;padding:1px 5px;border-radius:4px;border:1px solid currentColor;font:600 10px/1.3 ui-monospace,Menlo,monospace;opacity:.55;vertical-align:middle;letter-spacing:0;text-transform:none;text-shadow:none;white-space:nowrap}
+  .card>.kk{position:absolute;left:50%;top:-17px;transform:translateX(-50%);margin:0;background:rgba(0,0,0,.55);color:#fff;border-color:rgba(255,255,255,.4);opacity:.85;z-index:6}
+  .tile>.kk,.list .kk{display:none}
+}
 </style>
 <style>html{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<!-- version 5.3 -->
+<!-- version 5.4 -->
 </head>
 <body>
 
@@ -1183,7 +1189,7 @@ function faceSVG(c,small){
 }
 function cardHTML(c,o){
   o=o||{};
-  const a=o.act?' data-a="card" data-id="'+c.id+'" role="button" tabindex="0"':'';
+  const a=o.act?' data-a="card" data-id="'+c.id+'" role="button" tabindex="0"'+(o.i!==undefined&&S&&S.m&&S.m.step==='mus'?' data-key="'+(o.i+1)+'"':''):'';
   const dl=o.act&&fresh.has(c.id)?' deal':'';
   const e=o.mine===false?null:(bruja()&&o.mine?null:c.enh);
   const i=o.i;const first=dl?(i*0.06)+'s, ':(o.cls||'').includes('sel')?'0s, ':'';
@@ -1209,12 +1215,12 @@ function santosHTML(){
 function sheetSena(){
   const m=S.m;if(!m||m.step!=='bet'||m.senaDone||busy)return;
   sheet('<h2>Hacer una seña</h2><p style="font-size:13px">El rival puede no verla, creérsela (y achantarse en ese lance) o pillarla y exigir que la confirmes al enseñar las cartas. Si era verdad, ganas 2 piedras y se pone nervioso; si era mentira, se lleva él 2 piedras. Una por ronda.</p><div class="senas">'+
-    Object.entries(SENAS).map(([k,d])=>'<button data-a="dosena" data-k="'+k+'"><span>'+d.e+'</span><div><b>'+d.n+'</b><small>«Llevo '+d.m+'» · '+(d.t(P())?'verdad':'farol')+'</small></div></button>').join('')+'</div><button class="btn dark" data-a="close">Cerrar</button>');
+    Object.entries(SENAS).map(([k,d],i)=>'<button data-a="dosena" data-k="'+k+'" data-key="'+(i+1)+'"><span>'+d.e+'</span><div><b>'+d.n+'</b><small>«Llevo '+d.m+'» · '+(d.t(P())?'verdad':'farol')+'</small></div></button>').join('')+'</div><button class="btn dark" data-a="close" data-key="esc">Cerrar</button>');
 }
 function toolsHTML(){
   let h='<div class="tools">';
   for(let i=0;i<S.maxCo;i++){const k=S.cons[i];if(k){const d=con(k);h+='<button class="tool '+d.cls+'" data-a="co" data-i="'+i+'"><i>'+d.e+'</i><span>'+d.n+'</span></button>'}else h+='<div class="tool empty">Consumible</div>'}
-  return h+'<button class="mini" data-a="levels">Lances</button><button class="mini" data-a="deck">Baraja</button><button class="mini" data-a="settings" aria-label="Ajustes">⚙︎</button></div>';
+  return h+'<button class="mini" data-a="levels" data-key="l">Lances</button><button class="mini" data-a="deck" data-key="b">Baraja</button><button class="mini" data-a="settings" aria-label="Ajustes">⚙︎</button></div>';
 }
 const BOWL='<svg viewBox="0 0 64 30" aria-hidden="true"><path d="M2 6H62Q60 28 32 28Q4 28 2 6Z" fill="#8a4f24" stroke="#040814" stroke-width="2.5"/><path d="M6 9H58" stroke="#c98a4a" stroke-width="2"/></svg>';
 function bowlHTML(side,v,t){
@@ -1242,8 +1248,8 @@ function renderMenu(){
   const sv=loadSave(),ok=sv&&sv.phase!=='over';
   const fan=[{r:12,s:'o'},{r:1,s:'e'},{r:7,s:'c',enh:'dorada'},{r:11,s:'b'}].map((c,i)=>cardHTML(Object.assign({id:'f'+i},c),{})).join('');
   setScreen('<div class="screen"><div class="logo"><h1>Órdago</h1><p>Mus, santos y faroles de pueblo</p></div><div class="fan">'+fan+'</div><div class="col">'+
-    (ok?'<button class="btn y" data-a="continue">Continuar · '+fiestaName(sv.fiesta)+'</button>':'')+
-    '<button class="btn '+(ok?'b':'y')+'" data-a="decks">Nueva partida</button>'+
+    (ok?'<button class="btn y" data-a="continue" data-key="enter">Continuar · '+fiestaName(sv.fiesta)+'</button>':'')+
+    '<button class="btn '+(ok?'b':'y')+'" data-a="decks" data-key="n">Nueva partida</button>'+
     '<div class="row"><button class="btn dark grow" data-a="records">Récords</button><button class="btn dark grow" data-a="help">Cómo se juega</button></div>'+
     '<button class="btn dark" data-a="settings">Ajustes</button></div></div>');
 }
@@ -1260,7 +1266,7 @@ function renderPrevia(){
       '<div class="kv"><span>Tú necesitas</span><b class="num">'+tg.me+' piedras</b></div><div class="kv"><span>El rival necesita</span><b class="num">'+tg.riv+' piedras</b></div></div>';
   }
   setScreen('<div class="screen">'+hudHTML()+santosHTML()+toolsHTML()+'<div class="cartel"><b>'+fiestaName(S.fiesta)+'</b><small>'+(S.endless?'Modo infinito':'Fiesta '+S.fiesta+' de 6')+'</small></div><div class="col">'+t+'</div>'+
-    '<button class="btn y" data-a="start">¡A jugar!</button></div>');
+    '<button class="btn y" data-a="start" data-key="enter">¡A jugar!</button></div>');
 }
 const RLAB=v=>({12:'R',11:'C',10:'S',1:'A'})[v]||String(v);
 const RPL=v=>({12:'reyes',11:'caballos',10:'sotas',1:'ases',7:'sietes',6:'seises',5:'cincos',4:'cuatros'})[v]||v;
@@ -1301,9 +1307,9 @@ function infoLine(){
 }
 function chooserHTML(){
   const c=UI.choose,mx=maxBet();c.amt=Math.max(2,Math.min(mx,c.amt));
-  const q=[2,3,5].map(v=>'<button class="btn '+(c.amt===v?'y':'dark')+'" data-a="amt" data-v="'+v+'"'+(v>mx?' disabled':'')+'>'+v+'</button>').join('');
-  return '<div class="chooser">'+q+'<button class="btn dark" data-a="amtd" data-v="-1"'+(c.amt<=2?' disabled':'')+'>−</button><span class="amt num">'+c.amt+'</span><button class="btn dark" data-a="amtd" data-v="1"'+(c.amt>=mx?' disabled':'')+'>+</button>'+
-    '<button class="btn dark" data-a="amtback" style="grid-column:span 2">Atrás</button><button class="btn b" data-a="amtgo" style="grid-column:span 4">'+(c.mode==='env'?'Envidar '+c.amt:'Subir '+c.amt+' más')+'</button></div>';
+  const q=[2,3,5].map(v=>'<button class="btn '+(c.amt===v?'y':'dark')+'" data-a="amt" data-v="'+v+'" data-key="'+v+'"'+(v>mx?' disabled':'')+'>'+v+'</button>').join('');
+  return '<div class="chooser">'+q+'<button class="btn dark" data-a="amtd" data-v="-1" data-key="-"'+(c.amt<=2?' disabled':'')+'>−</button><span class="amt num">'+c.amt+'</span><button class="btn dark" data-a="amtd" data-v="1" data-key="+"'+(c.amt>=mx?' disabled':'')+'>+</button>'+
+    '<button class="btn dark" data-a="amtback" data-key="esc" style="grid-column:span 2">Atrás</button><button class="btn b" data-a="amtgo" data-key="enter" style="grid-column:span 4">'+(c.mode==='env'?'Envidar '+c.amt:'Subir '+c.amt+' más')+'</button></div>';
 }
 function renderPlay(){
   const m=S.m;
@@ -1313,16 +1319,16 @@ function renderPlay(){
   const lances=m.L.length?m.L.map(lanceRow).join(''):['grande','chica','pares','juego'].map(k=>'<div class="lance"><span class="ln">'+LANCES[k].n+'<small>nv '+S.lv[k]+'</small></span><span class="st">'+(k==='juego'?'Juego o punto':'—')+'</span><span class="res"></span></div>').join('');
   let acts='',n=3,info=infoLine();
   if(m.step==='mus'){
-    acts='<button class="btn g" data-a="mus"'+(busy?' disabled':'')+'>Mus ('+m.musLeft+')</button><button class="btn dark" data-a="clear"'+(!S.sel.length?' disabled':'')+'>Soltar</button><button class="btn y" data-a="cortar"'+(busy?' disabled':'')+'>No hay mus</button>';
+    acts='<button class="btn g" data-a="mus" data-key="m"'+(busy?' disabled':'')+'>Mus ('+m.musLeft+')</button><button class="btn dark" data-a="clear" data-key="esc"'+(!S.sel.length?' disabled':'')+'>Soltar</button><button class="btn y" data-a="cortar" data-key="c"'+(busy?' disabled':'')+'>No hay mus</button>';
     info='Elige cartas y pide <b>Mus</b> para cambiarlas, o corta. · '+info;
   }else if(m.step==='bet'&&m.bet&&UI.choose&&!busy){acts=chooserHTML();n=0}
   else if(m.step==='bet'&&m.bet){
     const b=m.bet;const dis=busy?' disabled':'';const ord=canOrdago()?'':' disabled';
-    if(b.state==='open'){n=m.senaDone?3:4;acts='<button class="btn dark" data-a="paso"'+dis+'>Paso</button><button class="btn b" data-a="envido"'+dis+'>Envido…</button><button class="btn r" data-a="ordago"'+dis+ord+'>Órdago</button>'+(m.senaDone?'':'<button class="btn y" data-a="sena"'+dis+'>Seña</button>')}
-    else if(b.state==='rivOrdago'){n=2;acts='<button class="btn dark" data-a="noquiero"'+dis+'>No quiero</button><button class="btn r" data-a="quiero"'+dis+'>¡Quiero!</button>'}
-    else{n=4;acts='<button class="btn dark" data-a="noquiero"'+dis+'>No</button><button class="btn g" data-a="quiero"'+dis+'>Quiero</button>'+
-      (b.state==='rivEnv'?'<button class="btn b" data-a="subir"'+dis+'>Subir…</button>':'<button class="btn b" disabled>Subir</button>')+'<button class="btn r" data-a="ordago"'+dis+ord+'>Órdago</button>'}
-  }else if(m.step==='roundEnd'){n=1;acts='<button class="btn y" data-a="nextround">Siguiente ronda</button>'}
+    if(b.state==='open'){n=m.senaDone?3:4;acts='<button class="btn dark" data-a="paso" data-key="p"'+dis+'>Paso</button><button class="btn b" data-a="envido" data-key="e"'+dis+'>Envido…</button><button class="btn r" data-a="ordago" data-key="o"'+dis+ord+'>Órdago</button>'+(m.senaDone?'':'<button class="btn y" data-a="sena" data-key="s"'+dis+'>Seña</button>')}
+    else if(b.state==='rivOrdago'){n=2;acts='<button class="btn dark" data-a="noquiero" data-key="n"'+dis+'>No quiero</button><button class="btn r" data-a="quiero" data-key="q"'+dis+'>¡Quiero!</button>'}
+    else{n=4;acts='<button class="btn dark" data-a="noquiero" data-key="n"'+dis+'>No</button><button class="btn g" data-a="quiero" data-key="q"'+dis+'>Quiero</button>'+
+      (b.state==='rivEnv'?'<button class="btn b" data-a="subir" data-key="u"'+dis+'>Subir…</button>':'<button class="btn b" disabled>Subir</button>')+'<button class="btn r" data-a="ordago" data-key="o"'+dis+ord+'>Órdago</button>'}
+  }else if(m.step==='roundEnd'){n=1;acts='<button class="btn y" data-a="nextround" data-key="enter">Siguiente ronda</button>'}
   else{n=1;acts='<button class="btn dark" disabled>Contando piedras…</button>'}
   const bub=bubble?'<div class="bubble'+(bubble.side==='me'?' l':'')+(/ÓRDAGO|Órdago/.test(bubble.t)?' big':'')+'">'+bubble.t+'</div>':'';
   app.innerHTML='<div class="playwrap">'+
@@ -1342,7 +1348,7 @@ function popupLance(i,txt,cls){const el=app.querySelector('.lance[data-li="'+i+'
 async function renderCobro(){
   setScreen('<div class="screen">'+hudHTML()+'<div class="cartel"><b>¡A cobrar!</b></div><div class="tile box cur">'+
     S.cobro.lines.map(l=>'<div class="kv cobro-l"><span>'+l[0]+'</span><b class="num" data-v="'+l[1]+'">+0$</b></div>').join('')+
-    '<div class="kv cobro-l" style="border-top:2px solid var(--edge);padding-top:8px"><span>Total</span><b class="num" id="cobroTot" style="color:var(--mustard);font-size:30px">0$</b></div></div><button class="btn y" data-a="cobrar">Cobrar '+S.cobro.total+'$</button></div>');
+    '<div class="kv cobro-l" style="border-top:2px solid var(--edge);padding-top:8px"><span>Total</span><b class="num" id="cobroTot" style="color:var(--mustard);font-size:30px">0$</b></div></div><button class="btn y" data-a="cobrar" data-key="enter">Cobrar '+S.cobro.total+'$</button></div>');
   const rows=[...app.querySelectorAll('.cobro-l')];
   for(const row of rows){
     if(!app.contains(row))return;row.classList.add('in');const b=row.querySelector('b'),v=Number(b.dataset.v||0);
@@ -1362,34 +1368,34 @@ function itemHTML(kind,i,it){
 function renderShop(){
   const sh=S.shop;
   setScreen('<div class="screen">'+hudHTML()+santosHTML()+toolsHTML()+
-    '<div class="cartel"><b>El puesto</b><small>'+(sh.sale?'¡Todo a mitad de precio!':'Santos, estampas y buen vino')+'</small></div><div class="sec-h"><span class="lbl">Santos</span><button class="btn r sm" data-a="reroll">Cambiar '+sh.rr+'$</button></div>'+
+    '<div class="cartel"><b>El puesto</b><small>'+(sh.sale?'¡Todo a mitad de precio!':'Santos, estampas y buen vino')+'</small></div><div class="sec-h"><span class="lbl">Santos</span><button class="btn r sm" data-a="reroll" data-key="r">Cambiar '+sh.rr+'$</button></div>'+
     '<div class="grid2">'+sh.sa.map((it,i)=>itemHTML('sa',i,it)).join('')+'</div>'+
     '<span class="lbl">Estampas y vinos</span><div class="grid2">'+sh.co.map((it,i)=>itemHTML('co',i,it)).join('')+'</div>'+
     '<span class="lbl">Sobres</span><div class="grid2">'+sh.pk.map((it,i)=>itemHTML('pk',i,it)).join('')+'</div>'+
-    '<button class="btn b" data-a="next">Siguiente partida</button></div>');
+    '<button class="btn b" data-a="next" data-key="enter">Siguiente partida</button></div>');
 }
 function renderPack(){
   const p=S.pack;let opts;
-  if(p.k==='cartas')opts=p.opts.map((c,i)=>'<button class="tile box" data-a="pick" data-i="'+i+'" style="align-items:center;--cw:80px">'+cardHTML(Object.assign({id:'p'+i},c),{mine:true})+'<p>'+RNAME(c.r)+' de '+SN[c.s]+' · <b>'+ENH[c.enh].n+'</b>: '+ENH[c.enh].d+'</p></button>').join('');
-  else if(p.k==='santo')opts=p.opts.map((k,i)=>'<button class="item" data-a="pick" data-i="'+i+'">'+saBig({k})+'</button>').join('');
-  else opts=p.opts.map((k,i)=>'<button class="item" data-a="pick" data-i="'+i+'">'+coBig(k)+'</button>').join('');
-  setScreen('<div class="screen">'+hudHTML()+'<div class="cartel"><b>'+PK[p.k].e+' '+PK[p.k].n+'</b><small>Toca la que quieras</small></div><div class="'+(p.k==='cartas'?'col':'grid2')+'">'+opts+'</div><button class="btn dark" data-a="skip">No quiero ninguna</button></div>');
+  if(p.k==='cartas')opts=p.opts.map((c,i)=>'<button class="tile box" data-a="pick" data-i="'+i+'" data-key="'+(i+1)+'" style="align-items:center;--cw:80px">'+cardHTML(Object.assign({id:'p'+i},c),{mine:true})+'<p>'+RNAME(c.r)+' de '+SN[c.s]+' · <b>'+ENH[c.enh].n+'</b>: '+ENH[c.enh].d+'</p></button>').join('');
+  else if(p.k==='santo')opts=p.opts.map((k,i)=>'<button class="item" data-a="pick" data-i="'+i+'" data-key="'+(i+1)+'">'+saBig({k})+'</button>').join('');
+  else opts=p.opts.map((k,i)=>'<button class="item" data-a="pick" data-i="'+i+'" data-key="'+(i+1)+'">'+coBig(k)+'</button>').join('');
+  setScreen('<div class="screen">'+hudHTML()+'<div class="cartel"><b>'+PK[p.k].e+' '+PK[p.k].n+'</b><small>Toca la que quieras</small></div><div class="'+(p.k==='cartas'?'col':'grid2')+'">'+opts+'</div><button class="btn dark" data-a="skip" data-key="esc">No quiero ninguna</button></div>');
 }
 function statsHTML(){return '<div class="kv"><span>Fiesta alcanzada</span><span style="color:#fff">'+fiestaName(S.fiesta)+'</span></div><div class="kv"><span>Partidas ganadas</span><b>'+S.stats.won+'</b></div><div class="kv"><span>Lances ganados</span><b>'+S.stats.lances+'</b></div><div class="kv"><span>Órdagos echados</span><b>'+S.stats.ordagos+'</b></div><div class="kv"><span>Faroles colados</span><b>'+(S.stats.faroles||0)+'</b></div><div class="kv"><span>Baraja</span><span style="color:#fff">'+DECKS[S.deckKind].n+'</span></div>'}
 function renderRome(){
   setScreen('<div class="screen">'+hudHTML()+'<div class="cartel"><b>Romería</b><small>Camino de '+fiestaName(S.fiesta)+': elige una parada</small></div><div class="col">'+
-    (S.rome||[]).map(k=>{const d=ROMERIA[k];return '<button class="tile box rome" data-a="rome" data-k="'+k+'"><span class="re">'+d.e+'</span><div><h3>'+d.n+'</h3><p>'+d.d+'</p></div></button>'}).join('')+'</div></div>');
+    (S.rome||[]).map((k,i)=>{const d=ROMERIA[k];return '<button class="tile box rome" data-a="rome" data-k="'+k+'" data-key="'+(i+1)+'"><span class="re">'+d.e+'</span><div><h3>'+d.n+'</h3><p>'+d.d+'</p></div></button>'}).join('')+'</div></div>');
 }
 function renderLost(){
   setScreen('<div class="screen">'+hudHTML()+'<div class="tile box bossy"><h3>Te han ganado</h3><p>'+(S.m?S.m.re+' '+S.m.rival:'El rival')+' se lleva la partida. Pierdes una vida; te quedan '+S.lives+'.</p></div>'+
-    '<button class="btn y" data-a="revancha">Revancha</button></div>');
+    '<button class="btn y" data-a="revancha" data-key="enter">Revancha</button></div>');
 }
 function renderOver(){
-  setScreen('<div class="screen"><div class="logo"><h1 style="font-size:46px;color:#b9c3dc;text-shadow:0 4px 0 var(--edge);animation:none">¡A casa!</h1><p>Te has quedado sin vidas.</p></div><div class="tile box">'+statsHTML()+'</div><button class="btn y" data-a="decks">Otra partida</button><button class="btn dark" data-a="menu">Menú</button></div>');
+  setScreen('<div class="screen"><div class="logo"><h1 style="font-size:46px;color:#b9c3dc;text-shadow:0 4px 0 var(--edge);animation:none">¡A casa!</h1><p>Te has quedado sin vidas.</p></div><div class="tile box">'+statsHTML()+'</div><button class="btn y" data-a="decks" data-key="n">Otra partida</button><button class="btn dark" data-a="menu">Menú</button></div>');
 }
 async function renderWin(){
   setScreen('<div class="screen"><div class="logo"><h1 style="font-size:44px">¡Campeón!</h1><p>Has ganado a El Campeón de la Peña. El pueblo te saca a hombros.</p></div><div class="tile box cur">'+statsHTML()+'</div>'+
-    '<button class="btn y" data-a="endless">Seguir (modo infinito)</button><button class="btn b" data-a="decks">Nueva partida</button></div>');
+    '<button class="btn y" data-a="endless" data-key="enter">Seguir (modo infinito)</button><button class="btn b" data-a="decks" data-key="n">Nueva partida</button></div>');
   if(S.winShown||!motionOK())return;S.winShown=true;
   const b=$('#banner');b.className='';b.hidden=false;
   for(const l of ['¡VIVA','EL','CAMPEÓN','DEL PUEBLO!']){b.innerHTML='<b>'+l+'</b>';SFX.win1();shake(8);BG.boom();confetti(70);await new Promise(r=>setTimeout(r,800))}
@@ -1401,31 +1407,31 @@ async function renderWin(){
 function sheet(html){const s=$('#sheet');s.innerHTML='<div class="in">'+html+'</div>';s.hidden=false}
 function closeSheet(){$('#sheet').hidden=true}
 function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>{e.style.opacity=0;setTimeout(()=>e.hidden=true,300)},2200)}
-function sheetSa(i){const a=S.santos[i],d=SANTOS[a.k];sheet(saBig(a,true)+'<div class="row"><button class="btn dark grow" data-a="close">Cerrar</button><button class="btn r grow" data-a="sellsa" data-i="'+i+'"'+(busy?' disabled':'')+'>Vender '+Math.floor(d.p/2)+'$</button></div>')}
+function sheetSa(i){const a=S.santos[i],d=SANTOS[a.k];sheet(saBig(a,true)+'<div class="row"><button class="btn dark grow" data-a="close" data-key="esc">Cerrar</button><button class="btn r grow" data-a="sellsa" data-i="'+i+'"'+(busy?' disabled':'')+'>Vender '+Math.floor(d.p/2)+'$</button></div>')}
 function sheetCo(i){const k=S.cons[i],d=con(k);sheet(coBig(k,true)+(d.need?'<p style="font-size:13px;color:var(--muted);text-align:center">Selecciona primero las cartas de tu mano y luego pulsa Usar.</p>':'')+
-  '<div class="row"><button class="btn dark grow" data-a="sellco" data-i="'+i+'">Vender 1$</button><button class="btn y grow" data-a="useco" data-i="'+i+'">'+(isVino(k)?'Beber':'Usar')+'</button></div><button class="btn dark" data-a="close">Cerrar</button>')}
+  '<div class="row"><button class="btn dark grow" data-a="sellco" data-i="'+i+'">Vender 1$</button><button class="btn y grow" data-a="useco" data-key="enter" data-i="'+i+'">'+(isVino(k)?'Beber':'Usar')+'</button></div><button class="btn dark" data-a="close" data-key="esc">Cerrar</button>')}
 function sheetLevels(){
   sheet('<h2>Lances</h2><p style="font-size:13px;color:var(--muted)">Cada nivel por encima de 1 suma +1 piedra cuando ganas ese lance. Se suben con vinos.</p><table class="lv"><tbody>'+
-    LK.map(k=>'<tr><td>'+VINOS[k][1]+' <b>'+LANCES[k].n+'</b><br><span style="font-size:11px;color:var(--muted)">'+LANCES[k].d+'</span></td><td>nv '+S.lv[k]+'</td></tr>').join('')+'</tbody></table><button class="btn dark" data-a="close">Cerrar</button>');
+    LK.map(k=>'<tr><td>'+VINOS[k][1]+' <b>'+LANCES[k].n+'</b><br><span style="font-size:11px;color:var(--muted)">'+LANCES[k].d+'</span></td><td>nv '+S.lv[k]+'</td></tr>').join('')+'</tbody></table><button class="btn dark" data-a="close" data-key="esc">Cerrar</button>');
 }
 const dcSuit=s=>'<svg viewBox="0 0 40 40"><use href="#s-'+s+'"/></svg>';
 function sheetDeck(){
   const rows=['o','c','e','b'].map(s=>{const cs=S.deck.filter(c=>c.s===s).sort((a,b)=>b.r-a.r);return '<div class="s-'+s+'"><b style="width:24px;display:inline-block">'+dcSuit(s).replace('<svg','<svg width="20" height="20"')+'</b>'+
     cs.map(c=>'<span class="dc s-'+c.s+(c.enh?' en':'')+'" title="'+(c.enh?ENH[c.enh].n:'')+'">'+c.r+dcSuit(c.s)+'</span>').join('')+'</div>'}).join('');
   sheet('<h2>Tu baraja · '+S.deck.length+' cartas</h2><p style="font-size:13px;color:var(--muted)">A ocho reyes: el 3 vale como Rey y el 2 como As. Borde amarillo: carta pintada.</p><div class="deckgrid">'+rows+'</div>'+
-    '<h3>Pinturas</h3>'+Object.values(ENH).map(e=>'<p style="font-size:13px"><b>'+e.n+':</b> '+e.d+'</p>').join('')+'<button class="btn dark" data-a="close">Cerrar</button>');
+    '<h3>Pinturas</h3>'+Object.values(ENH).map(e=>'<p style="font-size:13px"><b>'+e.n+':</b> '+e.d+'</p>').join('')+'<button class="btn dark" data-a="close" data-key="esc">Cerrar</button>');
 }
 function sheetSettings(){
   sheet('<h2>Ajustes</h2><span class="lbl">Velocidad</span><div class="seg">'+[1,2,4].map(v=>'<button data-a="speed" data-v="'+v+'" class="'+(CFG.speed===v?'on':'')+'">×'+v+'</button>').join('')+'</div>'+
     '<span class="lbl">Sonido</span><div class="seg"><button data-a="sound" data-v="1" class="'+(CFG.sound?'on':'')+'">Activado</button><button data-a="sound" data-v="0" class="'+(CFG.sound?'':'on')+'">Silencio</button></div>'+
-    '<button class="btn dark" data-a="help">Cómo se juega</button>'+(S?'<button class="btn dark" data-a="tomenu">Volver al menú (se guarda)</button><button class="btn r" data-a="abandon">Abandonar partida</button>':'')+'<button class="btn dark" data-a="close">Cerrar</button>');
+    '<button class="btn dark" data-a="help">Cómo se juega</button>'+(S?'<button class="btn dark" data-a="tomenu">Volver al menú (se guarda)</button><button class="btn r" data-a="abandon">Abandonar partida</button>':'')+'<button class="btn dark" data-a="close" data-key="esc">Cerrar</button>');
 }
 function sheetRecords(){
   const r=loadRec();
   sheet('<h2>Récords</h2><div class="kv"><span>Partidas</span><b>'+r.runs+'</b></div><div class="kv"><span>Victorias</span><b>'+r.wins+'</b></div><div class="kv"><span>Fiesta máxima</span><b>'+r.bestFiesta+'</b></div>'+
     '<div class="kv"><span>Partidas ganadas a rivales</span><b>'+r.matches+'</b></div><div class="kv"><span>Órdagos echados</span><b>'+r.ordagos+'</b></div><div class="kv"><span>Faroles colados</span><b>'+r.faroles+'</b></div>'+
     (r.history.length?'<span class="lbl">Últimas partidas</span><table class="lv"><tbody>'+r.history.map(h=>'<tr><td>'+h.d+' · '+(DECKS[h.deck]?DECKS[h.deck].n:h.deck)+'</td><td>'+(h.win?'🏆':fiestaName(h.f))+'</td><td>'+h.won+' ganadas</td></tr>').join('')+'</tbody></table>':'<p>Aún no has terminado ninguna partida.</p>')+
-    '<button class="btn dark" data-a="close">Cerrar</button>');
+    '<button class="btn dark" data-a="close" data-key="esc">Cerrar</button>');
 }
 function sheetHelp(){
   const ex=(r,s)=>'<div style="--cw:46px;display:inline-block;vertical-align:middle">'+cardHTML({id:'h'+r+s,r,s},{})+'</div>';
@@ -1442,8 +1448,9 @@ function sheetHelp(){
   '<h3>Faroles y señas</h3><p>😐 El rival tiene <b>nervios</b>. Cada vez que no quiere un envite tuyo que habrías perdido, te ha colado un farol y se pone más nervioso: acepta menos y se arriesga menos. Si le pillas faroleando, se envalentona.</p>'+
   '<p>😉 Una vez por ronda puedes hacer una <b>seña</b> (guiño, labio, lengua…). Puede no verla, creérsela y achantarse en ese lance, o pillarla y exigir que la confirmes: si era verdad ganas 2 piedras; si era mentira, se las lleva él.</p>'+
   '<h3>Jefes y romería</h3><p>🐄 Al jefe de cada fiesta se le gana <b>a vacas</b>, al mejor de tres juegos. Entre fiesta y fiesta haces una <b>romería</b>: eliges una parada (ermita, bodega, feria, mercadillo, fragua o pozo).</p>'+
+  '<h3>En el ordenador</h3><p>Cada botón muestra su tecla. En el mus, <b>1–4</b> eligen cartas, <b>M</b> pide mus, <b>C</b> corta y <b>Esc</b> suelta. En los lances: <b>P</b> paso, <b>E</b> envido, <b>O</b> órdago, <b>S</b> seña, <b>Q</b> quiero, <b>N</b> no quiero y <b>U</b> subir; al elegir el envite, <b>2</b>, <b>3</b>, <b>5</b>, <b>−</b> y <b>+</b> cambian la cantidad e <b>Intro</b> lo confirma. <b>Intro</b> también pasa de ronda y pulsa el botón principal de cada pantalla; <b>Esc</b> cierra ventanas.</p>'+
   '<p>⛪ <b>Santos</b>: efectos permanentes. 🖼️ <b>Estampas</b>: cambian cartas de tu baraja. 🍷 <b>Vinos</b>: suben de nivel un lance. Tienes 3 vidas: si pierdes una partida, te toca revancha. Gana las 6 fiestas para ser el campeón.</p>'+
-  '<button class="btn y" data-a="close">¡Vamos!</button>');
+  '<button class="btn y" data-a="close" data-key="esc">¡Vamos!</button>');
 }
 
 /* ---------- events ---------- */
@@ -1482,13 +1489,13 @@ document.addEventListener('click',e=>{
     case 'sellsa':{if(busy)break;S.money+=Math.floor(SANTOS[S.santos[i].k].p/2);S.santos.splice(i,1);closeSheet();SFX.coin();save();render();break}
     case 'sellco':S.money+=1;S.cons.splice(i,1);closeSheet();save();render();break;
     case 'useco':useCon(i);break;
-    case 'boss':{const rv=rivalOf(S.fiesta,S.match);sheet('<h2>'+rv.e+' '+rv.n+'</h2><p>'+BOSSES[rv.boss].d+'</p><button class="btn dark" data-a="close">Cerrar</button>');break}
+    case 'boss':{const rv=rivalOf(S.fiesta,S.match);sheet('<h2>'+rv.e+' '+rv.n+'</h2><p>'+BOSSES[rv.boss].d+'</p><button class="btn dark" data-a="close" data-key="esc">Cerrar</button>');break}
     case 'levels':sheetLevels();break;
     case 'deck':sheetDeck();break;
     case 'settings':sheetSettings();break;
     case 'speed':CFG.speed=Number(b.dataset.v);saveCfg();sheetSettings();break;
     case 'sound':CFG.sound=b.dataset.v==='1';saveCfg();sheetSettings();break;
-    case 'abandon':sheet('<h2>¿Abandonar?</h2><p>Perderás esta partida para siempre.</p><div class="row"><button class="btn dark grow" data-a="close">No</button><button class="btn r grow" data-a="abandon2">Sí, abandonar</button></div>');break;
+    case 'abandon':sheet('<h2>¿Abandonar?</h2><p>Perderás esta partida para siempre.</p><div class="row"><button class="btn dark grow" data-a="close" data-key="esc">No</button><button class="btn r grow" data-a="abandon2" data-key="enter">Sí, abandonar</button></div>');break;
     case 'abandon2':closeSheet();if(S)recordRun(false);clearSave();S=null;busy=false;renderMenu();break;
     case 'cobrar':cobrar();break;
     case 'buy':buy(b.dataset.k,i);break;
@@ -1502,12 +1509,8 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{
   if((e.key==='Enter'||e.key===' ')&&e.target.matches('.card[data-a]')){e.preventDefault();e.target.click();return}
-  if(!S||S.phase!=='play'||!S.m||busy||!$('#sheet').hidden||e.metaKey||e.ctrlKey||e.altKey)return;
-  const n=Number(e.key);
-  if(n>=1&&n<=4&&S.hand[n-1]!=null&&['mus','bet'].includes(S.m.step)){const id=S.hand[n-1],k=S.sel.indexOf(id);if(k>=0)S.sel.splice(k,1);else S.sel.push(id);render();return}
-  const k=e.key.toLowerCase();
-  if(S.m.step==='mus'){if(k==='m')doMus();else if(k==='c')cortar()}
-  else if(S.m.step==='roundEnd'&&(k==='enter'||k===' ')){e.preventDefault();nextRound()}
+  if(busy)return;
+  if(window.__keyclick)window.__keyclick(e);
 });
 function resume(){
   BG.setFiesta(S.fiesta);
@@ -1522,6 +1525,23 @@ addEventListener('pagehide',()=>{if(S&&!busy)save()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&S&&!busy)save()});
 if('serviceWorker' in navigator&&location.protocol==='https:'&&!/claude/.test(location.host)){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 renderMenu();
+})();
+</script>
+
+<script>
+/* keyboard shortcuts shown on the buttons themselves (computers only) */
+(function(){
+  const NAMES={enter:'↵ Intro',esc:'Esc',space:'Espacio',backspace:'⌫','-':'−','+':'+'};
+  const fine=matchMedia('(hover:hover) and (pointer:fine)');
+  function deco(){if(!fine.matches)return;document.querySelectorAll('[data-key]').forEach(b=>{if(b.querySelector(':scope>.kk'))return;const k=document.createElement('kbd');k.className='kk';k.textContent=NAMES[b.dataset.key]||b.dataset.key.toUpperCase();b.appendChild(k)})}
+  new MutationObserver(deco).observe(document.body,{childList:true,subtree:true});deco();
+  window.__keyclick=e=>{
+    if(e.metaKey||e.ctrlKey||e.altKey)return false;
+    const n=({Enter:'enter',Escape:'esc',' ':'space',Backspace:'backspace'})[e.key]||e.key.toLowerCase();
+    const sh=document.getElementById('sheet'),root=sh&&!sh.hidden?sh:document.getElementById('app');
+    const b=[...root.querySelectorAll('[data-key]')].find(x=>x.dataset.key===n&&!x.disabled&&x.offsetParent!==null);
+    if(!b)return false;e.preventDefault();b.click();return true;
+  };
 })();
 </script>
 
