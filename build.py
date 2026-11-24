@@ -49,7 +49,7 @@ def build(slug, g):
     src = open(os.path.join(HERE, g["src"]), encoding="utf-8").read()
     if not os.environ.get("KEEP_TEST_HOOK"):
         src = src.replace("if(location.protocol==='file:')window.__f=()=>S;\n", "").replace("if(location.protocol==='file:')window.__o=()=>S;\n", "")
-        src = "\n".join(l for l in src.split("\n") if not l.startswith("if(location.protocol==='file:')window.__ot="))
+        src = "\n".join(l for l in src.split("\n") if not l.startswith("if(location.protocol==='file:')window.__ot=") and not l.startswith("if(location.protocol==='file:')window.__ft="))
     head, body = src.split("</style>", 1)
     extra = ('<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="apple-touch-icon.png">\n'
              '<link rel="icon" href="icon-192.png">\n<meta name="description" content="%s">\n' % g["desc"])

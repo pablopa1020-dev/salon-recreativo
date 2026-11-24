@@ -102,7 +102,7 @@ h1,h2,h3{font-family:var(--display);font-weight:700;margin:0;text-wrap:balance;l
 .jc .cnt{position:absolute;top:2px;right:2px;font-family:var(--digits);font-size:15px;line-height:1;background:var(--mag);color:#fff;border:2px solid var(--edge);border-radius:6px;padding:0 3px;z-index:3}
 .jc.empty{background:transparent;border:2px dashed #4a2a62;box-shadow:none;display:grid;place-items:center}
 .jc.empty span{font-family:var(--display);font-size:7px;color:#6a4a85;text-transform:uppercase}
-.r1{--frame:#3fd2ff;--tint:#c9f3ff} .r2{--frame:#9dff4a;--tint:#e4ffc9} .r3{--frame:#ff2bd6;--tint:#ffd0f5}
+.r1{--frame:#3fd2ff;--tint:#c9f3ff} .r4{--frame:#ffd23f;--tint:#fff6c2} .tal{--frame:#5cf2c8;--tint:#d4fff1} .r2{--frame:#9dff4a;--tint:#e4ffc9} .r3{--frame:#ff2bd6;--tint:#ffd0f5}
 .perg{--frame:#d9b27a;--tint:#fff1d6} .lic{--frame:#ffb627;--tint:#ffe9bf}
 .holo{position:relative}
 .holo::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;
@@ -139,7 +139,7 @@ h1,h2,h3{font-family:var(--display);font-weight:700;margin:0;text-wrap:balance;l
 .bigc .art{height:64px;border-radius:8px;background:radial-gradient(circle at 50% 40%,#fff 0%,var(--tint) 85%);display:grid;place-items:center;font-size:38px;border:2px solid rgba(5,1,10,.45);overflow:hidden}
 .bigc h4{margin:0;font-family:var(--display);font-weight:700;font-size:12px;line-height:1.15;text-align:center;color:var(--ink);text-transform:uppercase}
 .bigc .tag{align-self:center;font-family:var(--display);font-size:8px;text-transform:uppercase;letter-spacing:.06em;background:var(--edge);color:var(--frame);border-radius:5px;padding:1px 6px}
-.bigc p{margin:0;font-size:13px;line-height:1.25;background:#fff8ec;border-radius:7px;padding:6px;font-weight:600;flex:1;color:var(--ink);position:relative;z-index:3}
+.bigc p,#sheet .bigc p{margin:0;font-size:13px;line-height:1.25;background:#fff8ec;border-radius:7px;padding:6px;font-weight:600;flex:1;color:var(--ink);position:relative;z-index:3}
 .bigc.xl{max-width:250px;align-self:center;width:100%}
 .bigc.xl .art{height:112px;font-size:64px}
 .bigc.xl h4{font-size:16px} .bigc.xl p{font-size:15px}
@@ -332,7 +332,7 @@ table.lv td:nth-child(n+2){text-align:right;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 <style>html{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<!-- version 4.2 -->
+<!-- version 5.0 -->
 </head>
 <body>
 
@@ -375,7 +375,9 @@ const HT={
   full:{n:'Full',c:50,m:5,dc:30,dm:2},
   poker:{n:'Póker',c:80,m:7,dc:35,dm:3},
   esccolor:{n:'Escalera de color',c:120,m:9,dc:45,dm:4},
-  repoker:{n:'Repóker',c:150,m:12,dc:50,dm:4}
+  repoker:{n:'Repóker',c:150,m:12,dc:50,dm:4},
+  fullcolor:{n:'Full de color',c:140,m:14,dc:40,dm:4},
+  repcolor:{n:'Repóker de color',c:160,m:16,dc:50,dm:3}
 };
 const HTK=Object.keys(HT);
 const needPlays=l=>2+l;
@@ -387,7 +389,8 @@ const ENH={
   eco:{n:'Eco',d:'Puntúa dos veces.'},
   comodin:{n:'Comodín',d:'Cuenta como cualquier palo y nunca se anula.'}
 };
-const suitIs=(c,s)=>c.s===s||c.enh==='comodin';
+const suitIs=(c,s)=>c.s===s||c.enh==='comodin'||(rule('smear')&&red(c.s)===red(s));
+const red=s=>s==='h'||s==='d';
 const AM={
   moneda:{n:'Moneda trucada',p:4,e:'🪙',d:'+4 Multi.',hand:(a,x,h)=>h.m(4)},
   corazon:{n:'Corazón de cera',p:5,e:'💗',d:'Cada ♥ que puntúa: +3 Multi.',card:(a,x,h,c)=>{if(suitIs(c,'h'))h.m(3)}},
@@ -443,9 +446,9 @@ const SEALS={
   lacre:{n:'Lacre',d:'Al descartarla: +$1.',c:'#c43b2e'},
   carmin:{n:'Carmín',d:'Al puntuar, su tipo de mano avanza un paso más hacia el siguiente nivel.',c:'#e0156a'}
 };
-const rar=p=>p<=5?'r1':p===6?'r2':'r3';
-const rarN={r1:'Común',r2:'Rara',r3:'Legendaria'};
-const amDesc=a=>AM[a.k].d.replace('{c}',a.c||0).replace('{m}',a.m||0).replace('{x}',fm(a.x||1)).replace('{l}',2*((S&&S.drinks)||0))+(a.ed?' '+EDS[a.ed].d:'');
+const rarOf=d=>d.leg?'r4':d.p<=5?'r1':d.p<=7?'r2':'r3';
+const rarN={r1:'Común',r2:'Poco común',r3:'Rara',r4:'Legendaria'};
+const amDesc=a=>AM[a.k].d.replace('{v}',AM[a.k].dv&&S?AM[a.k].dv(a):0).replace('{s}',a.s?G[a.s]:'?').replace('{c}',a.c==null?(a.k==='cafesolo'?8:0):a.c).replace('{m}',a.m==null?(a.k==='velacumple'?20:0):a.m).replace('{x}',fm(a.x||1)).replace('{l}',2*((S&&S.drinks)||0))+(a.ed?' '+EDS[a.ed].d:'');
 const amPrice=a=>AM[a.k].p+(a.ed?EDS[a.ed].p:0);
 
 const SC={
@@ -472,21 +475,29 @@ const SC={
     check:()=>amFree()?'':'No tienes huecos de amuleto libres.',use:()=>{const k=randAmulet([]);S.amulets.push({k});toast('Aparece: '+AM[k].n)}}
 };
 const LIC={alta:['Gaseosa','🥤','#b8f0ff'],pareja:['Anís','🍶','#f2f2e6'],doble:['Caña','🍺','#ffc23a'],trio:['Vermut','🍸','#c0302e'],escalera:['Ron','🍹','#c9762b'],color:['Tinto','🍷','#7b0f3a'],
-  full:['Coñac','🥃','#b5651d'],poker:['Mate','🧉','#5fae3a'],esccolor:['Cava','🍾','#ffe58a'],repoker:['Champán','🥂','#fff0a8']};
+  full:['Coñac','🥃','#b5651d'],poker:['Mate','🧉','#5fae3a'],esccolor:['Cava','🍾','#ffe58a'],repoker:['Champán','🥂','#fff0a8'],
+  fullcolor:['Absenta','🍵','#7fd65a'],repcolor:['Elixir','⚗️','#d6a5ff']};
 const isLic=k=>k.startsWith('l:');
 const bottle=(col)=>'<div class="bottle" style="--liq:'+col+'"><i class="neck"></i><i class="bd"><b class="liq"></b><i class="lab"></i></i></div>';
 function con(k){
-  if(isLic(k)){const h=k.slice(2),t=HT[h],lv=hasV('bodega')?2:1;return {n:LIC[h][0],e:LIC[h][1],art:bottle(LIC[h][2]),p:3,need:0,cls:'lic',tag:'Licor',
-    d:'Sube '+lv+' nivel'+(lv>1?'es':'')+' la mano '+t.n+': +'+t.dc*lv+' Fichas y +'+t.dm*lv+' Multi.',use:()=>{S.levels[h].l+=lv;S.drinks=(S.drinks||0)+1;toast(t.n+' sube a nivel '+S.levels[h].l)}}}
+  if(isLic(k)){const h=k.slice(2),t=HT[h],lv=(hasV('bodega')?2:1)*(has('pitonisa')?2:1);return {n:LIC[h][0],e:LIC[h][1],art:bottle(LIC[h][2]),p:3,need:0,cls:'lic',tag:'Licor',
+    d:'Sube '+lv+' nivel'+(lv>1?'es':'')+' la mano '+t.n+': +'+t.dc*lv+' Fichas y +'+t.dm*lv+' Multi.',
+    use:()=>{S.levels[h].l+=lv;S.drinks=(S.drinks||0)+1;const ex=has('bodeguero')+(hasV('sumiller')?1:0);
+      for(let i=0;i<ex;i++){const o=rnd(HTK.filter(z=>z!==h));S.levels[o].l++}toast(t.n+' sube a nivel '+S.levels[h].l)}}}
+  if(isTal(k))return Object.assign({cls:'tal',tag:'Talismán'},TAL[k.slice(2)]);
   return Object.assign({cls:'perg',tag:'Pergamino'},SC[k]);
 }
-const randLic=()=>'l:'+rnd(HTK.slice(0,9));
+/* secret hands only appear as liquor once you have played them */
+const randLic=()=>'l:'+rnd(HTK.filter((k,i)=>i<9||(S&&S.levels[k]&&S.levels[k].t>0)));
 const PK={
   perg:{n:'Sobre de pergaminos',p:4,e:'📜',d:'Elige entre 3 pergaminos para guardar.',size:3},
   lic:{n:'Sobre de licores',p:4,e:'🍾',d:'Elige entre 3 licores. Te los bebes al momento.',size:3},
   cartas:{n:'Sobre de cartas',p:4,e:'🎴',d:'Elige entre 3 cartas grabadas para tu baraja.',size:3},
-  amul:{n:'Sobre de amuletos',p:6,e:'🎁',d:'Elige entre 2 amuletos.',size:2}
+  amul:{n:'Sobre de amuletos',p:6,e:'🎁',d:'Elige entre 2 amuletos.',size:2},
+  tal:{n:'Sobre de talismanes',p:6,e:'🔯',d:'Elige entre 2 talismanes para guardar.',size:2}
 };
+const PKW={perg:30,lic:30,cartas:20,amul:12,tal:8};
+const randPack=()=>{let t=Math.random()*100;for(const [k,w] of Object.entries(PKW)){t-=w;if(t<=0)return k}return 'perg'};
 /* vouchers: permanent upgrades, one offered per night; the second of each pair needs the first */
 const VALES={
   taburete:{n:'Taburete extra',e:'🪑',d:'+1 hueco de amuleto.',apply(){S.maxAm++}},
@@ -511,6 +522,257 @@ const valePrice=()=>S&&S.freeVale===S.night?0:price(VALE_P);
 const hasV=k=>!!(S&&S.vales&&S.vales.includes(k));
 const disc=()=>Math.min(.75,(hasV('honor')?0.5:hasV('socio')?0.25:0)+(S&&S.shop&&S.shop.sale?0.5:0));
 const price=p=>Math.max(1,Math.round(p*(1-disc())));
+/* ---------- extra amulets (data) ---------- */
+const isFace=c=>rule('allface')||(c.r>=11&&c.r<=13);
+const chance=p=>Math.random()<Math.min(1,p*(1+has('dadotrucado')));
+const removeAm=a=>{const i=S.amulets.indexOf(a);if(i>=0)S.amulets.splice(i,1)};
+const freeSc=()=>S.scrolls.length<scSlots();
+const cntCards=f=>S.cards.filter(f).length;
+const suitM=(s,v)=>(a,x,h,c)=>{if(suitIs(c,s))h.m(v)};
+const suitC=(s,v)=>(a,x,h,c)=>{if(suitIs(c,s))h.c(v)};
+const suitX=(s,v)=>(a,x,h,c)=>{if(suitIs(c,s))h.x(v)};
+const hasM=(t,v)=>(a,x,h)=>{if(x.has(t))h.m(v)};
+const hasC=(t,v)=>(a,x,h)=>{if(x.has(t))h.c(v)};
+const hasX=(t,v)=>(a,x,h)=>{if(x.has(t))h.x(v)};
+const BIG=['poker','esccolor','repoker','fullcolor','repcolor'];
+Object.assign(AM,{
+  colorete:{n:'Colorete',p:5,e:'💄',d:'Cada ♦ que puntúa: +3 Multi.',card:suitM('d',3)},
+  carbonilla:{n:'Carbonilla',p:5,e:'🪨',d:'Cada ♣ que puntúa: +3 Multi.',card:suitM('c',3)},
+  picahierro:{n:'Pica de hierro',p:5,e:'⛏️',d:'Cada ♠ que puntúa: +3 Multi.',card:suitM('s',3)},
+  cartaamor:{n:'Carta de amor',p:5,e:'💌',d:'Cada ♥ que puntúa: +25 Fichas.',card:suitC('h',25)},
+  lupa:{n:'Lupa de joyero',p:5,e:'🔍',d:'Cada ♦ que puntúa: +25 Fichas.',card:suitC('d',25)},
+  garrote:{n:'Garrote',p:5,e:'🏏',d:'Cada ♣ que puntúa: +25 Fichas.',card:suitC('c',25)},
+  gotasangre:{n:'Gota de sangre',p:6,e:'🩸',d:'Cada ♥ que puntúa: ×1,1 Multi.',card:suitX('h',1.1)},
+  hollin:{n:'Hollín',p:6,e:'🌑',d:'Cada ♣ que puntúa: ×1,1 Multi.',card:suitX('c',1.1)},
+  obsidiana:{n:'Obsidiana',p:6,e:'🗡️',d:'Cada ♠ que puntúa: ×1,1 Multi.',card:suitX('s',1.1)},
+  monocromo:{n:'Monocromo',p:6,e:'🖤',d:'×2 Multi si juegas 4 cartas o más y todas son del mismo color (rojas o negras).',
+    hand:(a,x,h)=>{const p=x.played.filter(c=>c.enh!=='comodin');if(x.played.length>=4&&p.every(c=>red(c.s)===red(p[0].s)))h.x(2)}},
+  arcoiris:{n:'Arco iris',p:7,e:'🌈',d:'×3 Multi si entre las cartas que puntúan hay de los cuatro palos.',
+    hand:(a,x,h)=>{const s=new Set(x.sc.filter(c=>c.enh!=='comodin').map(c=>c.s));if(s.size+x.sc.filter(c=>c.enh==='comodin').length>=4)h.x(3)}},
+  banderin:{n:'Banderín',p:5,e:'🚩',d:'+4 Multi por cada palo distinto entre las cartas que puntúan.',hand:(a,x,h)=>{const n=new Set(x.sc.map(c=>c.s)).size;if(n)h.m(4*n)}},
+  palosuerte:{n:'Palo de la suerte',p:6,e:'🎯',d:'Cada mesa elige un palo al azar (ahora {s}): sus cartas que puntúan dan ×1,5 Multi.',
+    mesa:a=>{a.s=rnd(['h','d','c','s'])},card:(a,x,h,c)=>{if(a.s&&suitIs(c,a.s))h.x(1.5)}},
+  pardados:{n:'Par de dados',p:4,e:'🎲',d:'Si la mano contiene una pareja: +8 Multi.',hand:hasM('pareja',8)},
+  doblecita:{n:'Doble cita',p:5,e:'💞',d:'Si la mano contiene una doble pareja: +10 Multi.',hand:hasM('doble',10)},
+  tresenraya:{n:'Tres en raya',p:5,e:'⭕',d:'Si la mano contiene un trío: +12 Multi.',hand:hasM('trio',12)},
+  incendios:{n:'Escalera de incendios',p:5,e:'🪜',d:'Si la mano contiene una escalera: +12 Multi.',hand:hasM('escalera',12)},
+  paleta:{n:'Paleta de pintor',p:5,e:'🎨',d:'Si la mano contiene un color: +10 Multi.',hand:hasM('color',10)},
+  dosgotas:{n:'Dos gotas de agua',p:4,e:'💧',d:'Si la mano contiene una pareja: +50 Fichas.',hand:hasC('pareja',50)},
+  baile:{n:'Pareja de baile',p:5,e:'💃',d:'Si la mano contiene una doble pareja: +80 Fichas.',hand:hasC('doble',80)},
+  mosqueteros:{n:'Tres mosqueteros',p:5,e:'🤺',d:'Si la mano contiene un trío: +100 Fichas.',hand:hasC('trio',100)},
+  peldano:{n:'Peldaño',p:5,e:'🧗',d:'Si la mano contiene una escalera: +100 Fichas.',hand:hasC('escalera',100)},
+  acuarela:{n:'Acuarela',p:5,e:'🖌️',d:'Si la mano contiene un color: +80 Fichas.',hand:hasC('color',80)},
+  citaciegas:{n:'Cita a ciegas',p:7,e:'🙈',d:'Si la mano contiene una pareja: ×2 Multi.',hand:hasX('pareja',2)},
+  trillizos:{n:'Trillizos',p:7,e:'👶',d:'Si la mano contiene un trío: ×3 Multi.',hand:hasX('trio',3)},
+  cuarteto:{n:'Cuarteto de cuerda',p:8,e:'🎻',d:'Si la mano contiene un póker: ×4 Multi.',hand:hasX('poker',4)},
+  escalinata:{n:'Escalinata',p:7,e:'🏛️',d:'Si la mano contiene una escalera: ×3 Multi.',hand:hasX('escalera',3)},
+  vidriera:{n:'Vidriera',p:7,e:'🪟',d:'Si la mano contiene un color: ×2 Multi.',hand:hasX('color',2)},
+  calderilla:{n:'Calderilla',p:5,e:'🔩',d:'Cada 2, 3, 4 o 5 que puntúa: +15 Fichas y +2 Multi.',card:(a,x,h,c)=>{if(c.r<=5){h.c(15);h.m(2)}}},
+  billetediez:{n:'Billete de diez',p:5,e:'💵',d:'Cada 10 que puntúa: +10 Multi.',card:(a,x,h,c)=>{if(c.r===10)h.m(10)}},
+  sietesuerte:{n:'Siete de la suerte',p:6,e:'7️⃣',d:'Cada 7 que puntúa: 1 entre 2 de dar ×1,5 Multi.',card:(a,x,h,c)=>{if(c.r===7&&chance(.5))h.x(1.5)}},
+  ocholoco:{n:'Ocho loco',p:5,e:'🎱',d:'Cada 8 que puntúa: +8 Multi.',card:(a,x,h,c)=>{if(c.r===8)h.m(8)}},
+  cortereal:{n:'Corte real',p:8,e:'🤴',d:'Cada K que se queda en tu mano: ×1,5 Multi.',held:(a,x,h,c)=>{if(c.r===13)h.x(1.5)}},
+  damacompania:{n:'Dama de compañía',p:6,e:'👸',d:'Cada Q que se queda en tu mano: +13 Multi.',held:(a,x,h,c)=>{if(c.r===12)h.m(13)}},
+  paje:{n:'Paje',p:6,e:'🧑‍🎤',d:'Cada J que puntúa se activa una vez más.',retrig:(a,x,c)=>c.r===11?1:0},
+  corofiguras:{n:'Coro de figuras',p:8,e:'🎭',d:'Las figuras que puntúan se activan una vez más.',retrig:(a,x,c)=>isFace(c)?1:0},
+  tropamenuda:{n:'Tropa menuda',p:6,e:'🐜',d:'Las cartas del 2 al 5 que puntúan se activan una vez más.',retrig:(a,x,c)=>c.r<=5?1:0},
+  primerafila:{n:'Primera fila',p:6,e:'🎟️',d:'La primera carta que puntúa se activa una vez más.',retrig:(a,x,c,i)=>i===0?1:0},
+  manohierro:{n:'Mano de hierro',p:6,e:'🦾',d:'Los sellos de plata y plomo de tu mano actúan dos veces.'},
+  cuatroases:{n:'Cuatro ases',p:6,e:'🔱',d:'+4 Multi por cada As de tu baraja completa (ahora +{v} Multi).',dv:a=>4*cntCards(c=>c.r===14),hand:(a,x,h)=>{const v=4*cntCards(c=>c.r===14);if(v)h.m(v)}},
+  plebeyo:{n:'Plebeyo',p:6,e:'🧑‍🌾',d:'×1,5 Multi si ninguna carta jugada es una figura.',hand:(a,x,h)=>{if(!x.played.some(isFace))h.x(1.5)}},
+  cartasuelta:{n:'Carta suelta',p:5,e:'🍂',d:'+20 Multi si la mano es Carta alta.',hand:(a,x,h)=>{if(x.k==='alta')h.m(20)}},
+  simetria:{n:'Simetría',p:5,e:'⚖️',d:'Cada carta par que puntúa: +4 Multi.',card:(a,x,h,c)=>{if(c.r<=10&&c.r%2===0)h.m(4)}},
+  asimetria:{n:'Asimetría',p:5,e:'🌀',d:'Cada carta impar o As que puntúa: +30 Fichas.',card:(a,x,h,c)=>{if(c.r===14||(c.r<=10&&c.r%2===1))h.c(30)}},
+  disfraz:{n:'Disfraz',p:6,e:'🥸',d:'Todas las cartas cuentan como figuras.',rule:'allface'},
+  cuatroesq:{n:'Cuatro esquinas',p:7,e:'🖐️',d:'El Color y la Escalera se pueden hacer con solo 4 cartas.',rule:'four'},
+  atajo:{n:'Atajo de feriante',p:6,e:'🛤️',d:'Las escaleras pueden saltarse un valor entre carta y carta (por ejemplo, 4 6 7 9 10).',rule:'gap'},
+  manchatinta:{n:'Mancha de tinta',p:6,e:'🖋️',d:'♥ y ♦ cuentan como el mismo palo, y ♣ y ♠ también.',rule:'smear'},
+  salpicadura:{n:'Salpicadura',p:5,e:'💦',d:'Todas las cartas jugadas puntúan, formen parte de la mano o no.',rule:'splash'},
+  dadotrucado:{n:'Dado trucado',p:6,e:'🧿',d:'Duplica todas las probabilidades del juego (1 entre 3 pasa a ser 2 entre 3).'},
+  hormiguita:{n:'Hormiguita',p:5,e:'🐞',d:'Gana +2 Fichas por cada carta que puntúa. Ahora: +{c} Fichas.',hand:(a,x,h)=>{if(a.c)h.c(a.c)},after:(a,x)=>{a.c=(a.c||0)+2*x.sc.length}},
+  piedrarodante:{n:'Piedra rodante',p:5,e:'🎳',d:'Gana +12 Fichas cada vez que juegas una mano con escalera. Ahora: +{c} Fichas.',hand:(a,x,h)=>{if(a.c)h.c(a.c)},after:(a,x)=>{if(x.has('escalera'))a.c=(a.c||0)+12}},
+  abanico:{n:'Abanico',p:5,e:'🪭',d:'Gana +1 Multi cada vez que juegas una mano con color. Ahora: +{m} Multi.',hand:(a,x,h)=>{if(a.m)h.m(a.m)},after:(a,x)=>{if(x.has('color'))a.m=(a.m||0)+1}},
+  pavoreal:{n:'Pavo real',p:7,e:'🦚',d:'Gana ×0,1 Multi cada vez que juegas una mano con pareja. Ahora: ×{x} Multi.',hand:(a,x,h)=>{if((a.x||1)>1)h.x(a.x)},after:(a,x)=>{if(x.has('pareja'))a.x=(a.x||1)+0.1}},
+  albanil:{n:'Albañil',p:5,e:'🏗️',d:'Gana +6 Fichas por cada carta que se destruye. Ahora: +{c} Fichas.',hand:(a,x,h)=>{if(a.c)h.c(a.c)},destroy:(a,n)=>{a.c=(a.c||0)+6*n}},
+  cementerio:{n:'Cementerio',p:7,e:'🪦',d:'Gana ×0,25 Multi por cada carta que se destruye. Ahora: ×{x} Multi.',hand:(a,x,h)=>{if((a.x||1)>1)h.x(a.x)},destroy:(a,n)=>{a.x=(a.x||1)+0.25*n}},
+  obrero:{n:'Obrero',p:5,e:'👷',d:'Gana +2 Multi cada vez que ganas una mesa. Ahora: +{m} Multi.',hand:(a,x,h)=>{if(a.m)h.m(a.m)},win:a=>{a.m=(a.m||0)+2;return 0}},
+  paciencia:{n:'Paciencia',p:5,e:'🧘',d:'Gana +1 Multi por cada descarte sin usar al ganar una mesa. Ahora: +{m} Multi.',hand:(a,x,h)=>{if(a.m)h.m(a.m)},win:a=>{a.m=(a.m||0)+S.discLeft;return 0}},
+  sellista:{n:'Filatelista',p:5,e:'📮',d:'+3 Multi por cada carta con sello de tu baraja (ahora +{v} Multi).',dv:a=>3*cntCards(c=>c.seal),hand:(a,x,h)=>{const v=3*cntCards(c=>c.seal);if(v)h.m(v)}},
+  joyeria:{n:'Joyería',p:6,e:'💍',d:'+2 Multi por cada carta grabada de tu baraja (ahora +{v} Multi).',dv:a=>2*cntCards(c=>c.enh),hand:(a,x,h)=>{const v=2*cntCards(c=>c.enh);if(v)h.m(v)}},
+  barajagorda:{n:'Baraja gorda',p:5,e:'🍔',d:'+4 Fichas por cada carta de tu baraja por encima de 52 (ahora +{v} Fichas).',dv:a=>4*Math.max(0,S.cards.length-52),hand:(a,x,h)=>{const v=4*Math.max(0,S.cards.length-52);if(v)h.c(v)}},
+  barajaflaca:{n:'Baraja flaca',p:6,e:'🥢',d:'+2 Multi por cada carta de tu baraja por debajo de 52 (ahora +{v} Multi).',dv:a=>2*Math.max(0,52-S.cards.length),hand:(a,x,h)=>{const v=2*Math.max(0,52-S.cards.length);if(v)h.m(v)}},
+  cuco:{n:'Reloj de cuco',p:5,e:'🐦',d:'+2 Fichas por cada carta que queda en el mazo.',hand:(a,x,h)=>{const v=2*S.draw.filter(id=>C(id)).length;if(v)h.c(v)}},
+  ultimabala:{n:'Último cartucho',p:6,e:'🧨',d:'×2 Multi si no te quedan descartes.',hand:(a,x,h)=>{if(S.discLeft===0)h.x(2)}},
+  sintrampa:{n:'Sin trampa ni cartón',p:6,e:'😇',d:'×2 Multi si no has descartado en esta mesa.',hand:(a,x,h)=>{if(!S.discUsed)h.x(2)}},
+  manocorta:{n:'Mano corta',p:5,e:'🤏',d:'+20 Multi si juegas 3 cartas o menos.',hand:(a,x,h)=>{if(x.played.length<=3)h.m(20)}},
+  manollena:{n:'Cesta llena',p:5,e:'🧺',d:'+60 Fichas si juegas 5 cartas.',hand:(a,x,h)=>{if(x.played.length===5)h.c(60)}},
+  tripode:{n:'Trípode',p:6,e:'📷',d:'×2 Multi si juegas exactamente 3 cartas.',hand:(a,x,h)=>{if(x.played.length===3)h.x(2)}},
+  calentamiento:{n:'Calentamiento',p:5,e:'🏃',d:'Gana +2 Multi por cada mano que juegas en la mesa; vuelve a 0 en cada mesa. Ahora: +{m} Multi.',
+    hand:(a,x,h)=>{if(a.m)h.m(a.m)},after:a=>{a.m=(a.m||0)+2},mesa:a=>{a.m=0}},
+  velacumple:{n:'Vela de cumpleaños',p:5,e:'🎂',d:'+20 Multi, pero pierde 2 cada vez que juegas una mano y se apaga al llegar a 0. Ahora: +{m} Multi.',
+    hand:(a,x,h)=>h.m(a.m==null?20:a.m),after:a=>{a.m=(a.m==null?20:a.m)-2;if(a.m<=0){removeAm(a);toast('La vela de cumpleaños se apaga')}}},
+  cafesolo:{n:'Café solo',p:6,e:'☕',d:'×2 Multi en las próximas manos; se acaba tras 8 manos. Quedan {c}.',
+    hand:(a,x,h)=>h.x(2),after:a=>{a.c=(a.c==null?8:a.c)-1;if(a.c<=0){removeAm(a);toast('Te has acabado el café')}}},
+  bombilla:{n:'Bombilla',p:7,e:'💡',d:'Gana ×0,5 Multi cada vez que juegas un Póker o una mano mejor. Ahora: ×{x} Multi.',hand:(a,x,h)=>{if((a.x||1)>1)h.x(a.x)},after:(a,x)=>{if(BIG.includes(x.k))a.x=(a.x||1)+0.5}},
+  miron:{n:'Mirón',p:5,e:'👀',d:'+2 Multi por cada carta que se queda en tu mano al jugar.',hand:(a,x,h)=>{const v=2*S.hand.length;if(v)h.m(v)}},
+  jarra:{n:'Jarra de propinas',p:5,e:'🫙',d:'Al ganar una mesa: +$1 por cada amuleto común que tengas.',win:a=>S.amulets.filter(z=>rarOf(AM[z.k])==='r1').length},
+  cajero:{n:'Cajero',p:5,e:'🏧',d:'Al ganar una mesa: +$1 por cada descarte que no hayas usado.',win:a=>S.discLeft},
+  agente:{n:'Agente de bolsa',p:6,e:'📈',d:'Su precio de venta sube $2 cada vez que ganas una mesa.',win:a=>{a.sv=(a.sv||0)+2;return 0}},
+  cerdito:{n:'Cerdito',p:5,e:'🐖',d:'+$4 al ganar al rival de la noche.',win:a=>S.mesa===2?4:0},
+  mercader:{n:'Mercader',p:5,e:'🧾',d:'Cada compra en la trastienda tiene 1 entre 4 de devolverte $2.',buy:a=>{if(chance(.25)){S.money+=2;toast('Mercader: te devuelven $2')}}},
+  regateador:{n:'Regateador',p:5,e:'🤝',d:'Cambiar el género de la trastienda cuesta $1 menos.'},
+  recaudador:{n:'Recaudador',p:5,e:'🧮',d:'Al ganar una mesa: +$3 si tienes menos de $10.',win:a=>S.money<10?3:0},
+  taxista:{n:'Taxista',p:4,e:'🚕',d:'+$1 cada vez que juegas una mano con pareja.',after:(a,x)=>{if(x.has('pareja'))S.money++}},
+  tacano:{n:'Tacaño',p:7,e:'🧐',d:'×2 Multi si tienes $20 o más.',hand:(a,x,h)=>{if(S.money>=20)h.x(2)}},
+  pobrediablo:{n:'Pobre diablo',p:6,e:'🥲',d:'×2 Multi si tienes $5 o menos.',hand:(a,x,h)=>{if(S.money<=5)h.x(2)}},
+  cleptomano:{n:'Cleptómano',p:5,e:'🫳',d:'+$2 por cada carta grabada que descartes.',disc:(a,cs)=>2*cs.filter(c=>c.enh).length},
+  chatarrero:{n:'Chatarrero',p:5,e:'🔧',d:'+$2 extra cada vez que vendes un amuleto.',sell:a=>{S.money+=2}},
+  carapoker:{n:'Cara de póker',p:7,e:'😐',d:'Los faroles ganados pagan ×3 lo apostado en vez de ×2.'},
+  chivato:{n:'Chivato',p:6,e:'🐀',d:'Los faroles exigen un 15 % menos de puntos.'},
+  manotemblorosa:{n:'Mano temblorosa',p:7,e:'🫨',d:'×2 Multi si la mano lleva un farol encima.',hand:(a,x,h)=>{if(x.bluff)h.x(2)}},
+  maton:{n:'Matón',p:7,e:'🦍',d:'×2 Multi mientras debas dinero al prestamista.',hand:(a,x,h)=>{if(S.debt>0)h.x(2)}},
+  moroso:{n:'Moroso',p:6,e:'📉',d:'+1 Multi por cada $1 que debas al prestamista.',hand:(a,x,h)=>{if(S.debt>0)h.m(S.debt)}},
+  avalista:{n:'Avalista',p:5,e:'🖊️',d:'El prestamista solo te cobra un 20 % de recargo.'},
+  trilero:{n:'Trilero',p:6,e:'🥜',d:'Cada farol que ganas crea un pergamino al azar (si tienes hueco).',bluff:(a,won)=>{if(won&&freeSc())S.scrolls.push(randScroll())}},
+  malperdedor:{n:'Mal perdedor',p:5,e:'😤',d:'Si pierdes un farol, te devuelven la mitad de lo apostado.'},
+  empedernido:{n:'Jugador empedernido',p:6,e:'🎰',d:'Gana +3 Multi cada vez que echas un farol, lo ganes o no. Ahora: +{m} Multi.',hand:(a,x,h)=>{if(a.m)h.m(a.m)},bluff:a=>{a.m=(a.m||0)+3}},
+  ojeras:{n:'Ojeras',p:6,e:'🥱',d:'×1,5 Multi si ganaste el último farol que echaste.',hand:(a,x,h)=>{if(S.lastBluffWon)h.x(1.5)}},
+  pagare:{n:'Pagaré',p:5,e:'📃',d:'Al pedir un préstamo, crea un amuleto común al azar (si tienes hueco).',loan:a=>{if(amFree()){const k=randAmulet([],'r1');S.amulets.push({k});toast('Pagaré: aparece '+AM[k].n)}}},
+  novillos:{n:'Novillos',p:5,e:'🏖️',d:'Gana +4 Multi cada vez que te saltas una mesa. Ahora: +{m} Multi.',hand:(a,x,h)=>{if(a.m)h.m(a.m)},skip:a=>{a.m=(a.m||0)+4}},
+  absentista:{n:'Absentista',p:5,e:'🛌',d:'+$5 cada vez que te saltas una mesa.',skip:a=>{S.money+=5}},
+  bibliotecario:{n:'Bibliotecario',p:6,e:'📚',d:'+2 Multi por cada pergamino que hayas usado en la partida (ahora +{v} Multi).',dv:a=>2*(S.scrollsRun||0),hand:(a,x,h)=>{const v=2*(S.scrollsRun||0);if(v)h.m(v)}},
+  alquimistaloco:{n:'Alquimista loco',p:6,e:'🧪',d:'Al usar un pergamino, 1 entre 3 de crear otro al azar.',use:(a,k)=>{if(!isLic(k)&&!isTal(k)&&chance(1/3)&&freeSc()){S.scrolls.push(randScroll());toast('El alquimista crea otro pergamino')}}},
+  bodeguero:{n:'Bodeguero',p:6,e:'🛢️',d:'Cada licor que bebes también sube un nivel a otra mano al azar.'},
+  catador:{n:'Catador',p:6,e:'👃',d:'Los licores de la trastienda te salen gratis.'},
+  escriba:{n:'Escriba',p:6,e:'✒️',d:'Al ganar al rival de la noche, crea un talismán al azar (si tienes hueco).',win:a=>{if(S.mesa===2&&freeSc())S.scrolls.push(randTal());return 0}},
+  cartomante:{n:'Cartomante',p:6,e:'🪬',d:'Al ganar una mesa, crea el licor de la mano que más has jugado (si tienes hueco).',
+    win:a=>{if(freeSc()){let best='pareja',t=-1;HTK.forEach(k=>{if(S.levels[k].t>t){t=S.levels[k].t;best=k}});S.scrolls.push('l:'+best)}return 0}},
+  copista:{n:'Copista',p:6,e:'📠',d:'Al empezar cada mesa, añade a tu baraja una copia de una carta al azar de tu mano.',
+    mesa:a=>{if(S.hand.length){const c=C(rnd(S.hand));S.cards.push(Object.assign({},c,{id:S.nid++}))}}},
+  dibujante:{n:'Dibujante',p:6,e:'✏️',d:'Si la primera mano de la mesa es de una sola carta, esa carta se graba al azar.',
+    after:(a,x)=>{if(S.handNo===0&&x.played.length===1){const c=C(x.played[0].id);if(c)c.enh=rnd(Object.keys(ENH))}}},
+  vampiro:{n:'Vampiro',p:7,e:'🧛',d:'Cada carta grabada que puntúa pierde el grabado y le da ×0,15 Multi para siempre. Ahora: ×{x} Multi.',
+    hand:(a,x,h)=>{if((a.x||1)>1)h.x(a.x)},after:(a,x)=>{x.sc.forEach(c=>{if(c.enh){a.x=(a.x||1)+0.15;c.enh=null}})}},
+  midas:{n:'Toque de Midas',p:7,e:'🌟',d:'Las figuras que puntúan se vuelven de Oro.',after:(a,x)=>{x.sc.forEach(c=>{if(isFace(c))c.enh='oro'})}},
+  herrador:{n:'Herrador',p:5,e:'🐴',d:'Cada carta sin grabado que puntúa tiene 1 entre 4 de grabarse en Bronce.',after:(a,x)=>{x.sc.forEach(c=>{if(!c.enh&&chance(.25))c.enh='bronce'})}},
+  quemador:{n:'Volcán',p:6,e:'🌋',d:'Si el primer descarte de la mesa es de una sola carta, esa carta se destruye.'},
+  cuentacuentos:{n:'Cuentacuentos',p:5,e:'📖',d:'Al ganar una mesa, añade a tu baraja una carta grabada al azar.',
+    win:a=>{S.cards.push({id:S.nid++,r:2+Math.floor(Math.random()*13),s:rnd(['h','d','c','s']),enh:rnd(Object.keys(ENH)),b:0});return 0}},
+  imitador:{n:'Imitador',p:9,e:'🦎',d:'Copia el efecto del amuleto que tiene a su derecha.'},
+  ecobar:{n:'Eco de bar',p:9,e:'📣',d:'Copia el efecto del amuleto que está más a la izquierda.'},
+  canibal:{n:'Caníbal',p:8,e:'🦈',d:'Al empezar cada noche, se come el amuleto de su derecha y gana ×0,5 Multi. Ahora: ×{x} Multi.',
+    hand:(a,x,h)=>{if((a.x||1)>1)h.x(a.x)},night:a=>{const i=S.amulets.indexOf(a),r=S.amulets[i+1];if(r){S.amulets.splice(i+1,1);a.x=(a.x||1)+0.5;toast('El caníbal se come '+AM[r.k].n)}}},
+  portero:{n:'Portero de discoteca',p:6,e:'💂',d:'+2 huecos de amuleto, pero tienes 1 mano menos en cada mesa.',am:2,hp:-1},
+  maletin:{n:'Maletín',p:5,e:'💼',d:'+1 hueco de consumible.',sc:1},
+  gafas:{n:'Gafas de sol',p:6,e:'🕶️',d:'+1 carta en la mano, pero 1 descarte menos en cada mesa.',hs:1,dp:-1},
+  escudo:{n:'Escudo',p:6,e:'🛡️',d:'+1 mano en la mesa del rival de cada noche.'},
+  tijeras:{n:'Tijeras',p:6,e:'✂️',d:'+2 descartes, pero 1 mano menos en cada mesa.',dp:2,hp:-1},
+  soborno:{n:'Soborno',p:6,e:'💸',d:'Desactiva la regla del rival de la noche al sentarte en su mesa, y se gasta.'},
+  herradura:{n:'Herradura',p:6,e:'🧲',d:'Las cartas de Vidrio no se rompen.'},
+  lente:{n:'Lente de aumento',p:7,e:'🔎',d:'Las cartas de Vidrio dan ×2,5 Multi en vez de ×1,75.'},
+  yunque:{n:'Yunque',p:6,e:'🛠️',d:'Las cartas de Bronce dan el doble de Fichas.'},
+  rubitallado:{n:'Rubí tallado',p:6,e:'❤️‍🔥',d:'Las cartas de Rubí dan +10 Multi en vez de +5.'},
+  lingote:{n:'Lingote',p:6,e:'🧈',d:'Las cartas de Oro dan +$2 en vez de +$1.'},
+  megafono:{n:'Megáfono',p:7,e:'📯',d:'Las cartas de Eco se activan una vez más.'},
+  cromo:{n:'Cromo brillante',p:6,e:'🪩',d:'Cada carta Comodín que puntúa: ×1,5 Multi.',card:(a,x,h,c)=>{if(c.enh==='comodin')h.x(1.5)}},
+  lacrador:{n:'Lacrador',p:5,e:'🔏',d:'Cada carta con sello que puntúa: +20 Fichas.',card:(a,x,h,c)=>{if(c.seal)h.c(20)}},
+  damapicas:{n:'Dama de picas',p:10,leg:true,e:'🦢',d:'Cada Q que puntúa: ×2 Multi.',card:(a,x,h,c)=>{if(c.r===12)h.x(2)}},
+  grantahur:{n:'El gran tahúr',p:10,leg:true,e:'🤵',d:'Gana ×1 Multi cada vez que ganas un farol. Ahora: ×{x} Multi.',hand:(a,x,h)=>{if((a.x||1)>1)h.x(a.x)},bluff:(a,won)=>{if(won)a.x=(a.x||1)+1}},
+  banquera:{n:'La banquera',p:10,leg:true,e:'👩‍💼',d:'El interés no tiene máximo.'},
+  fantasmaopera:{n:'El fantasma de la ópera',p:10,leg:true,e:'👻',d:'Gana ×0,5 Multi cada vez que vendes un amuleto. Ahora: ×{x} Multi.',hand:(a,x,h)=>{if((a.x||1)>1)h.x(a.x)},sell:a=>{a.x=(a.x||1)+0.5}},
+  pitonisa:{n:'La pitonisa',p:10,leg:true,e:'🧙‍♀️',d:'Cada licor sube el doble de niveles y, al ganar una mesa, crea un licor al azar (si tienes hueco).',win:a=>{if(freeSc())S.scrolls.push(randLic());return 0}}
+});
+/* hooks for the original amulets, so every special case runs through the same events */
+Object.assign(AM.hucha,{win:()=>3});
+Object.assign(AM.mago,{win:()=>{if(freeSc())S.scrolls.push(randScroll());return 0}});
+Object.assign(AM.equilibrista,{win:a=>{a.c=(a.c||0)+6*S.discLeft;return 0}});
+Object.assign(AM.manofirme,{win:a=>{if(!S.discUsed)a.x=(a.x||1)+0.2;return 0}});
+Object.assign(AM.contrabandista,{disc:(a,cs)=>cs.filter(isFace).length});
+Object.assign(AM.vela,{disc:(a,cs)=>{a.x=(a.x||1)+0.15*cs.length;return 0},night:a=>{a.x=1}});
+Object.assign(AM.espejo,{retrig:(a,x,c,i)=>i===x.sc.length-1?1:0});
+Object.assign(AM.presti,{after:()=>{if(S.hand.length){const c=C(rnd(S.hand));c.b=(c.b||0)+6}}});
+Object.assign(AM.tahur,{bluff:(a,won)=>{a.m=won?(a.m||0)+2:Math.max(0,(a.m||0)-2)}});
+Object.assign(AM.sastre,{card:(a,x,h,c)=>{if(isFace(c)){h.c(12);h.m(1)}}});
+Object.assign(AM.trebol,{card:(a,x,h,c)=>{if(suitIs(c,'c')&&chance(1/3))h.$(2)}});
+Object.assign(AM.marinero,{hp:1});Object.assign(AM.escoba,{dp:1});Object.assign(AM.bolsillo,{hs:1});
+
+/* talismans: rare, powerful consumables with a price */
+const TAL={
+  pacto:{n:'Pacto',e:'😈',p:5,need:0,d:'Crea un amuleto raro al azar, pero tu dinero pasa a ser $0.',check:()=>amFree()?'':'No tienes huecos de amuleto libres.',
+    use(){const k=randAmulet([],'r3');S.amulets.push({k});S.money=0;toast('Aparece '+AM[k].n)}},
+  alma:{n:'Alma en pena',e:'👼',p:5,need:0,d:'Crea un amuleto legendario.',check:()=>amFree()?'':'No tienes huecos de amuleto libres.',
+    use(){const k=randAmulet([],'r4');S.amulets.push({k});toast('Aparece '+AM[k].n)}},
+  eclipse:{n:'Eclipse',e:'🌘',p:5,need:0,d:'Sube 1 nivel todas las manos.',use(){HTK.forEach(k=>S.levels[k].l++)}},
+  ectoplasma:{n:'Ectoplasma',e:'🫥',p:5,need:0,d:'Un amuleto al azar sin edición pasa a ser Fantasma, pero tienes 1 carta menos en la mano para siempre.',
+    check:()=>S.amulets.some(a=>!a.ed)?'':'No tienes amuletos sin edición.',use(){rnd(S.amulets.filter(a=>!a.ed)).ed='fantasma';S.baseHand=Math.max(4,S.baseHand-1)}},
+  hechizo:{n:'Hechizo',e:'💫',p:5,need:0,d:'Da una edición especial al azar a uno de tus amuletos y destruye todos los demás.',
+    check:()=>S.amulets.length?'':'No tienes amuletos.',use(){const a=rnd(S.amulets);a.ed=rnd(['charol','neon','prisma']);S.amulets=[a]}},
+  doble:{n:'Doppelgänger',e:'👥',p:5,need:0,d:'Crea una copia de uno de tus amuletos al azar y destruye todos los demás.',
+    check:()=>S.amulets.length?'':'No tienes amuletos.',use(){const a=rnd(S.amulets);S.amulets=[a,{k:a.k}]}},
+  ofrenda:{n:'Ofrenda',e:'🪔',p:4,need:'play',d:'Destruye una carta al azar de tu mano y añade 3 figuras grabadas a tu mano.',
+    use(){burnRandom();for(let i=0;i<3;i++)addHand({r:rnd([11,12,13]),s:rnd(['h','d','c','s']),enh:rnd(Object.keys(ENH))})}},
+  grimorio:{n:'Grimorio',e:'📕',p:4,need:'play',d:'Destruye una carta al azar de tu mano y añade 2 Ases grabados a tu mano.',
+    use(){burnRandom();for(let i=0;i<2;i++)addHand({r:14,s:rnd(['h','d','c','s']),enh:rnd(Object.keys(ENH))})}},
+  conjuro:{n:'Conjuro',e:'🔯',p:4,need:'play',d:'Destruye una carta al azar de tu mano y añade 4 cartas numeradas grabadas, pero pierdes $5.',
+    use(){burnRandom();for(let i=0;i<4;i++)addHand({r:2+Math.floor(Math.random()*9),s:rnd(['h','d','c','s']),enh:rnd(Object.keys(ENH))});S.money=Math.max(0,S.money-5)}},
+  medium:{n:'Médium',e:'👁️',p:4,need:'play',d:'Todas las cartas de tu mano pasan a tener el mismo valor al azar, pero tienes 1 carta menos en la mano para siempre.',
+    use(){const r=C(rnd(S.hand)).r;S.hand.forEach(id=>{C(id).r=r});S.baseHand=Math.max(4,S.baseHand-1)}},
+  tabula:{n:'Tabla espiritista',e:'🟣',p:4,need:'play',d:'Todas las cartas de tu mano pasan a ser del mismo palo al azar, pero tienes 1 carta menos en la mano para siempre.',
+    use(){const s=rnd(['h','d','c','s']);S.hand.forEach(id=>{C(id).s=s});S.baseHand=Math.max(4,S.baseHand-1)}},
+  plegaria:{n:'Plegaria',e:'🙏',p:4,need:0,d:'+3 niveles a una mano al azar, pero todas las demás bajan 1 nivel (sin bajar de 1).',
+    use(){const k=rnd(HTK.slice(0,10));HTK.forEach(z=>{if(z===k)S.levels[z].l+=3;else S.levels[z].l=Math.max(1,S.levels[z].l-1)});toast(HT[k].n+' sube 3 niveles')}},
+  exorcismo:{n:'Exorcismo',e:'🪤',p:4,need:0,d:'Salda toda tu deuda con el prestamista, pero destruye uno de tus amuletos al azar.',
+    check:()=>S.debt>0&&S.amulets.length?'':'Necesitas deber dinero y tener algún amuleto.',use(){S.debt=0;S.debtDue=0;S.amulets.splice(Math.floor(Math.random()*S.amulets.length),1)}},
+  aura:{n:'Aura',e:'💠',p:4,need:[1,1],d:'Da un grabado y un sello al azar a 1 carta seleccionada.',use(cs){cs[0].enh=rnd(Object.keys(ENH));cs[0].seal=rnd(Object.keys(SEALS))}},
+  clon:{n:'Clon',e:'🧬',p:4,need:[1,1],d:'Añade 2 copias de la carta seleccionada a tu baraja y destruye otra carta al azar de tu mano.',
+    use(cs){for(let i=0;i<2;i++)S.cards.push(Object.assign({},cs[0],{id:S.nid++}));const o=S.hand.filter(id=>id!==cs[0].id);if(o.length)destroyCards([rnd(o)])}}
+};
+const isTal=k=>k.startsWith('t:');
+const randTal=()=>'t:'+(Math.random()<0.04?'alma':rnd(Object.keys(TAL).filter(k=>k!=='alma')));
+function addHand(o){const c=Object.assign({b:0,enh:null},o,{id:S.nid++});S.cards.push(c);S.hand.push(c.id)}
+function burnRandom(){if(S.hand.length)destroyCards([rnd(S.hand)])}
+function destroyCards(ids){
+  if(!ids.length)return;
+  S.cards=S.cards.filter(c=>!ids.includes(c.id));S.hand=S.hand.filter(i=>!ids.includes(i));S.fd=(S.fd||[]).filter(i=>!ids.includes(i));
+  S.amulets.slice().forEach(a=>{const d=AM[a.k];if(d&&d.destroy)d.destroy(a,ids.length)});
+}
+/* extra pergaminos */
+Object.assign(SC,{
+  tinta_h:{n:'Tinta roja',p:3,e:'❤️',need:[1,3],d:'Convierte hasta 3 cartas seleccionadas en ♥.',use:cs=>cs.forEach(c=>c.s='h')},
+  tinta_d:{n:'Tinta naranja',p:3,e:'🔶',need:[1,3],d:'Convierte hasta 3 cartas seleccionadas en ♦.',use:cs=>cs.forEach(c=>c.s='d')},
+  tinta_c:{n:'Tinta verde',p:3,e:'🌿',need:[1,3],d:'Convierte hasta 3 cartas seleccionadas en ♣.',use:cs=>cs.forEach(c=>c.s='c')},
+  tinta_s:{n:'Tinta azul',p:3,e:'🔷',need:[1,3],d:'Convierte hasta 3 cartas seleccionadas en ♠.',use:cs=>cs.forEach(c=>c.s='s')},
+  rueda:{n:'Rueda de la fortuna',p:3,e:'☸️',need:0,d:'1 entre 3 de dar una edición especial al azar a un amuleto sin edición.',
+    check:()=>S.amulets.some(a=>!a.ed)?'':'No tienes amuletos sin edición.',use(){if(chance(1/3)){const a=rnd(S.amulets.filter(a=>!a.ed));a.ed=rnd(['charol','neon','prisma']);toast(AM[a.k].n+' ahora es '+EDS[a.ed].n)}else toast('La rueda no ha querido')}},
+  templanza:{n:'Templanza',p:3,e:'🫗',need:0,d:'Ganas lo que valen tus amuletos a la venta (máximo $25).',use(){S.money+=Math.min(25,S.amulets.reduce((t,a)=>t+sellValue(a),0))}},
+  emperador:{n:'Emperador',p:3,e:'🏰',need:0,d:'Crea 2 pergaminos al azar (si tienes hueco).',use(){for(let i=0;i<2;i++)if(S.scrolls.length<scSlots())S.scrolls.push(randScroll())}},
+  transfusion:{n:'Transfusión',p:3,e:'💉',need:[2,2],d:'Selecciona 2 cartas: la de la izquierda se convierte en una copia de la de la derecha.',use:cs=>{Object.assign(cs[0],{r:cs[1].r,s:cs[1].s,enh:cs[1].enh,seal:cs[1].seal,b:cs[1].b})}},
+  fiesta:{n:'Fiesta',p:3,e:'🎉',need:0,d:'Crea 2 licores al azar (si tienes hueco).',use(){for(let i=0;i<2;i++)if(S.scrolls.length<scSlots())S.scrolls.push(randLic())}},
+  heraldo:{n:'Heraldo',p:3,e:'🎺',need:0,d:'Crea un amuleto común al azar (si tienes hueco).',check:()=>amFree()?'':'No tienes huecos de amuleto libres.',use(){const k=randAmulet([],'r1');S.amulets.push({k});toast('Aparece '+AM[k].n)}}
+});
+SC.s_carmin.d='Pone un Sello carmín a 1 carta: al puntuar, crea el licor de la mano jugada (si tienes hueco).';
+SEALS.carmin.d='Al puntuar, crea el licor de la mano jugada (si tienes hueco).';
+Object.assign(VALES,{
+  escaparate:{n:'Escaparate',e:'🪟',d:'La trastienda ofrece un amuleto más.'},
+  galeria:{n:'Galería',req:'escaparate',e:'🖼️',d:'La trastienda ofrece otro amuleto más.'},
+  catavinos:{n:'Catavinos',e:'🍷',d:'Los licores de la trastienda cuestan $1.'},
+  sumiller:{n:'Sumiller',req:'catavinos',e:'🍾',d:'Cada licor también sube un nivel a otra mano al azar.'},
+  tintero:{n:'Tintero',e:'🖋️',d:'La trastienda ofrece un consumible más.'},
+  pluma:{n:'Pluma de ganso',req:'tintero',e:'🪶',d:'Al ganar una mesa, crea un pergamino al azar (si tienes hueco).'},
+  amnistia:{n:'Amnistía',e:'🕊️',d:'Todos los objetivos bajan un 10 %.'},
+  indulto:{n:'Indulto',req:'amnistia',e:'📜',d:'Los objetivos bajan otro 10 %.'},
+  propina:{n:'Propina',e:'🪙',d:'+$1 al ganar cada mesa.'},
+  bote:{n:'El bote',req:'propina',e:'💰',d:'+$2 más al ganar cada mesa.'},
+  grabador:{n:'Grabador',e:'🔨',d:'Las cartas sueltas de la trastienda salen siempre grabadas.'},
+  orfebre:{n:'Orfebre',req:'grabador',e:'💍',d:'Y además salen siempre con sello.'},
+  garantia:{n:'Garantía',e:'📑',d:'El prestamista solo cobra un 25 % de recargo.'},
+  plazo:{n:'Plazo extra',req:'garantia',e:'⏰',d:'Las deudas vencen una noche más tarde.'},
+  antifaz:{n:'Antifaz',e:'🎭',d:'Los faroles exigen un 10 % menos de puntos.'},
+  mascara:{n:'Máscara veneciana',req:'antifaz',e:'🎊',d:'Los faroles ganados pagan ×2,5 lo apostado.'},
+  guante:{n:'Guante de seda',e:'🧤',d:'+1 carta en la mano.'},
+  manopla:{n:'Manopla',req:'guante',e:'🥊',d:'El primer descarte de cada mesa no gasta descarte.'}
+});
+
 const BOSSES={
   contable:{n:'El Contable',e:'🧮',d:'Cada mano que juegas te cuesta $1.'},
   niebla:{n:'La Niebla',e:'🌫️',d:'Las figuras (J, Q, K) se reparten boca abajo.'},
@@ -604,6 +866,7 @@ function migrate(s){
   if(!s.stats)s.stats={best:0,bestName:'',hands:0};
   if(s.shop){if(!s.shop.cd)s.shop.cd=[];if(s.shop.free===undefined)s.shop.free=false}
   if(s.pack&&s.pack.left===undefined)s.pack.left=1;
+  HTK.forEach(k=>{if(!s.levels[k])s.levels[k]={l:1,p:0,t:0}});if(s.debt&&!s.debtDue)s.debtDue=s.night+(s.mesa===2?1:0);
   if(!s.stake)s.stake=1;if(!s.debt)s.debt=0;if(s.bluff===undefined)s.bluff=null;if(!s.skips)s.skips={};if(s.scrollsRun===undefined)s.scrollsRun=0;
   s.v=4;return s;
 }
@@ -611,16 +874,24 @@ function migrate(s){
 const C=id=>S.cards.find(c=>c.id===id);
 const has=k=>S.amulets.filter(a=>a.k===k).length;
 const amUsed=()=>S.amulets.filter(a=>a.ed!=='fantasma').length;
-const amFree=()=>amUsed()<S.maxAm;
-function randAmulet(excl){
-  const pool=Object.keys(AM).filter(k=>okAm(k)&&!excl.includes(k)&&!S.amulets.some(a=>a.k===k));
-  const list=pool.length?pool:Object.keys(AM);
-  const w=list.map(k=>1/AM[k].p**1.5);let t=w.reduce((a,b)=>a+b,0)*Math.random();
-  for(let i=0;i<list.length;i++){t-=w[i];if(t<=0)return list[i]}return list[0];
+const amCount=p=>S.amulets.reduce((t,a)=>t+((AM[a.k]&&AM[a.k][p])||0),0);
+const rule=r=>!!(S&&S.amulets&&S.amulets.some(a=>AM[a.k]&&AM[a.k].rule===r));
+const amSlots=()=>S.maxAm+amCount('am');
+const scSlots=()=>S.maxSc+amCount('sc');
+const amFree=()=>amUsed()<amSlots();
+const sellValue=a=>Math.floor(amPrice(a)/2)+(a.sv||0);
+function fire(ev,...args){S.amulets.slice().forEach(a=>{const d=AM[a.k];if(d&&d[ev])d[ev](a,...args)})}
+function randAmulet(excl,tier){
+  const ok=k=>okAm(k)&&!excl.includes(k)&&!S.amulets.some(a=>a.k===k);
+  let t=tier;if(!t){const r=Math.random();t=r<0.68?'r1':r<0.94?'r2':'r3'}
+  let pool=Object.keys(AM).filter(k=>ok(k)&&rarOf(AM[k])===t);
+  if(!pool.length)pool=Object.keys(AM).filter(k=>ok(k)&&!AM[k].leg);
+  if(!pool.length)pool=Object.keys(AM).filter(k=>!AM[k].leg);
+  return rnd(pool);
 }
 const randEd=()=>Math.random()<0.1?rnd(['charol','charol','neon','neon','prisma','fantasma']):null;
 const randScroll=()=>rnd(Object.keys(SC));
-const randCon=()=>Math.random()<0.45?randLic():randScroll();
+const randCon=()=>{const r=Math.random();return r<0.05?randTal():r<0.5?randLic():randScroll()};
 
 function newRun(deck,stake){
   S={v:4,stake:stake||1,debt:0,bluff:null,skips:{},scrollsRun:0,deck,night:1,mesa:0,money:4,amulets:[],scrolls:[],maxAm:5,maxSc:2,baseHand:8,baseHands:4,baseDisc:3,interestCap:5,drinks:0,vales:[],vale:null,
@@ -640,22 +911,24 @@ function bossOf(n){
   }
   return S.bosses[n-1];
 }
-const curBoss=()=>S.mesa===2?bossOf(S.night).k:null;
+const curBoss=()=>S.mesa===2&&!S.noBoss?bossOf(S.night).k:null;
 const shadow=()=>curBoss()==='sombra'?bossOf(S.night).s:null;
 const bossDesc=b=>BOSSES[b.k].d.replace('{s}',G[b.s]+' '+SUITN[b.s]);
 function nightBase(n){if(n<=8)return NIGHT_BASE[n-1];return Math.round(NIGHT_BASE[7]*Math.pow(1.9,n-8)/100)*100}
-function targetFor(n,m){const x=m<2?MESAS[m].x:(BOSSES[bossOf(n).k].x||2);const k=1+(stk(2)?.25:0)+(stk(6)?.25:0);return Math.round(nightBase(n)*x*k/10)*10}
+function targetFor(n,m){const x=m<2?MESAS[m].x:(BOSSES[bossOf(n).k].x||2);const k=(1+(stk(2)?.25:0)+(stk(6)?.25:0))*(1-(hasV('amnistia')?.1:0)-(hasV('indulto')?.1:0));return Math.round(nightBase(n)*x*k/10)*10}
 const rewardFor=m=>m<2?MESAS[m].r-(stk(3)?1:0):5;
 const mesaName=(n,m)=>m<2?MESAS[m].n:BOSSES[bossOf(n).k].n;
 const mesaEmoji=(n,m)=>m<2?MESAS[m].e:BOSSES[bossOf(n).k].e;
-function handSize(){return Math.max(3,S.baseHand+has('bolsillo')-(curBoss()==='marea'?2:0))}
-function handsPer(){return Math.max(1,S.baseHands+has('marinero')-(['verdugo','banca'].includes(curBoss())?1:0)-(stk(8)?1:0))}
-function discPer(){return Math.max(0,S.baseDisc+has('escoba')-(stk(5)?1:0))}
+function handSize(){return Math.max(3,S.baseHand+amCount('hs')+(hasV('guante')?1:0)-(curBoss()==='marea'?2:0))}
+function handsPer(){return Math.max(1,S.baseHands+amCount('hp')+(S.mesa===2?has('escudo'):0)-(['verdugo','banca'].includes(curBoss())?1:0)-(stk(8)?1:0))}
+function discPer(){return Math.max(0,S.baseDisc+amCount('dp')-(stk(5)?1:0))}
 
 function startMesa(){
-  S.draw=shuffle(S.cards.map(c=>c.id));S.hand=[];S.sel=[];S.fd=[];S.played=[];S.score=0;
+  S.noBoss=false;
+  if(S.mesa===2){const sb=S.amulets.find(a=>a.k==='soborno');if(sb){S.noBoss=true;removeAm(sb);toast('Sobornas al rival: su regla no cuenta esta noche')}}
+  S.draw=shuffle(S.cards.map(c=>c.id));S.hand=[];S.sel=[];S.fd=[];S.played=[];S.score=0;S.discUsed=false;S.freeDiscUsed=false;S.bluffUsed=false;S.bluff=null;
   S.handsLeft=handsPer();S.discLeft=discPer();S.playedTypes={};S.handNo=0;S.target=targetFor(S.night,S.mesa);S.phase='play';
-  drawUp();save();render();SFX.deal();
+  drawUp();fire('mesa');save();render();SFX.deal();
 }
 function drawUp(){
   while(S.hand.length<handSize()&&S.draw.length){
@@ -670,60 +943,92 @@ function sortHand(){
 }
 
 /* ---------- evaluation & scoring (unchanged rules) ---------- */
+function suitKey(c){if(c.enh==='comodin')return '*';if(rule('smear'))return red(c.s)?'r':'n';return c.s}
+function flushOf(cards){
+  const need=rule('four')?4:5;if(cards.length<need)return null;
+  const cnt={};let w=0;cards.forEach(c=>{const k=suitKey(c);if(k==='*')w++;else cnt[k]=(cnt[k]||0)+1});
+  let best=null,bn=0;for(const k in cnt)if(cnt[k]>bn){bn=cnt[k];best=k}
+  if(bn+w<need)return null;
+  return cards.filter(c=>{const k=suitKey(c);return k==='*'||k===best});
+}
+function straightOf(cards){
+  const need=rule('four')?4:5;if(cards.length<need)return null;
+  const step=rule('gap')?2:1,set=new Set(cards.map(c=>c.r));if(set.has(14))set.add(1);
+  const v=[...set].sort((a,b)=>a-b);let best=[],run=[v[0]];
+  for(let i=1;i<v.length;i++){if(v[i]-v[i-1]<=step)run.push(v[i]);else{if(run.length>best.length)best=run;run=[v[i]]}}
+  if(run.length>best.length)best=run;
+  if(best.length<need)return null;
+  const rs=new Set(best.map(x=>x===1?14:x));return cards.filter(c=>rs.has(c.r));
+}
 function evaluate(cards){
-  const n=cards.length,by={};
-  cards.forEach(c=>(by[c.r]=by[c.r]||[]).push(c));
+  const by={};cards.forEach(c=>(by[c.r]=by[c.r]||[]).push(c));
   const groups=Object.values(by).sort((a,b)=>b.length-a.length||b[0].r-a[0].r);
-  let flush=false,straight=false;
-  if(n===5){
-    const nw=cards.filter(c=>c.enh!=='comodin');flush=nw.every(c=>c.s===nw[0].s);
-    const rs=[...new Set(cards.map(c=>c.r))].sort((a,b)=>a-b);
-    if(rs.length===5&&(rs[4]-rs[0]===4||rs.join()==='2,3,4,5,14'))straight=true;
-  }
-  const g0=groups[0].length,g1=groups[1]?groups[1].length:0;let k,sc;
-  if(g0===5){k='repoker';sc=cards}
-  else if(straight&&flush){k='esccolor';sc=cards}
+  const g0=groups[0].length,g1=groups[1]?groups[1].length:0,pairs=groups.filter(g=>g.length>=2).length;
+  const fl=flushOf(cards),st=straightOf(cards);let k,sc;
+  if(g0===5){k=fl?'repcolor':'repoker';sc=cards}
+  else if(g0===3&&g1===2&&fl&&fl.length===cards.length){k='fullcolor';sc=cards}
+  else if(st&&fl){k='esccolor';sc=[...new Set(st.concat(fl))]}
   else if(g0===4){k='poker';sc=groups[0]}
   else if(g0===3&&g1===2){k='full';sc=cards}
-  else if(flush){k='color';sc=cards}
-  else if(straight){k='escalera';sc=cards}
+  else if(fl){k='color';sc=fl}
+  else if(st){k='escalera';sc=st}
   else if(g0===3){k='trio';sc=groups[0]}
-  else if(g0===2&&g1===2){k='doble';sc=groups[0].concat(groups[1])}
+  else if(pairs>=2){k='doble';sc=groups[0].concat(groups[1])}
   else if(g0===2){k='pareja';sc=groups[0]}
   else{k='alta';sc=[cards.reduce((a,b)=>b.r>a.r?b:a)]}
+  if(rule('splash'))sc=cards;
   const set=new Set(sc.map(c=>c.id));
-  return {k,sc:cards.filter(c=>set.has(c.id)),g0};
+  const hs={pareja:g0>=2,doble:pairs>=2||g0>=4,trio:g0>=3,poker:g0>=4,escalera:!!st,color:!!fl,full:g0>=3&&g1>=2};
+  return {k,sc:cards.filter(c=>set.has(c.id)),g0,has:hs};
 }
 function baseOf(k){const t=HT[k],L=S.levels[k].l;return {c:t.c+(L-1)*t.dc,m:t.m+(L-1)*t.dm,l:L}}
+/* amulets as they act on this hand: copies resolved, each copy works on its own clone of the state */
+function effAms(){
+  const A=S.amulets,L=[];
+  A.forEach((a,i)=>{
+    let src=a;
+    if(a.k==='imitador'){src=A[i+1];if(!src||src.k==='imitador'||src.k==='ecobar')return}
+    else if(a.k==='ecobar'){src=A[0];if(!src||src===a||src.k==='imitador'||src.k==='ecobar')return}
+    const d=AM[src.k];if(!d)return;
+    L.push({a:src===a?a:JSON.parse(JSON.stringify(src)),d,i,ed:a.ed});
+  });
+  return L;
+}
 function computeScore(played){
   const ev=evaluate(played),b=baseOf(ev.k);
-  const st={c:b.c,m:b.m},steps=[],broken=[];let money=0,ref=null,extra=0;
+  const st={c:b.c,m:b.m},steps=[],broken=[];let money=0,ref=null;
   const P=(txt,cls)=>steps.push({ref,txt,cls,c:st.c,m:st.m});
   const h={c:v=>{st.c+=v;P('+'+v,'c')},m:v=>{st.m+=v;P('+'+v+' Multi','m')},x:v=>{st.m*=v;P('×'+fm(v)+' Multi','x')},$:v=>{money+=v;P('+$'+v,'$')}};
-  const x={ev,played,k:ev.k};
+  const x={ev,played,k:ev.k,sc:ev.sc,has:t=>!!ev.has[t],bluff:!!S.bluff};
   const amOn=!(curBoss()==='avaro'&&S.handNo===0);
-  const sh=shadow(),esp=amOn?has('espejo'):0;
+  const L=amOn?effAms():[];
+  const sh=shadow();
   if(!amOn){ref={t:'boss'};P('Amuletos dormidos','off')}
+  const echo=has('megafono'),bx=has('yunque')?2:1,rx=has('rubitallado')?10:5,gx=has('lente')?2.5:1.75,ox=has('lingote')?2:1;
   ev.sc.forEach((c,idx)=>{
     if(sh&&c.s===sh&&c.enh!=='comodin'){ref={t:'card',id:c.id};P('Anulada','off');return}
-    const trig=1+(c.enh==='eco'?1:0)+(idx===ev.sc.length-1?esp:0);
+    let trig=1+(c.enh==='eco'?1+echo:0);
+    L.forEach(o=>{if(o.d.retrig)trig+=o.d.retrig(o.a,x,c,idx)||0});
     for(let r=0;r<trig;r++){
       ref={t:'card',id:c.id};
-      h.c(rankChips(c.r)+(c.b||0)+(c.enh==='bronce'?30:0));
-      if(c.enh==='rubi')h.m(5);
-      if(c.enh==='vidrio')h.x(1.75);
-      if(c.enh==='oro')h.$(1);
-      if(amOn)S.amulets.forEach((a,i)=>{const d=AM[a.k];if(d.card){ref={t:'am',i};d.card(a,x,h,c)}});
+      h.c(rankChips(c.r)+(c.b||0)+(c.enh==='bronce'?30*bx:0));
+      if(c.enh==='rubi')h.m(rx);
+      if(c.enh==='vidrio')h.x(gx);
+      if(c.enh==='oro')h.$(ox);
+      L.forEach(o=>{if(o.d.card){ref={t:'am',i:o.i};o.d.card(o.a,x,h,c,idx)}});
     }
-    if(c.seal==='carmin')extra++;
-    if(c.enh==='vidrio'&&Math.random()<0.2){broken.push(c.id);ref={t:'card',id:c.id};P('¡Se rompe!','off')}
+    if(c.enh==='vidrio'&&!has('herradura')&&chance(0.2)){broken.push(c.id);ref={t:'card',id:c.id};P('¡Se rompe!','off')}
   });
-  S.hand.forEach(id=>{const c=C(id);if(!c||!c.seal||S.fd.includes(id))return;ref={t:'held',id};if(c.seal==='plata')h.m(3);else if(c.seal==='plomo')h.c(25)});
-  if(amOn)S.amulets.forEach((a,i)=>{const d=AM[a.k];ref={t:'am',i};
-    if(a.ed==='charol')h.c(35);else if(a.ed==='neon')h.m(6);else if(a.ed==='prisma')h.x(1.4);
-    if(d.hand)d.hand(a,x,h)});
+  const twice=has('manohierro')?2:1;
+  S.hand.forEach(id=>{const c=C(id);if(!c||S.fd.includes(id))return;
+    if(c.seal==='plata'||c.seal==='plomo')for(let r=0;r<twice;r++){ref={t:'held',id};if(c.seal==='plata')h.m(3);else h.c(25)}
+    L.forEach(o=>{if(o.d.held){ref={t:'held',id};o.d.held(o.a,x,h,c)}});
+  });
+  L.forEach(o=>{ref={t:'am',i:o.i};
+    if(o.ed==='charol')h.c(35);else if(o.ed==='neon')h.m(6);else if(o.ed==='prisma')h.x(1.4);
+    if(o.d.hand)o.d.hand(o.a,x,h)});
   if(curBoss()==='juez'&&S.playedTypes[ev.k]){ref={t:'boss'};h.x(0.5)}
-  return {k:ev.k,sc:ev.sc,lvl:b.l,base:b,steps,total:Math.floor(st.c*st.m),money,broken,extra};
+  return {k:ev.k,sc:ev.sc,lvl:b.l,base:b,steps,total:Math.floor(st.c*st.m),money,broken,x};
 }
 
 /* ---------- actions ---------- */
@@ -746,31 +1051,34 @@ async function playHand(){
   render();SFX.deal();
   await animate(R);
   S.score+=R.total;S.money+=R.money;
-  if(R.broken.length){S.cards=S.cards.filter(c=>!R.broken.includes(c.id))}
-  const lv=S.levels[R.k];lv.p+=1+(R.extra||0);lv.t++;
-  let lvUp=false;while(lv.p>=needPlays(lv.l)){lv.p-=needPlays(lv.l);lv.l++;lvUp=true}
+  if(R.broken.length)destroyCards(R.broken);
+  S.levels[R.k].t++;
+  S.hlog=(S.hlog||[]).concat(R.total).slice(-8);
   let bluffMsg='',bluffWon=false;
-  if(S.bluff){const bf=S.bluff;S.bluff=null;
-    if(R.total>=bf.need){bluffWon=true;S.money+=bf.stake*3;bluffMsg='¡Farol ganado! +$'+bf.stake*3;S.amulets.forEach(a=>{if(a.k==='tahur')a.m=(a.m||0)+2})}
-    else{bluffMsg='Farol perdido: -$'+bf.stake;S.amulets.forEach(a=>{if(a.k==='tahur')a.m=Math.max(0,(a.m||0)-2)})}}
+  if(S.bluff){const bf=S.bluff;S.bluff=null;S.bluffUsed=true;
+    const mult=has('carapoker')?3:hasV('mascara')?2.5:2;
+    if(R.total>=bf.need){bluffWon=true;const g=Math.floor(bf.stake*mult);S.money+=g;bluffMsg='¡Farol ganado! Cobras $'+g}
+    else{const back=has('malperdedor')?Math.floor(bf.stake/2):0;S.money+=back;bluffMsg='Farol perdido: -$'+(bf.stake-back)}
+    S.lastBluffWon=bluffWon;fire('bluff',bluffWon)}
+  if(R.sc.some(c=>c.seal==='carmin')&&freeSc()){S.scrolls.push('l:'+R.k);toast('Sello carmín: licor de '+HT[R.k].n)}
+  fire('after',R.x,R);
   recBump(r=>{r.hands++;if(bluffWon)r.faroles++;if(R.total>r.bestHand){r.bestHand=R.total;r.bestHandName=HT[R.k].n}});
   S.lastType=R.k;S.playedTypes[R.k]=1;S.handNo++;S.handsLeft--;S.stats.hands++;
   if(R.total>S.stats.best){S.stats.best=R.total;S.stats.bestName=HT[R.k].n}
-  for(let i=0;i<has('presti');i++){if(S.hand.length){const c=C(rnd(S.hand));c.b=(c.b||0)+6}}
   S.played=[];
   const won=S.score>=S.target;
   if(won)winMesa(false,true);
   else if(S.handsLeft>0){drawUp();if(S.hand.length)save()}
   await countTo(S.score);
   if(bluffMsg){toast(bluffMsg);if(bluffWon){SFX.win();burstAt($('#bluffBtn')||$('#pTotal'),40,['#ffb627','#fff'])}else SFX.no()}
-  else if(lvUp)toast(HT[R.k].n+' sube a nivel '+lv.l);
+  if(S.phase==='over'){await mourn('El prestamista<br>te ha pillado');busy=false;return render()}
   if(won){await celebrate('¡Mesa<br>ganada!');busy=false;return render()}
   if(S.handsLeft<=0||!S.hand.length)return loseOrSave();
   busy=false;render();
 }
 async function loseOrSave(){
   const i=S.amulets.findIndex(a=>a.k==='fenix');
-  if(i>=0&&S.score>=S.target/2){S.amulets.splice(i,1);winMesa(true,true);await celebrate('¡El fénix<br>te salva!');busy=false;return render()}
+  if(i>=0&&S.score>=S.target/2){S.amulets.splice(i,1);winMesa(true,true);if(S.phase==='over'){await mourn('El prestamista<br>te ha pillado');busy=false;return render()}await celebrate('¡El fénix<br>te salva!');busy=false;return render()}
   S.phase='over';recordRun(false);clearSave();
   await mourn('Sin blanca');busy=false;render();
 }
@@ -778,28 +1086,32 @@ async function discard(){
   if(busy||!S.sel.length||S.discLeft<=0)return;
   if(curBoss()==='peaje'){if(S.money<1)return toast('El Peaje cobra $1 por descartar y no tienes dinero.');S.money--}
   busy=true;
-  const ids=selOrdered(),cs=ids.map(C);
+  const ids=selOrdered(),cs=ids.map(C),free=hasV('manopla')&&!S.freeDiscUsed;
   await tossAway(ids);
-  const lac=cs.filter(c=>c.seal==='lacre').length;if(lac){S.money+=lac;toast('Lacre: +$'+lac);SFX.coin()}
-  const faces=cs.filter(c=>c.r>=11&&c.r<=13).length*has('contrabandista');
-  if(faces){S.money+=faces;toast('Contrabandista: +$'+faces);SFX.coin()}
-  S.amulets.forEach(a=>{if(a.k==='vela')a.x=(a.x||1)+0.15*ids.length});
-  S.hand=S.hand.filter(id=>!ids.includes(id));S.fd=S.fd.filter(id=>!ids.includes(id));S.sel=[];S.discLeft--;
+  let money=cs.filter(c=>c.seal==='lacre').length;
+  S.amulets.slice().forEach(a=>{const d=AM[a.k];if(d&&d.disc)money+=d.disc(a,cs)||0});
+  if(money){S.money+=money;toast('+$'+money+' al descartar');SFX.coin()}
+  S.hand=S.hand.filter(id=>!ids.includes(id));S.fd=S.fd.filter(id=>!ids.includes(id));S.sel=[];
+  if(!S.discUsed&&has('quemador')&&cs.length===1){destroyCards([cs[0].id]);toast('El volcán se traga la carta')}
+  if(free)S.freeDiscUsed=true;else S.discLeft--;
+  S.discUsed=true;
   drawUp();save();busy=false;render();SFX.deal();
 }
+/* settles the reward lines and moves to the cash-out screen in one saved step */
 /* settles the reward lines and moves to the cash-out screen in one saved step */
 function winMesa(saved,quiet){
   const lines=[[saved?'Mesa salvada':'Mesa superada',rewardFor(S.mesa)]];
   if(S.handsLeft>0)lines.push(['Manos sin usar ('+S.handsLeft+')',S.handsLeft]);
-  S.amulets.forEach(a=>{if(a.k==='equilibrista')a.c=(a.c||0)+6*S.discLeft;if(a.k==='manofirme'&&S.discLeft>=discPer())a.x=(a.x||1)+0.2});
-  const cap=Math.max(1,S.interestCap+5*has('usurero')-(stk(4)?2:0)),per=hasV('acorazada')?4:5,it=Math.min(cap,Math.floor(Math.max(0,S.money)/per));
-  if(it>0)lines.push(['Interés ($1 por cada $'+per+', máx. $'+cap+')',it]);
-  const hu=has('hucha');if(hu)lines.push(['Hucha de barro',3*hu]);
-  for(let i=0;i<has('mago');i++)if(S.scrolls.length<S.maxSc)S.scrolls.push(randScroll());
-  if(S.mesa===2&&S.debt>0){
-    const pos=lines.reduce((a,l)=>a+l[1],0),pay=Math.min(S.debt,Math.max(0,S.money+pos));
-    if(pay>0)lines.push(['Pago al prestamista',-pay]);
-    S.debt-=pay;if(S.debt>0){S.debt=Math.ceil(S.debt*1.25);lines.push(['Te queda por pagar (con recargo): $'+S.debt,0])}
+  if(hasV('propina'))lines.push([hasV('bote')?'Propina y bote':'Propina',hasV('bote')?3:1]);
+  S.amulets.slice().forEach(a=>{const d=AM[a.k];if(d&&d.win){const v=d.win(a);if(v)lines.push([d.n,v])}});
+  const cap=has('banquera')?Infinity:Math.max(1,S.interestCap+5*has('usurero')-(stk(4)?2:0)),per=hasV('acorazada')?4:5,it=Math.min(cap,Math.floor(Math.max(0,S.money)/per));
+  if(it>0)lines.push(['Interés ($1 por cada $'+per+(cap===Infinity?'':', máx. $'+cap)+')',it]);
+  if(hasV('pluma')&&freeSc())S.scrolls.push(randScroll());
+  /* the loan falls due when you beat the rival of its night: pay it or lose the run */
+  if(S.mesa===2&&S.debt>0&&S.night>=(S.debtDue||S.night)){
+    const pos=lines.reduce((a,l)=>a+l[1],0);
+    if(S.money+pos>=S.debt){lines.push(['Pago al prestamista',-S.debt]);S.debt=0;S.debtDue=0}
+    else{S.phase='over';S.overReason='loan';S.hand=[];S.sel=[];S.bluff=null;recordRun(false);clearSave();return}
   }
   S.cobro={lines,total:lines.reduce((a,l)=>a+l[1],0)};
   S.hand=[];S.sel=[];S.fd=[];S.played=[];S.bluff=null;
@@ -816,24 +1128,25 @@ function pickVale(){
 function genShop(){
   S.shop={rr:Math.max(0,3-(hasV('cambista')?2:0)),free:hasV('cortesia'),sale:!!S.sale,am:[],sc:[],pk:[],cd:[]};S.sale=false;rollShop();
   if(S.nextEd){S.shop.am[0].ed=rnd(['charol','neon','prisma','fantasma']);S.nextEd=false}
-  const pks=Object.keys(PK);S.shop.pk=[{k:rnd(pks),sold:false},{k:rnd(pks),sold:false}];
+  S.shop.pk=[{k:randPack(),sold:false},{k:randPack(),sold:false}];
   if(!S.vale||S.vale.night!==S.night){const k=pickVale();S.vale=k?{night:S.night,k,sold:false}:null}
 }
 function randShopCard(){
-  const ks=Object.keys(ENH),enh=Math.random()<0.35?rnd(ks):null;
-  const seal=Math.random()<0.15?rnd(Object.keys(SEALS)):null;
+  const ks=Object.keys(ENH),enh=hasV('grabador')||Math.random()<0.35?rnd(ks):null;
+  const seal=hasV('orfebre')||Math.random()<0.15?rnd(Object.keys(SEALS)):null;
   const c={r:2+Math.floor(Math.random()*13),s:rnd(['h','d','c','s']),enh,b:0};if(seal)c.seal=seal;
   return {c,p:2+(enh?2:0)+(seal?1:0)};
 }
 function rollShop(){
-  const a1=randAmulet([]),a2=randAmulet([a1]);
-  S.shop.am=[{k:a1,ed:randEd(),sold:false},{k:a2,ed:randEd(),sold:false}];
-  const nc=2+(hasV('bodega')?1:0);S.shop.sc=[];for(let i=0;i<nc;i++)S.shop.sc.push({k:randCon(),sold:false});
+  const na=2+(hasV('escaparate')?1:0)+(hasV('galeria')?1:0),am=[];
+  for(let i=0;i<na;i++)am.push(randAmulet(am));
+  S.shop.am=am.map(k=>({k,ed:randEd(),sold:false}));
+  const nc=2+(hasV('bodega')?1:0)+(hasV('tintero')?1:0);S.shop.sc=[];for(let i=0;i<nc;i++)S.shop.sc.push({k:randCon(),sold:false});
   S.shop.cd=[0,1].map(()=>Object.assign(randShopCard(),{sold:false}));
 }
 function itemPrice(kind,it){
   if(kind==='am')return price(amPrice(it)+(stk(7)?1:0));
-  if(kind==='sc')return price(con(it.k).p);
+  if(kind==='sc'){if(isLic(it.k)){if(has('catador'))return 0;if(hasV('catavinos'))return 1}return price(con(it.k).p)}
   if(kind==='cd')return price(it.p);
   return price(PK[it.k].p);
 }
@@ -842,8 +1155,8 @@ function buy(kind,i){
   const p=itemPrice(kind,it);
   if(S.money<p){SFX.no();return toast('No te llega el dinero.')}
   if(kind==='am'&&it.ed!=='fantasma'&&!amFree()){SFX.no();return toast('No te quedan huecos de amuleto. Vende uno primero.')}
-  if(kind==='sc'&&S.scrolls.length>=S.maxSc){SFX.no();return toast('No te quedan huecos de consumible.')}
-  S.money-=p;it.sold=true;SFX.coin();
+  if(kind==='sc'&&!freeSc()){SFX.no();return toast('No te quedan huecos de consumible.')}
+  S.money-=p;it.sold=true;SFX.coin();fire('buy');
   if(kind==='am'){S.amulets.push(it.ed?{k:it.k,ed:it.ed}:{k:it.k});recBump(r=>r.maxAm=Math.max(r.maxAm,S.amulets.length))}
   else if(kind==='sc')S.scrolls.push(it.k);
   else if(kind==='cd'){S.cards.push(Object.assign({},it.c,{id:S.nid++}));toast('Carta añadida a tu baraja')}
@@ -862,14 +1175,15 @@ function buyVale(){
 function openPack(k){
   const extra=hasV('sobregordo')?1:0,size=PK[k].size+extra;let opts;
   if(k==='perg')opts=Array.from({length:size},randScroll);
-  else if(k==='lic'){const s=shuffle(HTK.slice(0,9));opts=s.slice(0,size).map(h=>'l:'+h)}
+  else if(k==='tal'){opts=[];for(let i=0;i<size;i++){let t;do{t=randTal()}while(opts.includes(t)&&Object.keys(TAL).length>size);opts.push(t)}}
+  else if(k==='lic'){const s=shuffle(HTK.filter((h,i)=>i<9||S.levels[h].t>0));opts=s.slice(0,size).map(h=>'l:'+h)}
   else if(k==='amul'){opts=[];for(let i=0;i<size;i++)opts.push(randAmulet(opts))}
   else{const ks=Object.keys(ENH);opts=Array.from({length:size},()=>{const c={r:2+Math.floor(Math.random()*13),s:rnd(['h','d','c','s']),enh:rnd(ks),b:0};if(Math.random()<0.2)c.seal=rnd(Object.keys(SEALS));return c})}
   S.pack={k,opts,left:hasV('doblesobre')&&k!=='amul'?2:1};S.phase='pack';
 }
 function pickPack(i){
   const p=S.pack,o=p.opts[i];if(o==null)return;
-  if(p.k==='perg'){if(S.scrolls.length>=S.maxSc){SFX.no();return toast('No te quedan huecos de consumible.')}S.scrolls.push(o)}
+  if(p.k==='perg'||p.k==='tal'){if(!freeSc()){SFX.no();return toast('No te quedan huecos de consumible.')}S.scrolls.push(o)}
   else if(p.k==='lic'){con(o).use();recBump(r=>r.drinks++)}
   else if(p.k==='amul'){if(!amFree()){SFX.no();return toast('No te quedan huecos de amuleto.')}S.amulets.push({k:o})}
   else S.cards.push(Object.assign({},o,{id:S.nid++}));
@@ -881,41 +1195,58 @@ function pickPack(i){
 }
 function skipMesa(){
   if(busy||S.mesa>1)return;
-  const k=skipOf(S.night,S.mesa);S.mesa++;SKIPS[k].use();
+  const k=skipOf(S.night,S.mesa);S.mesa++;SKIPS[k].use();fire('skip');
   if(S.phase!=='pack')S.phase='previa';
   SFX.coin();toast('Mesa saltada: '+SKIPS[k].n);save();render();
 }
 function skipOf(n,m){S.skips=S.skips||{};const k=n+'-'+m;if(!S.skips[k])S.skips[k]=rnd(Object.keys(SKIPS));return S.skips[k]}
-function bluffNeed(){return Math.max(10,Math.round((S.target-S.score)/Math.max(1,S.handsLeft)*1.2/10)*10)}
+const niceUp=v=>{if(v<100)return Math.ceil(v/5)*5;const p=Math.pow(10,Math.floor(Math.log10(v))-1);return Math.ceil(v/p)*p};
+/* the bar follows what you have been scoring lately, so a bluff is always a real gamble */
+function bluffNeed(){
+  const log=(S.hlog||[]).slice(-5),rem=Math.max(0,S.target-S.score)/Math.max(1,S.handsLeft);
+  let base=log.length?Math.max(Math.max(...log)*1.1,log.reduce((a,b)=>a+b,0)/log.length*1.6):S.target*0.5;
+  base=Math.max(base,rem*1.25,S.target*0.3);
+  return niceUp(base*(1-(has('chivato')?0.15:0)-(hasV('antifaz')?0.1:0)));
+}
 function setBluff(v){
+  if(S.bluffUsed&&!S.bluff)return toast('Ya has echado un farol en esta mesa.');
   if(S.bluff){S.money+=S.bluff.stake;S.bluff=null}
   if(v>0){if(S.money<v){SFX.no();return toast('No te llega el dinero.')}S.money-=v;S.bluff={stake:v,need:bluffNeed()};SFX.coin()}
   closeSheet();save();render();
 }
+const loanRate=()=>has('avalista')?0.2:hasV('garantia')?0.25:0.5;
+const loanSizes=()=>{const k=1+Math.floor((S.night-1)/3);return [5,10,15].map(v=>v*k)};
 function takeLoan(v){
   if(S.debt>0)return toast('Ya debes dinero al prestamista.');
-  S.money+=v;S.debt=Math.ceil(v*1.5);SFX.coin();toast('El prestamista te da $'+v+'. Le debes $'+S.debt+'.');closeSheet();save();render();
+  S.money+=v;S.debt=Math.ceil(v*(1+loanRate()));
+  S.debtDue=(S.mesa===2?S.night+1:S.night)+(hasV('plazo')?1:0);
+  fire('loan');SFX.coin();toast('El prestamista te da $'+v+'. Le debes $'+S.debt+' antes del final de la noche '+S.debtDue+'.');closeSheet();save();render();
 }
-function payLoan(){if(S.money<S.debt)return toast('No te llega para pagar la deuda entera.');S.money-=S.debt;S.debt=0;SFX.coin();toast('Deuda saldada.');closeSheet();save();render()}
+function payLoan(){if(S.money<S.debt)return toast('No te llega para pagar la deuda entera.');S.money-=S.debt;S.debt=0;S.debtDue=0;SFX.coin();toast('Deuda saldada.');closeSheet();save();render()}
 function nextMesa(){
   if(S.mesa<2)S.mesa++;
-  else{S.mesa=0;S.night++;S.amulets.forEach(a=>{if(a.k==='vela')a.x=1});recBump(r=>r.bestNight=Math.max(r.bestNight,S.night))}
+  else{S.mesa=0;S.night++;fire('night');recBump(r=>r.bestNight=Math.max(r.bestNight,S.night))}
   S.shop=null;S.phase='previa';save();render();
 }
 async function useScroll(i){
   if(busy)return;
   const k=S.scrolls[i],d=con(k);
   let cs=null;
-  if(d.need){
-    if(S.phase!=='play')return toast('Este pergamino se usa durante una mesa, con cartas de tu mano seleccionadas.');
+  if(d.need==='play'){if(S.phase!=='play'||!S.hand.length)return toast('Este talismán se usa durante una mesa, sobre las cartas de tu mano.')}
+  else if(d.need){
+    if(S.phase!=='play')return toast('Este consumible se usa durante una mesa, con cartas de tu mano seleccionadas.');
     cs=selOrdered().map(C);
-    if(cs.length<d.need[0]||cs.length>d.need[1])return toast(d.need[0]===d.need[1]?'Selecciona exactamente '+d.need[0]+' carta.':'Selecciona entre '+d.need[0]+' y '+d.need[1]+' cartas.');
-  }else{const err=d.check&&d.check();if(err)return toast(err)}
+    if(cs.length<d.need[0]||cs.length>d.need[1])return toast(d.need[0]===d.need[1]?'Selecciona exactamente '+d.need[0]+' carta'+(d.need[0]>1?'s':'')+'.':'Selecciona entre '+d.need[0]+' y '+d.need[1]+' cartas.');
+  }
+  const err=d.check&&d.check();if(err)return toast(err);
   closeSheet();busy=true;
   await consumeFx(d);
-  if(cs){d.use(cs);S.fd=S.fd.filter(id=>!cs.some(c=>c.id===id));S.sel=[];sortHand()}else d.use();
-  if(!isLic(k)){S.scrollsRun=(S.scrollsRun||0)+1;recBump(r=>{r.scrolls++;r.scrollsRun=Math.max(r.scrollsRun,S.scrollsRun)})}else recBump(r=>r.drinks++);
-  S.scrolls.splice(i,1);save();busy=false;render();
+  S.scrolls.splice(i,1);
+  if(cs){d.use(cs);S.fd=S.fd.filter(id=>!cs.some(c=>c.id===id));S.sel=[]}else d.use();
+  if(S.phase==='play'){S.sel=S.sel.filter(id=>S.hand.includes(id));sortHand()}
+  if(isLic(k))recBump(r=>r.drinks++);else{S.scrollsRun=(S.scrollsRun||0)+1;recBump(r=>{r.scrolls++;r.scrollsRun=Math.max(r.scrollsRun,S.scrollsRun)})}
+  fire('use',k);
+  save();busy=false;render();
 }
 
 /* ---------- sound (WebAudio, only after the first touch) ---------- */
@@ -1121,30 +1452,30 @@ function cardHTML(c,cls,act,i){
     (c.enh?'<div class="ce">'+ENH[c.enh].n+'</div>':'')+(c.b?'<div class="cb">+'+c.b+'</div>':'')+(c.seal?'<span class="seal" style="--sc:'+SEALS[c.seal].c+'" title="Sello de '+SEALS[c.seal].n+'"></span>':'')+'</div>';
 }
 function amMini(a,i){
-  const d=AM[a.k];const extra=a.k==='bola'?'+'+(a.c||0):(a.k==='vela'||a.k==='racha')&&(a.x||1)>1?'×'+fm(a.x):'';
-  return '<button class="jc holo '+rar(d.p)+(a.ed?' ed-'+a.ed:'')+'" data-a="am" data-i="'+i+'" aria-label="'+d.n+'"><span class="art">'+d.e+'</span><span class="nm">'+d.n+'</span>'+
+  const d=AM[a.k];const extra=(a.x||1)>1?'×'+fm(a.x):a.m?'+'+a.m:a.c?'+'+a.c:a.s?G[a.s]:'';
+  return '<button class="jc holo '+rarOf(d)+(a.ed?' ed-'+a.ed:'')+'" data-a="am" data-i="'+i+'" aria-label="'+d.n+'"><span class="art">'+d.e+'</span><span class="nm">'+d.n+'</span>'+
     (a.ed?'<span class="edtag">'+EDS[a.ed].n+'</span>':'')+(extra?'<span class="cnt">'+extra+'</span>':'')+'</button>';
 }
 function bigCard(o){
   return '<div class="bigc holo '+o.cls+(o.xl?' xl':'')+(o.ed?' ed-'+o.ed:'')+'"'+(o.style?' style="'+o.style+'"':'')+'><div class="art">'+(o.art||o.e)+'</div><span class="tag">'+o.tag+'</span><h4>'+o.n+'</h4><p>'+kw(o.d)+'</p></div>';
 }
-const amBig=(a,xl)=>{const d=AM[a.k];return bigCard({cls:rar(d.p),e:d.e,tag:'Amuleto · '+rarN[rar(d.p)]+(a.ed?' · '+EDS[a.ed].n:''),n:d.n,d:amDesc(a),xl,ed:a.ed})};
+const amBig=(a,xl)=>{const d=AM[a.k];return bigCard({cls:rarOf(d),e:d.e,tag:'Amuleto · '+rarN[rarOf(d)]+(a.ed?' · '+EDS[a.ed].n:''),n:d.n,d:amDesc(a),xl,ed:a.ed})};
 const conBig=(k,xl)=>{const d=con(k);return bigCard({cls:d.cls,e:d.e,art:d.art,tag:d.tag,n:d.n,d:d.d,xl})};
 function amHTML(){
-  const slots=S.maxAm+S.amulets.filter(a=>a.ed==='fantasma').length,n=Math.max(slots,S.amulets.length);
+  const slots=amSlots()+S.amulets.filter(a=>a.ed==='fantasma').length,n=Math.max(slots,S.amulets.length);
   let h='<div class="slots" style="--n:'+n+'">';
   for(let i=0;i<n;i++){const a=S.amulets[i];h+=a?amMini(a,i):'<div class="jc empty"><span>Amuleto</span></div>'}
   return h+'</div>';
 }
 function toolsHTML(){
   let h='<div class="tools">';
-  for(let i=0;i<S.maxSc;i++){const k=S.scrolls[i];if(k){const d=con(k);h+='<button class="tool '+d.cls+'" data-a="sc" data-i="'+i+'"><i>'+(d.art||d.e)+'</i><span>'+d.n+'</span></button>'}else h+='<div class="tool empty">Consumible</div>'}
+  for(let i=0;i<Math.max(scSlots(),S.scrolls.length);i++){const k=S.scrolls[i];if(k){const d=con(k);h+='<button class="tool '+d.cls+'" data-a="sc" data-i="'+i+'"><i>'+(d.art||d.e)+'</i><span>'+d.n+'</span></button>'}else h+='<div class="tool empty">Consumible</div>'}
   return h+'<button class="mini" data-a="levels">Manos</button><button class="mini" data-a="deck">Mazo</button><button class="mini" data-a="settings" aria-label="Ajustes">⚙︎</button></div>';
 }
 function hudHTML(){
   const boss=S.mesa===2?bossOf(S.night):null;
   let h='<div class="hud box"><div class="where"><span class="lbl">Noche '+S.night+(S.endless?'':'/8')+'</span><b class="'+(boss?'neon':'')+'">'+mesaEmoji(S.night,S.mesa)+' '+mesaName(S.night,S.mesa)+'</b>'+
-    (boss?'<button class="pill" id="bossTag" data-a="boss">Regla</button>':'')+'</div><div class="money num" id="moneyNow">$'+S.money+(S.debt?'<span class="debt">debes $'+S.debt+'</span>':'')+'</div>';
+    (boss?'<button class="pill" id="bossTag" data-a="boss">Regla</button>':'')+'</div><div class="money num" id="moneyNow">$'+S.money+(S.debt?'<span class="debt">debes $'+S.debt+' · vence noche '+S.debtDue+'</span>':'')+'</div>';
   if(S.phase==='play'){
     h+='<div class="score-line num"><span>PUNTOS<b id="scoreNow" data-v="'+S.score+'">'+fm(S.score)+'</b></span><span>OBJETIVO<b>'+fm(S.target)+'</b></span></div>'+
       '<div class="bar"><i id="scoreBar" style="width:'+Math.min(100,S.score/S.target*100)+'%"></i></div>'+
@@ -1246,17 +1577,19 @@ function itemHTML(kind,i,it){
   else{const d=PK[it.k];card=bigCard({cls:'lic',style:'--frame:#ffd23f;--tint:#fff2b8',e:d.e,tag:'Sobre',n:d.n,d:d.d.replace(/entre (\d)/,(m,n)=>'entre '+(Number(n)+(hasV('sobregordo')?1:0)))})}
   return '<div class="item'+(it.sold?' sold':'')+'">'+card+'<button class="btn '+(S.money>=p&&!it.sold?'y':'dark')+' sm" data-a="buy" data-k="'+kind+'" data-i="'+i+'"'+(it.sold?' disabled':'')+'>'+(it.sold?'Comprado':'Comprar $'+p)+'</button></div>';
 }
+const rerollCost=()=>S.shop.free?0:Math.max(0,S.shop.rr-has('regateador'));
 function renderShop(){
-  const sh=S.shop,v=S.vale,rr=sh.free?0:sh.rr;
+  const sh=S.shop,v=S.vale,rr=rerollCost();
   const vale=v?'<div class="vale" id="valeBox"'+(v.sold?' style="opacity:.4"':'')+'><span class="ve">'+VALES[v.k].e+'</span><div class="grow"><span class="lbl">Vale de la noche</span><h4>'+VALES[v.k].n+'</h4><p>'+VALES[v.k].d+'</p></div>'+
     '<button class="btn '+(v.sold?'dark':'y')+' sm" data-a="vale"'+(v.sold?' disabled':'')+'>'+(v.sold?'Tuyo':valePrice()?'$'+valePrice():'Gratis')+'</button></div>':'';
-  const loan='<div class="loan"><h4>🕴️ El prestamista</h4>'+(S.debt?'<p>Le debes <b>$'+S.debt+'</b>. Te lo cobra al ganar al rival de esta noche; si no te llega, la deuda sube un 25 %.</p><button class="btn y sm" data-a="payloan"'+(S.money<S.debt?' disabled':'')+'>Pagar ahora $'+S.debt+'</button>'
-    :'<p>Dinero ahora, a devolver con un 50 % más al ganar al rival de esta noche.</p>'+[5,10,15].map(v=>'<button class="btn m sm" data-a="loan" data-v="'+v+'">$'+v+' → debes $'+Math.ceil(v*1.5)+'</button>').join(''))+'</div>';
+  const due=(S.mesa===2?S.night+1:S.night)+(hasV('plazo')?1:0);
+  const loan='<div class="loan"><h4>🕴️ El prestamista</h4>'+(S.debt?'<p>Le debes <b>$'+S.debt+'</b>. Te lo cobra al ganar al rival de la noche '+S.debtDue+'. <b>Si entonces no te llega, pierdes la partida.</b></p><button class="btn y sm" data-a="payloan"'+(S.money<S.debt?' disabled':'')+'>Pagar ahora $'+S.debt+'</button>'
+    :'<p>Dinero ahora, a devolver con un '+Math.round(loanRate()*100)+' % más al ganar al rival de la noche '+due+'. <b>Si entonces no puedes pagar, pierdes la partida.</b></p>'+loanSizes().map(v=>'<button class="btn m sm" data-a="loan" data-v="'+v+'">$'+v+' → debes $'+Math.ceil(v*(1+loanRate()))+'</button>').join(''))+'</div>';
   setScreen('<div class="screen">'+hudHTML()+amHTML()+toolsHTML()+
     '<div class="sign"><div class="neon a">TRASTIENDA</div><small>Abierto toda la noche'+(disc()?' · descuento del '+disc()*100+' %':'')+'</small></div>'+
     '<div class="sec-h"><span class="lbl">Amuletos</span><button class="btn m sm" data-a="reroll">'+(rr?'Cambiar $'+rr:'Cambiar gratis')+'</button></div>'+
     '<div class="grid2">'+sh.am.map((it,i)=>itemHTML('am',i,it)).join('')+'</div>'+vale+
-    '<span class="lbl">Pergaminos y licores</span><div class="grid2">'+sh.sc.map((it,i)=>itemHTML('sc',i,it)).join('')+'</div>'+
+    '<span class="lbl">Consumibles</span><div class="grid2">'+sh.sc.map((it,i)=>itemHTML('sc',i,it)).join('')+'</div>'+
     '<span class="lbl">Cartas sueltas</span><div class="grid2">'+sh.cd.map((it,i)=>itemHTML('cd',i,it)).join('')+'</div>'+
     '<span class="lbl">Sobres</span><div class="grid2">'+sh.pk.map((it,i)=>itemHTML('pk',i,it)).join('')+'</div>'+loan+
     '<button class="btn c" data-a="next">Siguiente: '+(S.mesa<2?mesaName(S.night,S.mesa+1):'Noche '+(S.night+1))+'</button></div>');
@@ -1271,7 +1604,8 @@ function renderPack(){
 }
 function statsHTML(){return '<div class="kv"><span>Noche alcanzada</span><b>'+S.night+'</b></div><div class="kv"><span>Mejor mano</span><b class="num">'+fm(S.stats.best)+'</b></div>'+(S.stats.bestName?'<div class="kv"><span></span><span>'+S.stats.bestName+'</span></div>':'')+'<div class="kv"><span>Manos jugadas</span><b>'+S.stats.hands+'</b></div><div class="kv"><span>Baraja</span><span style="color:#fff">'+DECKS[S.deck].n+'</span></div>'}
 function renderOver(){
-  setScreen('<div class="screen"><div class="logo"><h1 style="font-size:40px;color:#c9b8d6;text-shadow:0 4px 0 var(--edge);animation:none">SIN BLANCA</h1><p style="color:var(--muted);text-shadow:none">'+mesaName(S.night,S.mesa)+' se queda con tus fichas: '+fm(S.score)+' de '+fm(S.target)+'.</p></div><div class="tile box">'+statsHTML()+'</div>'+
+  const why=S.overReason==='loan'?'No has podido pagar al prestamista a tiempo y te ha echado del club.':mesaName(S.night,S.mesa)+' se queda con tus fichas: '+fm(S.score)+' de '+fm(S.target)+'.';
+  setScreen('<div class="screen"><div class="logo"><h1 style="font-size:40px;color:#c9b8d6;text-shadow:0 4px 0 var(--edge);animation:none">SIN BLANCA</h1><p style="color:var(--muted);text-shadow:none">'+why+'</p></div><div class="tile box">'+statsHTML()+'</div>'+
     '<button class="btn y" data-a="decks">Otra partida</button><button class="btn dark" data-a="menu">Menú</button></div>');
 }
 async function renderWin(){
@@ -1290,7 +1624,7 @@ function sheet(html){const s=$('#sheet');s.innerHTML='<div class="in">'+html+'</
 function closeSheet(){$('#sheet').hidden=true}
 function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>{e.style.opacity=0;setTimeout(()=>e.hidden=true,300)},2200)}
 function sheetAm(i){
-  const a=S.amulets[i],sell=Math.floor(amPrice(a)/2);
+  const a=S.amulets[i],sell=sellValue(a);
   sheet(amBig(a,true)+'<p style="font-size:13px;color:var(--muted);text-align:center">Los amuletos actúan de izquierda a derecha.</p>'+
     '<div class="row">'+(i>0?'<button class="btn dark sm" data-a="moveam" data-i="'+i+'" data-d="-1">◀</button>':'')+
     '<button class="btn dark grow" data-a="close">Cerrar</button><button class="btn m grow" data-a="sellam" data-i="'+i+'"'+(busy?' disabled':'')+'>Vender $'+sell+'</button>'+
@@ -1302,8 +1636,8 @@ function sheetSc(i){
     '<div class="row"><button class="btn dark grow" data-a="sellsc" data-i="'+i+'">Vender $1</button><button class="btn y grow" data-a="usesc" data-i="'+i+'">'+(isLic(S.scrolls[i])?'Beber':'Usar')+'</button></div><button class="btn dark" data-a="close">Cerrar</button>');
 }
 function sheetLevels(){
-  sheet('<h2>Tus manos</h2><p style="font-size:14px;color:var(--muted)">Cada tipo de mano sube de nivel al jugarlo varias veces o al beber su licor.</p><table class="lv num"><tbody>'+
-    HTK.map(k=>{const b=baseOf(k),L=S.levels[k];return '<tr><td>'+LIC[k][1]+' '+HT[k].n+'</td><td>nv '+b.l+'</td><td><span style="color:var(--cyan)">'+b.c+'</span> × <span style="color:var(--mag)">'+b.m+'</span></td><td style="color:var(--muted)">'+L.p+'/'+needPlays(L.l)+'</td></tr>'}).join('')+
+  sheet('<h2>Tus manos</h2><p style="font-size:14px;color:var(--muted)">Las manos solo suben de nivel con licores, talismanes y algunos amuletos.</p><table class="lv num"><thead><tr><th></th><th>Nivel</th><th>Fichas × Multi</th><th>Jugadas</th></tr></thead><tbody>'+
+    HTK.filter((k,i)=>i<10||S.levels[k].t>0||S.levels[k].l>1).map(k=>{const b=baseOf(k),L=S.levels[k];return '<tr><td>'+LIC[k][1]+' '+HT[k].n+'</td><td>nv '+b.l+'</td><td><span style="color:var(--cyan)">'+b.c+'</span> × <span style="color:var(--mag)">'+b.m+'</span></td><td style="color:var(--muted)">'+(L.t||0)+'</td></tr>'}).join('')+
     '</tbody></table>'+(S.vales.length?'<h2>Vales</h2>'+S.vales.map(k=>'<p>'+VALES[k].e+' <b>'+VALES[k].n+'</b>: '+VALES[k].d+'</p>').join(''):'')+'<button class="btn dark" data-a="close">Cerrar</button>');
 }
 let deckMode='left';
@@ -1334,14 +1668,15 @@ function sheetSettings(){
 }
 function sheetBluff(){
   if(S.phase!=='play'||busy)return;
-  const need=S.bluff?S.bluff.need:bluffNeed();
-  sheet('<div class="sign"><div class="neon a">🎭 ECHAR UN FAROL</div><small>Apuesta a que tu próxima mano llega a <b>'+fm(need)+'</b> puntos. Si llega, cobras el triple. Si no, pierdes lo apostado.</small></div>'+
+  if(S.bluffUsed&&!S.bluff)return toast('Ya has echado un farol en esta mesa.');
+  const need=S.bluff?S.bluff.need:bluffNeed(),mult=has('carapoker')?3:hasV('mascara')?2.5:2;
+  sheet('<div class="sign"><div class="neon a">🎭 ECHAR UN FAROL</div><small>Apuesta a que tu próxima mano llega a <b>'+fm(need)+'</b> puntos. Si llega, cobras ×'+fm(mult)+' lo apostado; si no, lo pierdes. La cifra sigue a tus mejores manos recientes, y solo puedes echar un farol por mesa.</small></div>'+
     '<div class="row" style="flex-wrap:wrap;justify-content:center">'+[1,2,3,5,10].map(v=>'<button class="btn '+(S.bluff&&S.bluff.stake===v?'y':'m')+' sm" data-a="bluffset" data-v="'+v+'"'+(S.money+(S.bluff?S.bluff.stake:0)<v?' disabled':'')+'>$'+v+'</button>').join('')+'</div>'+
     (S.bluff?'<button class="btn dark" data-a="bluffset" data-v="0">Retirar el farol (te devuelven $'+S.bluff.stake+')</button>':'')+'<button class="btn dark" data-a="close">Cerrar</button>');
 }
 function sheetLoan(){}
 function sheetCollection(){
-  const am=Object.keys(AM).map(k=>{const d=AM[k],ok=okAm(k);return '<div class="jc '+rar(d.p)+(ok?'':' locked')+'" title="'+(ok?d.n:LOCKS.am[k].d)+'"><span class="art"><span>'+d.e+'</span></span><span class="nm">'+(ok?d.n:'???')+'</span></div>'}).join('');
+  const am=Object.keys(AM).map(k=>{const d=AM[k],ok=okAm(k);return '<div class="jc '+rarOf(d)+(ok?'':' locked')+'" title="'+(ok?d.n:LOCKS.am[k].d)+'"><span class="art"><span>'+d.e+'</span></span><span class="nm">'+(ok?d.n:'???')+'</span></div>'}).join('');
   const locks=Object.entries(LOCKS.am).filter(([k])=>!okAm(k)).map(([k,l])=>'<p style="font-size:13px">🔒 <b>'+AM[k].n+'</b>: '+l.d+'</p>').join('')+
     Object.entries(LOCKS.deck).filter(([k])=>!okDeck(k)).map(([k,l])=>'<p style="font-size:13px">🔒 Baraja <b>'+DECKS[k].n+'</b>: '+l.d+'</p>').join('');
   sheet('<h2>Colección</h2><p style="font-size:13px;color:var(--muted)">'+Object.keys(AM).filter(okAm).length+' de '+Object.keys(AM).length+' amuletos · '+Object.keys(DECKS).filter(okDeck).length+' de '+Object.keys(DECKS).length+' barajas · apuesta máxima '+(REC.stakeMax||1)+'</p>'+
@@ -1359,11 +1694,12 @@ function sheetRecords(){
 function sheetHelp(){
   sheet('<h2>Cómo se juega</h2>'+
   '<p>Cada <b>noche</b> tiene tres mesas. Para superar una mesa tienes que llegar a su <b>objetivo de puntos</b> antes de quedarte sin manos.</p>'+
+  '<p>Las manos suben de nivel con <b>licores</b>, <b>talismanes</b> y algunos amuletos, no por jugarlas.</p>'+
   '<p>Toca hasta 5 cartas para probar manos. El panel te dice qué mano formas. <b>Soltar</b> las deselecciona todas. Pulsa <b>Jugar</b> y las cartas que forman la mano puntúan: cada una suma sus <b style="color:var(--cyan)">Fichas</b> (2–10 su valor, figuras 10, As 11) y al final se multiplican por el <b style="color:var(--mag)">Multi</b>. Con <b>Descartar</b> cambias cartas sin gastar manos.</p>'+
   '<p>La tercera mesa de cada noche es un <b>rival</b> con una regla especial. Toca «Regla» para verla.</p>'+
   '<p>Al ganar cobras el premio, $1 por mano sin usar e <b>interés</b> ($1 por cada $5). En la trastienda compras:</p>'+
-  '<p>🃏 <b>Amuletos</b>: efectos permanentes, a veces en edición especial (Charol, Neón, Prisma, Fantasma). Actúan de izquierda a derecha.<br>📜 <b>Pergaminos</b>: graban, tiñen, copian o destruyen cartas.<br>🍷 <b>Licores</b>: suben de nivel un tipo de mano.<br>🎫 <b>Vales</b>: una mejora permanente distinta cada noche.<br>🂠 <b>Cartas sueltas</b> y 🎁 <b>sobres</b>.</p>'+
-  '<p>🎭 <b>Farol</b>: antes de jugar puedes apostar a que tu mano llegará a una cifra. Si llega, cobras el triple.<br>🕴️ <b>Prestamista</b>: en la trastienda te presta dinero; se lo devuelves con un 50 % más al ganar al rival de la noche.<br>⏭️ <b>Saltar mesa</b>: las mesas 1 y 2 se pueden saltar a cambio de una recompensa, sin cobro ni trastienda.<br>🔖 <b>Sellos</b>: algunas cartas llevan un sello que actúa aunque se quede en tu mano.</p>'+
+  '<p>🃏 <b>Amuletos</b>: efectos permanentes, a veces en edición especial (Charol, Neón, Prisma, Fantasma). Actúan de izquierda a derecha.<br>📜 <b>Pergaminos</b>: graban, tiñen, copian o destruyen cartas.<br>🍷 <b>Licores</b>: suben de nivel un tipo de mano.<br>🔯 <b>Talismanes</b>: muy poderosos, pero con un precio.<br>🎫 <b>Vales</b>: una mejora permanente distinta cada noche.<br>🂠 <b>Cartas sueltas</b> y 🎁 <b>sobres</b>.</p>'+
+  '<p>🎭 <b>Farol</b>: antes de jugar puedes apostar a que tu mano llegará a una cifra. Si llega, cobras el doble. Uno por mesa, y la cifra sigue a tus mejores manos.<br>🕴️ <b>Prestamista</b>: en la trastienda te presta dinero, a devolver con un 50 % más al ganar al rival de la noche. Si entonces no puedes pagar, pierdes la partida.<br>⏭️ <b>Saltar mesa</b>: las mesas 1 y 2 se pueden saltar a cambio de una recompensa, sin cobro ni trastienda.<br>🔖 <b>Sellos</b>: algunas cartas llevan un sello que actúa aunque se quede en tu mano.</p>'+
   '<p>Supera la Noche 8 para ganar. Cada victoria desbloquea una <b>apuesta</b> más difícil, y al jugar desbloqueas amuletos y barajas nuevas (Récords → Colección).</p><button class="btn y" data-a="close">¡Entendido!</button>');
 }
 
@@ -1398,7 +1734,7 @@ document.addEventListener('click',e=>{
     case 'am':sheetAm(i);break;
     case 'moveam':{if(busy)break;const d=Number(b.dataset.d),j=i+d;if(j<0||j>=S.amulets.length)break;[S.amulets[i],S.amulets[j]]=[S.amulets[j],S.amulets[i]];save();render();sheetAm(j);break}
     case 'sc':sheetSc(i);break;
-    case 'sellam':{if(busy)break;S.money+=Math.floor(amPrice(S.amulets[i])/2);S.amulets.splice(i,1);closeSheet();SFX.coin();save();render();break}
+    case 'sellam':{if(busy)break;const a=S.amulets[i];S.money+=sellValue(a);S.amulets.splice(i,1);S.sold=(S.sold||0)+1;fire('sell',a);closeSheet();SFX.coin();save();render();break}
     case 'sellsc':if(busy)break;S.money+=1;S.scrolls.splice(i,1);closeSheet();save();render();break;
     case 'usesc':useScroll(i);break;
     case 'boss':{const bo=bossOf(S.night);sheet('<div class="sign"><div class="neon">'+BOSSES[bo.k].e+' '+BOSSES[bo.k].n+'</div><small>'+bossDesc(bo)+'</small></div><button class="btn dark" data-a="close">Cerrar</button>');break}
@@ -1413,7 +1749,7 @@ document.addEventListener('click',e=>{
     case 'cobrar':cobrar();break;
     case 'buy':buy(b.dataset.k,i);break;
     case 'vale':buyVale();break;
-    case 'reroll':{const sh=S.shop;const c=sh.free?0:sh.rr;if(S.money<c){toast('No te llega el dinero.');break}S.money-=c;if(sh.free)sh.free=false;else sh.rr++;rollShop();save();render();break}
+    case 'reroll':{const sh=S.shop;const c=rerollCost();if(S.money<c){toast('No te llega el dinero.');break}S.money-=c;if(sh.free)sh.free=false;else sh.rr++;rollShop();save();render();break}
     case 'next':nextMesa();break;
     case 'pick':pickPack(i);break;
     case 'skip':S.phase=(S.pack&&S.pack.ret)||'shop';S.pack=null;save();render();break;
