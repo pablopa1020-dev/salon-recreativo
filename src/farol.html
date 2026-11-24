@@ -258,6 +258,23 @@ h1,h2,h3{font-family:var(--display);font-weight:700;margin:0;text-wrap:balance;l
 .vale .ve{font-size:36px;width:56px;height:56px;display:grid;place-items:center;background:#2b1408;border-radius:10px;flex:none;border:2px solid var(--edge)}
 .vale h4{margin:0 0 3px;font-family:var(--display);font-size:12px;color:var(--amber)}
 .vale p{margin:0;font-size:13px;line-height:1.3}
+.card .seal{position:absolute;left:5%;top:40%;width:calc(var(--cw)*.27);aspect-ratio:1;border-radius:50%;z-index:2;
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.75),transparent 45%),var(--sc);border:2px solid var(--edge);box-shadow:inset 0 0 0 2px rgba(0,0,0,.18)}
+.bluffbtn{position:absolute;top:4px;right:5px;font-family:var(--display);font-size:9px;padding:3px 6px;border-radius:7px;border:2px solid var(--edge);background:#2a1036;color:var(--amber);box-shadow:0 2px 0 var(--edge);z-index:3}
+.bluffbtn.on{background:var(--amber);color:var(--ink);animation:flicker 3s infinite}
+.debt{display:block;font-family:var(--display);font-size:8px;color:var(--red);text-align:right;margin-top:2px}
+.skipbtn{display:flex;align-items:center;gap:8px;justify-content:space-between;border-top:2px dashed #4a2a62;padding-top:7px;margin-top:2px}
+.skipbtn span{font-size:13px;color:#f0e4ff}
+.loan{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:9px;border:3px dashed var(--red);border-radius:12px;background:#1d0710}
+.loan h4{margin:0;font-family:var(--display);font-size:12px;color:var(--red);width:100%}
+.loan p{margin:0;font-size:13px;width:100%;line-height:1.3}
+.tile.stake{flex-direction:row;gap:10px;align-items:center;text-align:left}
+.stake .sn{font-family:var(--digits);font-size:34px;width:40px;text-align:center;color:var(--amber);flex:none}
+.locked{opacity:.45;filter:grayscale(.8)}
+.lockreq{font-size:12px;color:var(--amber)}
+.coll{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.coll .jc{--jh:96px}
+.coll .jc.locked .art span{filter:brightness(0)}
 .cobro-l{opacity:0;transform:translateX(-14px);transition:opacity .25s,transform .25s}
 .cobro-l.in{opacity:1;transform:none}
 
@@ -390,6 +407,10 @@ const AM={
   racha:{n:'Racha',p:7,e:'🔥',d:'Gana ×0,25 Multi cada vez que repites el tipo de mano anterior. Si cambias, vuelve a ×1. Ahora: ×{x} Multi.',
     hand:(a,x,h)=>{a.x=S.lastType===x.k?(a.x||1)+0.25:1;if(a.x>1)h.x(a.x)}},
   solista:{n:'Solista',p:6,e:'🎤',d:'×4 Multi si juegas una sola carta.',hand:(a,x,h)=>{if(x.played.length===1)h.x(4)}},
+  album:{n:'Álbum de cromos',p:6,e:'📔',d:'Gana +1 Multi cada vez que puntúa una carta grabada. Ahora: +{m} Multi.',card:(a,x,h,c)=>{if(c.enh)a.m=(a.m||0)+1},hand:(a,x,h)=>{if(a.m)h.m(a.m)}},
+  equilibrista:{n:'Equilibrista',p:5,e:'🤹',d:'Al ganar una mesa, gana +6 Fichas por cada descarte que no hayas usado. Ahora: +{c} Fichas.',hand:(a,x,h)=>{if(a.c)h.c(a.c)}},
+  tahur:{n:'Tahúr de feria',p:6,e:'🎲',d:'Gana +2 Multi cada vez que ganas un farol y pierde 2 cuando lo fallas. Ahora: +{m} Multi.',hand:(a,x,h)=>{if(a.m>0)h.m(a.m)}},
+  manofirme:{n:'Mano firme',p:7,e:'✋',d:'Gana ×0,2 Multi cada vez que ganas una mesa sin descartar. Ahora: ×{x} Multi.',hand:(a,x,h)=>{if((a.x||1)>1)h.x(a.x)}},
   pirata:{n:'Loro pirata',p:6,e:'🦜',d:'+2 Multi por cada licor que hayas bebido en la partida. Ahora: +{l} Multi.',hand:(a,x,h)=>{if(S.drinks)h.m(2*S.drinks)}},
   mago:{n:'Aprendiz de mago',p:5,e:'🪄',d:'Al ganar una mesa, crea un pergamino al azar si tienes hueco.'}
 };
@@ -400,9 +421,16 @@ const EDS={
   prisma:{n:'Prisma',p:5,d:'Edición Prisma: ×1,4 Multi.'},
   fantasma:{n:'Fantasma',p:5,d:'Edición Fantasma: no ocupa hueco de amuleto.'}
 };
+/* seals: a second slot on a card, with effects that also work while the card stays in your hand */
+const SEALS={
+  plata:{n:'Plata',d:'Si se queda en la mano cuando juegas: +3 Multi.',c:'#d6dde8'},
+  plomo:{n:'Plomo',d:'Si se queda en la mano cuando juegas: +25 Fichas.',c:'#6f7886'},
+  lacre:{n:'Lacre',d:'Al descartarla: +$1.',c:'#c43b2e'},
+  carmin:{n:'Carmín',d:'Al puntuar, su tipo de mano avanza un paso más hacia el siguiente nivel.',c:'#e0156a'}
+};
 const rar=p=>p<=5?'r1':p===6?'r2':'r3';
 const rarN={r1:'Común',r2:'Rara',r3:'Legendaria'};
-const amDesc=a=>AM[a.k].d.replace('{c}',a.c||0).replace('{x}',fm(a.x||1)).replace('{l}',2*((S&&S.drinks)||0))+(a.ed?' '+EDS[a.ed].d:'');
+const amDesc=a=>AM[a.k].d.replace('{c}',a.c||0).replace('{m}',a.m||0).replace('{x}',fm(a.x||1)).replace('{l}',2*((S&&S.drinks)||0))+(a.ed?' '+EDS[a.ed].d:'');
 const amPrice=a=>AM[a.k].p+(a.ed?EDS[a.ed].p:0);
 
 const SC={
@@ -421,6 +449,10 @@ const SC={
   cuaderno:{n:'Cuaderno de apuntes',p:3,e:'📓',need:0,d:'+1 nivel a la mano que más veces has jugado.',
     use:()=>{let best='alta',t=-1;HTK.forEach(k=>{if(S.levels[k].t>t){t=S.levels[k].t;best=k}});S.levels[best].l++;toast(HT[best].n+' sube a nivel '+S.levels[best].l)}},
   bolsa:{n:'Bolsa de monedas',p:3,e:'👛',need:0,d:'Duplica tu dinero (máximo +$15).',use:()=>{S.money+=Math.min(15,S.money)}},
+  s_plata:{n:'Sello de plata',p:3,e:'🥈',need:[1,1],d:'Pone un Sello de plata a 1 carta: si se queda en la mano cuando juegas, +3 Multi.',use:cs=>cs.forEach(c=>c.seal='plata')},
+  s_plomo:{n:'Sello de plomo',p:3,e:'🔩',need:[1,1],d:'Pone un Sello de plomo a 1 carta: si se queda en la mano cuando juegas, +25 Fichas.',use:cs=>cs.forEach(c=>c.seal='plomo')},
+  s_lacre:{n:'Sello de lacre',p:3,e:'🧧',need:[1,2],d:'Pone un Sello de lacre a hasta 2 cartas: +$1 cada vez que las descartas.',use:cs=>cs.forEach(c=>c.seal='lacre')},
+  s_carmin:{n:'Sello carmín',p:3,e:'💋',need:[1,1],d:'Pone un Sello carmín a 1 carta: al puntuar, su mano avanza un paso más hacia el siguiente nivel.',use:cs=>cs.forEach(c=>c.seal='carmin')},
   invocacion:{n:'Invocación',p:4,e:'✨',need:0,d:'Crea un amuleto al azar. Necesita un hueco libre.',
     check:()=>amFree()?'':'No tienes huecos de amuleto libres.',use:()=>{const k=randAmulet([]);S.amulets.push({k});toast('Aparece: '+AM[k].n)}}
 };
@@ -460,8 +492,9 @@ const VALES={
   cortesia:{n:'Cortesía de la casa',req:'cambista',e:'🎁',d:'El primer cambio de género de cada trastienda es gratis.'}
 };
 const VALE_P=10;
+const valePrice=()=>S&&S.freeVale===S.night?0:price(VALE_P);
 const hasV=k=>!!(S&&S.vales&&S.vales.includes(k));
-const disc=()=>hasV('honor')?0.5:hasV('socio')?0.25:0;
+const disc=()=>Math.min(.75,(hasV('honor')?0.5:hasV('socio')?0.25:0)+(S&&S.shop&&S.shop.sale?0.5:0));
 const price=p=>Math.max(1,Math.round(p*(1-disc())));
 const BOSSES={
   contable:{n:'El Contable',e:'🧮',d:'Cada mano que juegas te cuesta $1.'},
@@ -486,6 +519,34 @@ const DECKS={
   mecenas:{n:'Del Mecenas',e:'🎭',d:'Empiezas con un amuleto al azar, pero solo tienes 4 huecos de amuleto.',apply(){S.maxAm=4;S.amulets=[{k:randAmulet([])}]}},
   borracha:{n:'Borracha',e:'🍻',d:'Empiezas con 2 licores bebidos al azar, pero solo tienes 1 hueco de consumible.',apply(){S.maxSc=1;for(let i=0;i<2;i++)con(randLic()).use()}}
 };
+/* rewards for skipping table 1 or 2 of a night */
+const SKIPS={
+  dinero:{e:'💵',n:'+$8 al momento',use(){S.money+=8}},
+  sobre:{e:'🎁',n:'Un sobre gratis ahora mismo',use(){openPack(rnd(Object.keys(PK)));S.pack.ret='previa'}},
+  rebaja:{e:'🏷️',n:'La próxima trastienda, a mitad de precio',use(){S.sale=true}},
+  edicion:{e:'✨',n:'El primer amuleto de la próxima trastienda sale con edición especial',use(){S.nextEd=true}},
+  licores:{e:'🍸',n:'Dos manos al azar suben un nivel',use(){shuffle(HTK.slice(0,9)).slice(0,2).forEach(k=>S.levels[k].l++)}},
+  vale:{e:'🎫',n:'El vale de esta noche te sale gratis',use(){S.freeVale=S.night}}
+};
+/* difficulty levels: each one keeps the previous changes */
+const STAKES=[null,
+  {n:'Calderilla',d:'La partida normal.'},
+  {n:'Billetes',d:'Los objetivos suben un 25 %.'},
+  {n:'Fajos',d:'Las mesas 1 y 2 pagan $1 menos.'},
+  {n:'Maletín',d:'El interés máximo baja $2.'},
+  {n:'Caja B',d:'Un descarte menos en cada mesa.'},
+  {n:'Alta sociedad',d:'Los objetivos suben otro 25 %.'},
+  {n:'Mesa VIP',d:'Los amuletos cuestan $1 más.'},
+  {n:'Todo o nada',d:'Una mano menos en cada mesa.'}];
+const stk=n=>(S&&S.stake||1)>=n;
+/* unlocks, earned with feats tracked across games */
+const LOCKS={
+  deck:{grabada:{d:'Gana una partida.',ok:r=>r.wins>=1},mecenas:{d:'Llega a la noche 5.',ok:r=>r.bestNight>=5},
+    borracha:{d:'Bébete 15 licores en total.',ok:r=>r.drinks>=15},pesada:{d:'Consigue una mano de 5.000 puntos.',ok:r=>r.bestHand>=5000}},
+  am:{espejo:{d:'Llega a la noche 4.',ok:r=>r.bestNight>=4},racha:{d:'Juega 60 manos en total.',ok:r=>r.hands>=60},faro:{d:'Gana 12 mesas en total.',ok:r=>r.mesas>=12},
+    vitrina:{d:'Ten 5 amuletos a la vez.',ok:r=>r.maxAm>=5},pirata:{d:'Bébete 8 licores en total.',ok:r=>r.drinks>=8},mago:{d:'Usa 10 pergaminos en total.',ok:r=>r.scrolls>=10},
+    tahur:{d:'Gana 3 faroles en total.',ok:r=>r.faroles>=3},manofirme:{d:'Gana 6 mesas en total.',ok:r=>r.mesas>=6},album:{d:'Usa 4 pergaminos en una sola partida.',ok:r=>r.scrollsRun>=4}}
+};
 const NIGHT_BASE=[250,700,1600,3600,8000,16000,30000,55000];
 const MESAS=[{n:'Mesa del rincón',e:'🪑',x:1,r:3},{n:'Mesa principal',e:'🎰',x:1.5,r:4}];
 
@@ -498,13 +559,26 @@ function loadSave(){try{const t=localStorage.getItem(KEY);return t?migrate(JSON.
 function clearSave(){try{localStorage.removeItem(KEY)}catch(e){}}
 try{const c=JSON.parse(localStorage.getItem(CKEY)||'null');if(c)CFG=Object.assign(CFG,c)}catch(e){}
 function saveCfg(){try{localStorage.setItem(CKEY,JSON.stringify(CFG))}catch(e){}}
-function loadRec(){try{return Object.assign({runs:0,wins:0,bestNight:0,bestHand:0,bestHandName:'',history:[]},JSON.parse(localStorage.getItem(RKEY)||'{}'))}catch(e){return {runs:0,wins:0,bestNight:0,bestHand:0,bestHandName:'',history:[]}}}
+const REC0={runs:0,wins:0,bestNight:0,bestHand:0,bestHandName:'',history:[],stakeMax:1,drinks:0,scrolls:0,scrollsRun:0,hands:0,mesas:0,faroles:0,maxAm:0,seen:[]};
+function loadRec(){try{return Object.assign({},REC0,JSON.parse(localStorage.getItem(RKEY)||'{}'))}catch(e){return Object.assign({},REC0)}}
 function saveRec(r){try{localStorage.setItem(RKEY,JSON.stringify(r))}catch(e){}}
+let REC=loadRec();
+const okAm=k=>!LOCKS.am[k]||LOCKS.am[k].ok(REC);
+const okDeck=k=>!LOCKS.deck[k]||LOCKS.deck[k].ok(REC);
+function recBump(fn){fn(REC);saveRec(REC);checkUnlocks()}
+function checkUnlocks(quiet){
+  const news=[];
+  for(const [k,l] of Object.entries(LOCKS.deck))if(l.ok(REC)&&!REC.seen.includes('d:'+k)){REC.seen.push('d:'+k);news.push('baraja '+DECKS[k].n)}
+  for(const [k,l] of Object.entries(LOCKS.am))if(l.ok(REC)&&!REC.seen.includes('a:'+k)){REC.seen.push('a:'+k);news.push(AM[k].n)}
+  if(news.length){saveRec(REC);if(!quiet){toast('¡Desbloqueado: '+news.join(', ')+'!');SFX.win()}}
+}
 function recordRun(win){
-  const r=loadRec(),again=!!S.recorded;S.recorded=true;
+  const r=REC,again=!!S.recorded;S.recorded=true;
   if(!again){r.runs++;if(win)r.wins++}r.bestNight=Math.max(r.bestNight,S.night);
   if(S.stats.best>r.bestHand){r.bestHand=S.stats.best;r.bestHandName=S.stats.bestName}
-  if(!again)r.history.unshift({d:new Date().toISOString().slice(0,10),deck:S.deck,night:S.night,win:!!win,best:S.stats.best});r.history=r.history.slice(0,12);saveRec(r);
+  if(win&&(S.stake||1)>=r.stakeMax&&r.stakeMax<8){r.stakeMax=(S.stake||1)+1;setTimeout(()=>toast('¡Nueva apuesta desbloqueada: '+STAKES[r.stakeMax].n+'!'),1500)}
+  if(!again)r.history.unshift({d:new Date().toISOString().slice(0,10),deck:S.deck,night:S.night,win:!!win,best:S.stats.best,stake:S.stake||1});r.history=r.history.slice(0,12);
+  saveRec(r);checkUnlocks();
 }
 /* old saves (v1/v2) get the new fields; nothing is discarded */
 function migrate(s){
@@ -515,7 +589,8 @@ function migrate(s){
   if(!s.stats)s.stats={best:0,bestName:'',hands:0};
   if(s.shop){if(!s.shop.cd)s.shop.cd=[];if(s.shop.free===undefined)s.shop.free=false}
   if(s.pack&&s.pack.left===undefined)s.pack.left=1;
-  s.v=3;return s;
+  if(!s.stake)s.stake=1;if(!s.debt)s.debt=0;if(s.bluff===undefined)s.bluff=null;if(!s.skips)s.skips={};if(s.scrollsRun===undefined)s.scrollsRun=0;
+  s.v=4;return s;
 }
 
 const C=id=>S.cards.find(c=>c.id===id);
@@ -523,7 +598,7 @@ const has=k=>S.amulets.filter(a=>a.k===k).length;
 const amUsed=()=>S.amulets.filter(a=>a.ed!=='fantasma').length;
 const amFree=()=>amUsed()<S.maxAm;
 function randAmulet(excl){
-  const pool=Object.keys(AM).filter(k=>!excl.includes(k)&&!S.amulets.some(a=>a.k===k));
+  const pool=Object.keys(AM).filter(k=>okAm(k)&&!excl.includes(k)&&!S.amulets.some(a=>a.k===k));
   const list=pool.length?pool:Object.keys(AM);
   const w=list.map(k=>1/AM[k].p**1.5);let t=w.reduce((a,b)=>a+b,0)*Math.random();
   for(let i=0;i<list.length;i++){t-=w[i];if(t<=0)return list[i]}return list[0];
@@ -532,8 +607,8 @@ const randEd=()=>Math.random()<0.1?rnd(['charol','charol','neon','neon','prisma'
 const randScroll=()=>rnd(Object.keys(SC));
 const randCon=()=>Math.random()<0.45?randLic():randScroll();
 
-function newRun(deck){
-  S={v:3,deck,night:1,mesa:0,money:4,amulets:[],scrolls:[],maxAm:5,maxSc:2,baseHand:8,baseHands:4,baseDisc:3,interestCap:5,drinks:0,vales:[],vale:null,
+function newRun(deck,stake){
+  S={v:4,stake:stake||1,debt:0,bluff:null,skips:{},scrollsRun:0,deck,night:1,mesa:0,money:4,amulets:[],scrolls:[],maxAm:5,maxSc:2,baseHand:8,baseHands:4,baseDisc:3,interestCap:5,drinks:0,vales:[],vale:null,
     levels:{},cards:[],nid:1,phase:'previa',bosses:[],endless:false,sort:'rank',hand:[],draw:[],sel:[],fd:[],played:[],
     stats:{best:0,bestName:'',hands:0},lastType:null};
   for(const s of 'hdcs')for(let r=2;r<=14;r++)S.cards.push({id:S.nid++,r,s,enh:null,b:0});
@@ -554,13 +629,13 @@ const curBoss=()=>S.mesa===2?bossOf(S.night).k:null;
 const shadow=()=>curBoss()==='sombra'?bossOf(S.night).s:null;
 const bossDesc=b=>BOSSES[b.k].d.replace('{s}',G[b.s]+' '+SUITN[b.s]);
 function nightBase(n){if(n<=8)return NIGHT_BASE[n-1];return Math.round(NIGHT_BASE[7]*Math.pow(1.9,n-8)/100)*100}
-function targetFor(n,m){const x=m<2?MESAS[m].x:(BOSSES[bossOf(n).k].x||2);return Math.round(nightBase(n)*x/10)*10}
-const rewardFor=m=>m<2?MESAS[m].r:5;
+function targetFor(n,m){const x=m<2?MESAS[m].x:(BOSSES[bossOf(n).k].x||2);const k=1+(stk(2)?.25:0)+(stk(6)?.25:0);return Math.round(nightBase(n)*x*k/10)*10}
+const rewardFor=m=>m<2?MESAS[m].r-(stk(3)?1:0):5;
 const mesaName=(n,m)=>m<2?MESAS[m].n:BOSSES[bossOf(n).k].n;
 const mesaEmoji=(n,m)=>m<2?MESAS[m].e:BOSSES[bossOf(n).k].e;
 function handSize(){return Math.max(3,S.baseHand+has('bolsillo')-(curBoss()==='marea'?2:0))}
-function handsPer(){return Math.max(1,S.baseHands+has('marinero')-(['verdugo','banca'].includes(curBoss())?1:0))}
-function discPer(){return S.baseDisc+has('escoba')}
+function handsPer(){return Math.max(1,S.baseHands+has('marinero')-(['verdugo','banca'].includes(curBoss())?1:0)-(stk(8)?1:0))}
+function discPer(){return Math.max(0,S.baseDisc+has('escoba')-(stk(5)?1:0))}
 
 function startMesa(){
   S.draw=shuffle(S.cards.map(c=>c.id));S.hand=[];S.sel=[];S.fd=[];S.played=[];S.score=0;
@@ -607,7 +682,7 @@ function evaluate(cards){
 function baseOf(k){const t=HT[k],L=S.levels[k].l;return {c:t.c+(L-1)*t.dc,m:t.m+(L-1)*t.dm,l:L}}
 function computeScore(played){
   const ev=evaluate(played),b=baseOf(ev.k);
-  const st={c:b.c,m:b.m},steps=[],broken=[];let money=0,ref=null;
+  const st={c:b.c,m:b.m},steps=[],broken=[];let money=0,ref=null,extra=0;
   const P=(txt,cls)=>steps.push({ref,txt,cls,c:st.c,m:st.m});
   const h={c:v=>{st.c+=v;P('+'+v,'c')},m:v=>{st.m+=v;P('+'+v+' Multi','m')},x:v=>{st.m*=v;P('×'+fm(v)+' Multi','x')},$:v=>{money+=v;P('+$'+v,'$')}};
   const x={ev,played,k:ev.k};
@@ -625,13 +700,15 @@ function computeScore(played){
       if(c.enh==='oro')h.$(1);
       if(amOn)S.amulets.forEach((a,i)=>{const d=AM[a.k];if(d.card){ref={t:'am',i};d.card(a,x,h,c)}});
     }
+    if(c.seal==='carmin')extra++;
     if(c.enh==='vidrio'&&Math.random()<0.2){broken.push(c.id);ref={t:'card',id:c.id};P('¡Se rompe!','off')}
   });
+  S.hand.forEach(id=>{const c=C(id);if(!c||!c.seal||S.fd.includes(id))return;ref={t:'held',id};if(c.seal==='plata')h.m(3);else if(c.seal==='plomo')h.c(25)});
   if(amOn)S.amulets.forEach((a,i)=>{const d=AM[a.k];ref={t:'am',i};
     if(a.ed==='charol')h.c(35);else if(a.ed==='neon')h.m(6);else if(a.ed==='prisma')h.x(1.4);
     if(d.hand)d.hand(a,x,h)});
   if(curBoss()==='juez'&&S.playedTypes[ev.k]){ref={t:'boss'};h.x(0.5)}
-  return {k:ev.k,sc:ev.sc,lvl:b.l,base:b,steps,total:Math.floor(st.c*st.m),money,broken};
+  return {k:ev.k,sc:ev.sc,lvl:b.l,base:b,steps,total:Math.floor(st.c*st.m),money,broken,extra};
 }
 
 /* ---------- actions ---------- */
@@ -655,8 +732,13 @@ async function playHand(){
   await animate(R);
   S.score+=R.total;S.money+=R.money;
   if(R.broken.length){S.cards=S.cards.filter(c=>!R.broken.includes(c.id))}
-  const lv=S.levels[R.k];lv.p++;lv.t++;
-  let lvUp=false;if(lv.p>=needPlays(lv.l)){lv.p=0;lv.l++;lvUp=true}
+  const lv=S.levels[R.k];lv.p+=1+(R.extra||0);lv.t++;
+  let lvUp=false;while(lv.p>=needPlays(lv.l)){lv.p-=needPlays(lv.l);lv.l++;lvUp=true}
+  let bluffMsg='',bluffWon=false;
+  if(S.bluff){const bf=S.bluff;S.bluff=null;
+    if(R.total>=bf.need){bluffWon=true;S.money+=bf.stake*3;bluffMsg='¡Farol ganado! +$'+bf.stake*3;S.amulets.forEach(a=>{if(a.k==='tahur')a.m=(a.m||0)+2})}
+    else{bluffMsg='Farol perdido: -$'+bf.stake;S.amulets.forEach(a=>{if(a.k==='tahur')a.m=Math.max(0,(a.m||0)-2)})}}
+  recBump(r=>{r.hands++;if(bluffWon)r.faroles++;if(R.total>r.bestHand){r.bestHand=R.total;r.bestHandName=HT[R.k].n}});
   S.lastType=R.k;S.playedTypes[R.k]=1;S.handNo++;S.handsLeft--;S.stats.hands++;
   if(R.total>S.stats.best){S.stats.best=R.total;S.stats.bestName=HT[R.k].n}
   for(let i=0;i<has('presti');i++){if(S.hand.length){const c=C(rnd(S.hand));c.b=(c.b||0)+6}}
@@ -665,7 +747,8 @@ async function playHand(){
   if(won)winMesa(false,true);
   else if(S.handsLeft>0){drawUp();if(S.hand.length)save()}
   await countTo(S.score);
-  if(lvUp)toast(HT[R.k].n+' sube a nivel '+lv.l);
+  if(bluffMsg){toast(bluffMsg);if(bluffWon){SFX.win();burstAt($('#bluffBtn')||$('#pTotal'),40,['#ffb627','#fff'])}else SFX.no()}
+  else if(lvUp)toast(HT[R.k].n+' sube a nivel '+lv.l);
   if(won){await celebrate('¡Mesa<br>ganada!');busy=false;return render()}
   if(S.handsLeft<=0||!S.hand.length)return loseOrSave();
   busy=false;render();
@@ -682,6 +765,7 @@ async function discard(){
   busy=true;
   const ids=selOrdered(),cs=ids.map(C);
   await tossAway(ids);
+  const lac=cs.filter(c=>c.seal==='lacre').length;if(lac){S.money+=lac;toast('Lacre: +$'+lac);SFX.coin()}
   const faces=cs.filter(c=>c.r>=11&&c.r<=13).length*has('contrabandista');
   if(faces){S.money+=faces;toast('Contrabandista: +$'+faces);SFX.coin()}
   S.amulets.forEach(a=>{if(a.k==='vela')a.x=(a.x||1)+0.15*ids.length});
@@ -692,12 +776,19 @@ async function discard(){
 function winMesa(saved,quiet){
   const lines=[[saved?'Mesa salvada':'Mesa superada',rewardFor(S.mesa)]];
   if(S.handsLeft>0)lines.push(['Manos sin usar ('+S.handsLeft+')',S.handsLeft]);
-  const cap=S.interestCap+5*has('usurero'),per=hasV('acorazada')?4:5,it=Math.min(cap,Math.floor(S.money/per));
+  S.amulets.forEach(a=>{if(a.k==='equilibrista')a.c=(a.c||0)+6*S.discLeft;if(a.k==='manofirme'&&S.discLeft>=discPer())a.x=(a.x||1)+0.2});
+  const cap=Math.max(1,S.interestCap+5*has('usurero')-(stk(4)?2:0)),per=hasV('acorazada')?4:5,it=Math.min(cap,Math.floor(Math.max(0,S.money)/per));
   if(it>0)lines.push(['Interés ($1 por cada $'+per+', máx. $'+cap+')',it]);
   const hu=has('hucha');if(hu)lines.push(['Hucha de barro',3*hu]);
   for(let i=0;i<has('mago');i++)if(S.scrolls.length<S.maxSc)S.scrolls.push(randScroll());
+  if(S.mesa===2&&S.debt>0){
+    const pos=lines.reduce((a,l)=>a+l[1],0),pay=Math.min(S.debt,Math.max(0,S.money+pos));
+    if(pay>0)lines.push(['Pago al prestamista',-pay]);
+    S.debt-=pay;if(S.debt>0){S.debt=Math.ceil(S.debt*1.25);lines.push(['Te queda por pagar (con recargo): $'+S.debt,0])}
+  }
   S.cobro={lines,total:lines.reduce((a,l)=>a+l[1],0)};
-  S.hand=[];S.sel=[];S.fd=[];S.played=[];
+  S.hand=[];S.sel=[];S.fd=[];S.played=[];S.bluff=null;
+  recBump(r=>r.mesas++);
   if(S.mesa===2&&S.night===8&&!S.endless){S.phase='win';recordRun(true)}
   else S.phase='cobro';
   save();if(!quiet)render();
@@ -708,13 +799,16 @@ function pickVale(){
   return pool.length?rnd(pool):null;
 }
 function genShop(){
-  S.shop={rr:Math.max(0,3-(hasV('cambista')?2:0)),free:hasV('cortesia'),am:[],sc:[],pk:[],cd:[]};rollShop();
+  S.shop={rr:Math.max(0,3-(hasV('cambista')?2:0)),free:hasV('cortesia'),sale:!!S.sale,am:[],sc:[],pk:[],cd:[]};S.sale=false;rollShop();
+  if(S.nextEd){S.shop.am[0].ed=rnd(['charol','neon','prisma','fantasma']);S.nextEd=false}
   const pks=Object.keys(PK);S.shop.pk=[{k:rnd(pks),sold:false},{k:rnd(pks),sold:false}];
   if(!S.vale||S.vale.night!==S.night){const k=pickVale();S.vale=k?{night:S.night,k,sold:false}:null}
 }
 function randShopCard(){
   const ks=Object.keys(ENH),enh=Math.random()<0.35?rnd(ks):null;
-  return {c:{r:2+Math.floor(Math.random()*13),s:rnd(['h','d','c','s']),enh,b:0},p:enh?4:2};
+  const seal=Math.random()<0.15?rnd(Object.keys(SEALS)):null;
+  const c={r:2+Math.floor(Math.random()*13),s:rnd(['h','d','c','s']),enh,b:0};if(seal)c.seal=seal;
+  return {c,p:2+(enh?2:0)+(seal?1:0)};
 }
 function rollShop(){
   const a1=randAmulet([]),a2=randAmulet([a1]);
@@ -723,7 +817,7 @@ function rollShop(){
   S.shop.cd=[0,1].map(()=>Object.assign(randShopCard(),{sold:false}));
 }
 function itemPrice(kind,it){
-  if(kind==='am')return price(amPrice(it));
+  if(kind==='am')return price(amPrice(it)+(stk(7)?1:0));
   if(kind==='sc')return price(con(it.k).p);
   if(kind==='cd')return price(it.p);
   return price(PK[it.k].p);
@@ -735,14 +829,14 @@ function buy(kind,i){
   if(kind==='am'&&it.ed!=='fantasma'&&!amFree()){SFX.no();return toast('No te quedan huecos de amuleto. Vende uno primero.')}
   if(kind==='sc'&&S.scrolls.length>=S.maxSc){SFX.no();return toast('No te quedan huecos de consumible.')}
   S.money-=p;it.sold=true;SFX.coin();
-  if(kind==='am')S.amulets.push(it.ed?{k:it.k,ed:it.ed}:{k:it.k});
+  if(kind==='am'){S.amulets.push(it.ed?{k:it.k,ed:it.ed}:{k:it.k});recBump(r=>r.maxAm=Math.max(r.maxAm,S.amulets.length))}
   else if(kind==='sc')S.scrolls.push(it.k);
   else if(kind==='cd'){S.cards.push(Object.assign({},it.c,{id:S.nid++}));toast('Carta añadida a tu baraja')}
   else openPack(it.k);
   save();render();
 }
 function buyVale(){
-  const v=S.vale;if(!v||v.sold)return;const p=price(VALE_P);
+  const v=S.vale;if(!v||v.sold)return;const p=valePrice();
   if(S.money<p){SFX.no();return toast('No te llega el dinero.')}
   S.money-=p;v.sold=true;S.vales.push(v.k);const d=VALES[v.k];if(d.apply)d.apply();
   if(v.k==='bodega'&&S.shop)S.shop.sc.push({k:randCon(),sold:false});
@@ -755,23 +849,42 @@ function openPack(k){
   if(k==='perg')opts=Array.from({length:size},randScroll);
   else if(k==='lic'){const s=shuffle(HTK.slice(0,9));opts=s.slice(0,size).map(h=>'l:'+h)}
   else if(k==='amul'){opts=[];for(let i=0;i<size;i++)opts.push(randAmulet(opts))}
-  else{const ks=Object.keys(ENH);opts=Array.from({length:size},()=>({r:2+Math.floor(Math.random()*13),s:rnd(['h','d','c','s']),enh:rnd(ks),b:0}))}
+  else{const ks=Object.keys(ENH);opts=Array.from({length:size},()=>{const c={r:2+Math.floor(Math.random()*13),s:rnd(['h','d','c','s']),enh:rnd(ks),b:0};if(Math.random()<0.2)c.seal=rnd(Object.keys(SEALS));return c})}
   S.pack={k,opts,left:hasV('doblesobre')&&k!=='amul'?2:1};S.phase='pack';
 }
 function pickPack(i){
   const p=S.pack,o=p.opts[i];if(o==null)return;
   if(p.k==='perg'){if(S.scrolls.length>=S.maxSc){SFX.no();return toast('No te quedan huecos de consumible.')}S.scrolls.push(o)}
-  else if(p.k==='lic')con(o).use();
+  else if(p.k==='lic'){con(o).use();recBump(r=>r.drinks++)}
   else if(p.k==='amul'){if(!amFree()){SFX.no();return toast('No te quedan huecos de amuleto.')}S.amulets.push({k:o})}
   else S.cards.push(Object.assign({},o,{id:S.nid++}));
   SFX.coin();
   p.opts[i]=null;p.left--;
-  if(p.left<=0||p.opts.every(x=>x==null)){S.pack=null;S.phase='shop'}
+  if(p.k==='amul')recBump(r=>r.maxAm=Math.max(r.maxAm,S.amulets.length));
+  if(p.left<=0||p.opts.every(x=>x==null)){S.phase=p.ret||'shop';S.pack=null}
   save();render();
 }
+function skipMesa(){
+  if(busy||S.mesa>1)return;
+  const k=skipOf(S.night,S.mesa);S.mesa++;SKIPS[k].use();
+  if(S.phase!=='pack')S.phase='previa';
+  SFX.coin();toast('Mesa saltada: '+SKIPS[k].n);save();render();
+}
+function skipOf(n,m){S.skips=S.skips||{};const k=n+'-'+m;if(!S.skips[k])S.skips[k]=rnd(Object.keys(SKIPS));return S.skips[k]}
+function bluffNeed(){return Math.max(10,Math.round((S.target-S.score)/Math.max(1,S.handsLeft)*1.2/10)*10)}
+function setBluff(v){
+  if(S.bluff){S.money+=S.bluff.stake;S.bluff=null}
+  if(v>0){if(S.money<v){SFX.no();return toast('No te llega el dinero.')}S.money-=v;S.bluff={stake:v,need:bluffNeed()};SFX.coin()}
+  closeSheet();save();render();
+}
+function takeLoan(v){
+  if(S.debt>0)return toast('Ya debes dinero al prestamista.');
+  S.money+=v;S.debt=Math.ceil(v*1.5);SFX.coin();toast('El prestamista te da $'+v+'. Le debes $'+S.debt+'.');closeSheet();save();render();
+}
+function payLoan(){if(S.money<S.debt)return toast('No te llega para pagar la deuda entera.');S.money-=S.debt;S.debt=0;SFX.coin();toast('Deuda saldada.');closeSheet();save();render()}
 function nextMesa(){
   if(S.mesa<2)S.mesa++;
-  else{S.mesa=0;S.night++;S.amulets.forEach(a=>{if(a.k==='vela')a.x=1})}
+  else{S.mesa=0;S.night++;S.amulets.forEach(a=>{if(a.k==='vela')a.x=1});recBump(r=>r.bestNight=Math.max(r.bestNight,S.night))}
   S.shop=null;S.phase='previa';save();render();
 }
 async function useScroll(i){
@@ -786,6 +899,7 @@ async function useScroll(i){
   closeSheet();busy=true;
   await consumeFx(d);
   if(cs){d.use(cs);S.fd=S.fd.filter(id=>!cs.some(c=>c.id===id));S.sel=[];sortHand()}else d.use();
+  if(!isLic(k)){S.scrollsRun=(S.scrollsRun||0)+1;recBump(r=>{r.scrolls++;r.scrollsRun=Math.max(r.scrollsRun,S.scrollsRun)})}else recBump(r=>r.drinks++);
   S.scrolls.splice(i,1);save();busy=false;render();
 }
 
@@ -908,6 +1022,7 @@ function findRef(r){
   if(r.t==='card')return app.querySelector('.table [data-id="'+r.id+'"]');
   if(r.t==='am')return app.querySelector('.slots [data-i="'+r.i+'"]');
   if(r.t==='boss')return $('#bossTag');
+  if(r.t==='held')return app.querySelector('.hand [data-id="'+r.id+'"]');
   return null;
 }
 function popup(el,txt,cls){
@@ -988,7 +1103,7 @@ function cardHTML(c,cls,act,i){
   const sh=S&&S.phase==='play'?shadow():null;const off=sh&&c.s===sh&&c.enh!=='comodin'?' off':'';
   return '<div class="card s-'+c.s+(c.enh?' e-'+c.enh:'')+off+dl+' '+(cls||'')+'"'+a+st+' aria-label="'+RN(c.r)+' de '+SUITN[c.s]+'">'+
     '<div class="cr">'+RN(c.r)+'<i>'+G[c.s]+'</i></div><div class="cp">'+(c.enh==='comodin'?'✦':G[c.s])+'</div>'+
-    (c.enh?'<div class="ce">'+ENH[c.enh].n+'</div>':'')+(c.b?'<div class="cb">+'+c.b+'</div>':'')+'</div>';
+    (c.enh?'<div class="ce">'+ENH[c.enh].n+'</div>':'')+(c.b?'<div class="cb">+'+c.b+'</div>':'')+(c.seal?'<span class="seal" style="--sc:'+SEALS[c.seal].c+'" title="Sello de '+SEALS[c.seal].n+'"></span>':'')+'</div>';
 }
 function amMini(a,i){
   const d=AM[a.k];const extra=a.k==='bola'?'+'+(a.c||0):(a.k==='vela'||a.k==='racha')&&(a.x||1)>1?'×'+fm(a.x):'';
@@ -1014,7 +1129,7 @@ function toolsHTML(){
 function hudHTML(){
   const boss=S.mesa===2?bossOf(S.night):null;
   let h='<div class="hud box"><div class="where"><span class="lbl">Noche '+S.night+(S.endless?'':'/8')+'</span><b class="'+(boss?'neon':'')+'">'+mesaEmoji(S.night,S.mesa)+' '+mesaName(S.night,S.mesa)+'</b>'+
-    (boss?'<button class="pill" id="bossTag" data-a="boss">Regla</button>':'')+'</div><div class="money num" id="moneyNow">$'+S.money+'</div>';
+    (boss?'<button class="pill" id="bossTag" data-a="boss">Regla</button>':'')+'</div><div class="money num" id="moneyNow">$'+S.money+(S.debt?'<span class="debt">debes $'+S.debt+'</span>':'')+'</div>';
   if(S.phase==='play'){
     h+='<div class="score-line num"><span>PUNTOS<b id="scoreNow" data-v="'+S.score+'">'+fm(S.score)+'</b></span><span>OBJETIVO<b>'+fm(S.target)+'</b></span></div>'+
       '<div class="bar"><i id="scoreBar" style="width:'+Math.min(100,S.score/S.target*100)+'%"></i></div>'+
@@ -1044,7 +1159,14 @@ function renderMenu(){
 }
 function renderDecks(){
   setScreen('<div class="screen"><div class="sec-h"><h2>Elige baraja</h2><button class="mini" data-a="menu">Volver</button></div><div class="deckpick">'+
-    Object.entries(DECKS).map(([k,d])=>'<button class="tile box" data-a="pickdeck" data-k="'+k+'"><span class="dk">'+d.e+'</span><h3>'+d.n+'</h3><p>'+d.d+'</p></button>').join('')+'</div></div>');
+    Object.entries(DECKS).map(([k,d])=>okDeck(k)?'<button class="tile box" data-a="pickdeck" data-k="'+k+'"><span class="dk">'+d.e+'</span><h3>'+d.n+'</h3><p>'+d.d+'</p></button>'
+      :'<div class="tile box locked"><span class="dk">🔒</span><h3>'+d.n+'</h3><p class="lockreq">'+LOCKS.deck[k].d+'</p></div>').join('')+'</div></div>');
+}
+function renderStakes(deck){
+  const mx=REC.stakeMax||1;
+  setScreen('<div class="screen"><div class="sec-h"><h2>Elige apuesta</h2><button class="mini" data-a="decks">Volver</button></div><p class="lbl">Baraja '+DECKS[deck].n+' · cada apuesta suma su cambio a los anteriores. Gana con una para desbloquear la siguiente.</p><div class="col">'+
+    STAKES.slice(1).map((st,i)=>{const n=i+1;return n<=mx?'<button class="tile box stake" data-a="pickstake" data-k="'+deck+'" data-v="'+n+'"><span class="sn">'+n+'</span><div><h3>'+st.n+'</h3><p>'+st.d+'</p></div></button>'
+      :'<div class="tile box stake locked"><span class="sn">🔒</span><div><h3>'+st.n+'</h3><p>'+st.d+'</p></div></div>'}).join('')+'</div></div>');
 }
 function renderPrevia(){
   const b=bossOf(S.night);
@@ -1054,10 +1176,12 @@ function renderPrevia(){
     if(m===2){t+='<div class="tile box bossy'+st+'"><div class="kv"><span class="lbl">Rival de la noche</span><span>'+(m<S.mesa?'✔ Superada':'Premio <b>$'+rewardFor(m)+'</b>')+'</span></div>'+
       '<div class="sign"><div class="neon">'+BOSSES[b.k].e+' '+BOSSES[b.k].n+'</div><small>'+bossDesc(b)+'</small></div>'+
       '<div class="kv"><span>Objetivo</span><b class="num">'+fm(targetFor(S.night,m))+'</b></div></div>';continue}
-    t+='<div class="tile box'+st+'"><div class="kv"><span class="lbl">Mesa '+(m+1)+'</span><span>'+(m<S.mesa?'✔ Superada':'Premio <b>$'+rewardFor(m)+'</b>')+'</span></div>'+
-      '<h3>'+mesaEmoji(S.night,m)+' '+mesaName(S.night,m)+'</h3><div class="kv"><span>Objetivo</span><b class="num">'+fm(targetFor(S.night,m))+'</b></div></div>';
+    const sk=m===S.mesa?SKIPS[skipOf(S.night,m)]:null;
+    t+='<div class="tile box'+st+'"><div class="kv"><span class="lbl">Mesa '+(m+1)+'</span><span>'+(m<S.mesa?'✔ Superada o saltada':'Premio <b>$'+rewardFor(m)+'</b>')+'</span></div>'+
+      '<h3>'+mesaEmoji(S.night,m)+' '+mesaName(S.night,m)+'</h3><div class="kv"><span>Objetivo</span><b class="num">'+fm(targetFor(S.night,m))+'</b></div>'+
+      (sk?'<div class="skipbtn"><span>Si la saltas: '+sk.e+' '+sk.n+'</span><button class="btn dark sm" data-a="skipmesa">Saltar</button></div>':'')+'</div>';
   }
-  setScreen('<div class="screen">'+hudHTML()+amHTML()+toolsHTML()+'<div class="sec-h"><h2>Noche '+S.night+'</h2><span class="lbl">'+(S.endless?'Modo infinito':'de 8')+'</span></div>'+
+  setScreen('<div class="screen">'+hudHTML()+amHTML()+toolsHTML()+'<div class="sec-h"><h2>Noche '+S.night+'</h2><span class="lbl">'+(S.endless?'Modo infinito':'de 8')+' · Apuesta '+(S.stake||1)+'</span></div>'+
     '<div class="col">'+t+'</div><button class="btn y" data-a="start">¡A la mesa!</button></div>');
 }
 function renderPlay(){
@@ -1068,7 +1192,7 @@ function renderPlay(){
   app.innerHTML='<div class="playwrap">'+
     '<div class="pa-hud">'+hudHTML()+'</div>'+
     '<div class="pa-top">'+amHTML()+toolsHTML()+'</div>'+
-    '<div class="pa-panel"><div class="panel box"><div class="pname" id="pName">'+pname+'</div><div class="pvals num">'+
+    '<div class="pa-panel"><div class="panel box"><button class="bluffbtn'+(S.bluff?' on':'')+'" id="bluffBtn" data-a="bluff"'+(busy?' disabled':'')+'>'+(S.bluff?'🎭 $'+S.bluff.stake+' a '+fm(S.bluff.need):'🎭 Farol')+'</button><div class="pname" id="pName">'+pname+'</div><div class="pvals num">'+
       '<div class="pv chips"><div class="chipstack" id="chipStack">'+chipStack(pc)+'</div><span id="pChips">'+fm(pc)+'</span></div><b>×</b>'+
       '<div class="pv mult'+(pm>=10?' hot':'')+(pm>=25?' fire':'')+'" id="multBox"><span id="pMult">'+fm(pm)+'</span></div></div><div class="ptotal num" id="pTotal"></div></div></div>'+
     '<div class="pa-table"><div class="table">'+(played.length?played.map((c,i)=>cardHTML(c,'toss')).join(''):'<div class="hint">Toca cartas para probar manos. «Soltar» las deselecciona todas de golpe.</div>')+'</div></div>'+
@@ -1087,7 +1211,7 @@ function fitHand(){
 }
 async function renderCobro(){
   setScreen('<div class="screen">'+hudHTML()+'<div class="sign"><div class="neon c">¡A COBRAR!</div></div><div class="tile box cur" id="cobroBox">'+
-    S.cobro.lines.map((l,i)=>'<div class="kv cobro-l"><span>'+l[0]+'</span><b class="num" data-v="'+l[1]+'">+$0</b></div>').join('')+
+    S.cobro.lines.map((l,i)=>'<div class="kv cobro-l"><span>'+l[0]+'</span><b class="num" data-v="'+l[1]+'"'+(l[1]<0?' style="color:var(--red)"':'')+'>'+(l[1]<0?'-$'+(-l[1]):l[1]?'+$0':'')+'</b></div>').join('')+
     '<div class="kv cobro-l" style="border-top:2px solid var(--edge);padding-top:8px"><span>Total</span><b class="num" id="cobroTot" style="color:var(--amber);font-size:30px">$0</b></div></div>'+
     '<button class="btn y" data-a="cobrar">Cobrar $'+S.cobro.total+'</button></div>');
   const rows=[...app.querySelectorAll('.cobro-l')];let acc=0;
@@ -1095,6 +1219,7 @@ async function renderCobro(){
     if(!app.contains(rows[r]))return;
     rows[r].classList.add('in');const b=rows[r].querySelector('b');const v=Number(b.dataset.v||0);
     if(b.id==='cobroTot'){b.textContent='$'+S.cobro.total;jump(b,'boom');SFX.win();burstAt(b,30,['#ffb627','#fff']);break}
+    if(v<0){SFX.no();jump(b);await wait(motionOK()?300:0);continue}
     for(let i=1;i<=v;i++){b.textContent='+$'+i;SFX.coin();await wait(motionOK()?110:0)}acc+=v;jump(b);await wait(motionOK()?160:0);
   }
 }
@@ -1102,27 +1227,29 @@ function itemHTML(kind,i,it){
   let card;const p=itemPrice(kind,it);
   if(kind==='am')card=amBig({k:it.k,ed:it.ed});
   else if(kind==='sc')card=conBig(it.k);
-  else if(kind==='cd')card='<div class="tile box" style="align-items:center;--cw:64px;padding:8px">'+cardHTML(Object.assign({id:'s'+i},it.c))+'<p style="font-size:12px;text-align:center">'+RN(it.c.r)+' de '+SUITN[it.c.s]+(it.c.enh?' · <b>'+ENH[it.c.enh].n+'</b>':'')+'</p></div>';
+  else if(kind==='cd')card='<div class="tile box" style="align-items:center;--cw:64px;padding:8px">'+cardHTML(Object.assign({id:'s'+i},it.c))+'<p style="font-size:12px;text-align:center">'+RN(it.c.r)+' de '+SUITN[it.c.s]+(it.c.enh?' · <b>'+ENH[it.c.enh].n+'</b>':'')+(it.c.seal?' · Sello de '+SEALS[it.c.seal].n.toLowerCase():'')+'</p></div>';
   else{const d=PK[it.k];card=bigCard({cls:'lic',style:'--frame:#ffd23f;--tint:#fff2b8',e:d.e,tag:'Sobre',n:d.n,d:d.d.replace(/entre (\d)/,(m,n)=>'entre '+(Number(n)+(hasV('sobregordo')?1:0)))})}
   return '<div class="item'+(it.sold?' sold':'')+'">'+card+'<button class="btn '+(S.money>=p&&!it.sold?'y':'dark')+' sm" data-a="buy" data-k="'+kind+'" data-i="'+i+'"'+(it.sold?' disabled':'')+'>'+(it.sold?'Comprado':'Comprar $'+p)+'</button></div>';
 }
 function renderShop(){
   const sh=S.shop,v=S.vale,rr=sh.free?0:sh.rr;
   const vale=v?'<div class="vale" id="valeBox"'+(v.sold?' style="opacity:.4"':'')+'><span class="ve">'+VALES[v.k].e+'</span><div class="grow"><span class="lbl">Vale de la noche</span><h4>'+VALES[v.k].n+'</h4><p>'+VALES[v.k].d+'</p></div>'+
-    '<button class="btn '+(v.sold?'dark':'y')+' sm" data-a="vale"'+(v.sold?' disabled':'')+'>'+(v.sold?'Tuyo':'$'+price(VALE_P))+'</button></div>':'';
+    '<button class="btn '+(v.sold?'dark':'y')+' sm" data-a="vale"'+(v.sold?' disabled':'')+'>'+(v.sold?'Tuyo':valePrice()?'$'+valePrice():'Gratis')+'</button></div>':'';
+  const loan='<div class="loan"><h4>🕴️ El prestamista</h4>'+(S.debt?'<p>Le debes <b>$'+S.debt+'</b>. Te lo cobra al ganar al rival de esta noche; si no te llega, la deuda sube un 25 %.</p><button class="btn y sm" data-a="payloan"'+(S.money<S.debt?' disabled':'')+'>Pagar ahora $'+S.debt+'</button>'
+    :'<p>Dinero ahora, a devolver con un 50 % más al ganar al rival de esta noche.</p>'+[5,10,15].map(v=>'<button class="btn m sm" data-a="loan" data-v="'+v+'">$'+v+' → debes $'+Math.ceil(v*1.5)+'</button>').join(''))+'</div>';
   setScreen('<div class="screen">'+hudHTML()+amHTML()+toolsHTML()+
     '<div class="sign"><div class="neon a">TRASTIENDA</div><small>Abierto toda la noche'+(disc()?' · descuento del '+disc()*100+' %':'')+'</small></div>'+
     '<div class="sec-h"><span class="lbl">Amuletos</span><button class="btn m sm" data-a="reroll">'+(rr?'Cambiar $'+rr:'Cambiar gratis')+'</button></div>'+
     '<div class="grid2">'+sh.am.map((it,i)=>itemHTML('am',i,it)).join('')+'</div>'+vale+
     '<span class="lbl">Pergaminos y licores</span><div class="grid2">'+sh.sc.map((it,i)=>itemHTML('sc',i,it)).join('')+'</div>'+
     '<span class="lbl">Cartas sueltas</span><div class="grid2">'+sh.cd.map((it,i)=>itemHTML('cd',i,it)).join('')+'</div>'+
-    '<span class="lbl">Sobres</span><div class="grid2">'+sh.pk.map((it,i)=>itemHTML('pk',i,it)).join('')+'</div>'+
+    '<span class="lbl">Sobres</span><div class="grid2">'+sh.pk.map((it,i)=>itemHTML('pk',i,it)).join('')+'</div>'+loan+
     '<button class="btn c" data-a="next">Siguiente: '+(S.mesa<2?mesaName(S.night,S.mesa+1):'Noche '+(S.night+1))+'</button></div>');
 }
 function renderPack(){
   const p=S.pack;let opts;
   const vis=(i,h)=>p.opts[i]==null?'':h;
-  if(p.k==='cartas')opts=p.opts.map((c,i)=>vis(i,'<button class="tile box" data-a="pick" data-i="'+i+'" style="align-items:center;--cw:72px">'+cardHTML(Object.assign({id:'p'+i},c))+'<p>'+RN(c.r)+' de '+SUITN[c.s]+' · <b>'+ENH[c.enh].n+'</b>: '+kw(ENH[c.enh].d)+'</p></button>')).join('');
+  if(p.k==='cartas')opts=p.opts.map((c,i)=>vis(i,'<button class="tile box" data-a="pick" data-i="'+i+'" style="align-items:center;--cw:72px">'+cardHTML(Object.assign({id:'p'+i},c))+'<p>'+RN(c.r)+' de '+SUITN[c.s]+' · <b>'+ENH[c.enh].n+'</b>: '+kw(ENH[c.enh].d)+(c.seal?' <b>Sello de '+SEALS[c.seal].n.toLowerCase()+'</b>: '+kw(SEALS[c.seal].d):'')+'</p></button>')).join('');
   else if(p.k==='amul')opts=p.opts.map((k,i)=>vis(i,'<button class="item" data-a="pick" data-i="'+i+'">'+amBig({k})+'</button>')).join('');
   else opts=p.opts.map((k,i)=>vis(i,'<button class="item" data-a="pick" data-i="'+i+'">'+conBig(k)+'</button>')).join('');
   setScreen('<div class="screen">'+hudHTML()+'<div class="sign"><div class="neon c">'+PK[p.k].e+' '+PK[p.k].n.toUpperCase()+'</div><small>'+(p.left>1?'Elige '+p.left:'Elige 1')+'</small></div><div class="'+(p.k==='cartas'?'col':'grid2')+'">'+opts+'</div><button class="btn dark" data-a="skip">'+(p.left<(hasV('doblesobre')&&p.k!=='amul'?2:1)?'Ya está':'No quiero ninguna')+'</button></div>');
@@ -1175,24 +1302,42 @@ function sheetDeck(){
   suits.forEach(s=>{grid+='<span class="h s-'+s+'" style="color:var(--suit)">'+G[s]+'</span>';
     ranks.forEach(r=>{const cs=pool.filter(c=>c.s===s&&c.r===r);const en=cs.some(c=>c.enh);grid+='<span class="cell s-'+s+(cs.length?'':' z')+(en?' en':'')+'" title="'+(en?cs.filter(c=>c.enh).map(c=>ENH[c.enh].n).join(', '):'')+'">'+(cs.length||'·')+'</span>'})});
   grid+='</div>';
-  const enhList=pool.filter(c=>c.enh||c.b);
+  const enhList=pool.filter(c=>c.enh||c.b||c.seal);
   sheet('<h2>'+(mode==='left'?'Lo que queda en el mazo':'Tu baraja completa')+' · '+pool.length+'</h2>'+
     (inPlay?'<div class="seg"><button data-a="deckmode" data-v="left" class="'+(mode==='left'?'on':'')+'">Lo que queda</button><button data-a="deckmode" data-v="all" class="'+(mode==='all'?'on':'')+'">Baraja completa</button></div>':'')+
     '<span class="lbl">Por palo</span><div class="cnts">'+suits.map((s,i)=>'<div class="s-'+s+'"><small>'+G[s]+'</small>'+bySuit[i]+'</div>').join('')+'</div>'+
     '<span class="lbl">Por valor</span><div class="rk">'+ranks.map((r,i)=>'<div><small>'+RN(r)+'</small>'+byRank[i]+'</div>').join('')+'</div>'+
     '<span class="lbl">Palo × valor · borde ámbar: carta grabada</span>'+grid+
-    (enhList.length?'<span class="lbl">Cartas especiales</span><p style="font-size:13px">'+enhList.map(c=>'<span class="s-'+c.s+'" style="color:var(--suit)">'+RN(c.r)+G[c.s]+'</span> '+(c.enh?ENH[c.enh].n:'')+(c.b?' +'+c.b+' Fichas':'')).join(' · ')+'</p>':'')+
-    '<span class="lbl">Grabados</span>'+Object.values(ENH).map(e=>'<p style="font-size:13px"><b>'+e.n+':</b> '+e.d+'</p>').join('')+'<button class="btn dark" data-a="close">Cerrar</button>');
+    (enhList.length?'<span class="lbl">Cartas especiales</span><p style="font-size:13px">'+enhList.map(c=>'<span class="s-'+c.s+'" style="color:var(--suit)">'+RN(c.r)+G[c.s]+'</span> '+(c.enh?ENH[c.enh].n:'')+(c.seal?' · sello de '+SEALS[c.seal].n.toLowerCase():'')+(c.b?' +'+c.b+' Fichas':'')).join(' · ')+'</p>':'')+
+    '<span class="lbl">Grabados</span>'+Object.values(ENH).map(e=>'<p style="font-size:13px"><b>'+e.n+':</b> '+e.d+'</p>').join('')+
+    '<span class="lbl">Sellos</span>'+Object.values(SEALS).map(e=>'<p style="font-size:13px"><b>'+e.n+':</b> '+e.d+'</p>').join('')+'<button class="btn dark" data-a="close">Cerrar</button>');
 }
 function sheetSettings(){
   sheet('<h2>Ajustes</h2><span class="lbl">Velocidad de la puntuación</span><div class="seg">'+[1,2,4].map(v=>'<button data-a="speed" data-v="'+v+'" class="'+(CFG.speed===v?'on':'')+'">×'+v+'</button>').join('')+'</div>'+
     '<span class="lbl">Sonido</span><div class="seg"><button data-a="sound" data-v="1" class="'+(CFG.sound?'on':'')+'">Activado</button><button data-a="sound" data-v="0" class="'+(CFG.sound?'':'on')+'">Silencio</button></div>'+
     '<button class="btn dark" data-a="help">Cómo se juega</button>'+(S?'<button class="btn dark" data-a="tomenu">Volver al menú (se guarda)</button><button class="btn m" data-a="abandon">Abandonar partida</button>':'')+'<button class="btn dark" data-a="close">Cerrar</button>');
 }
+function sheetBluff(){
+  if(S.phase!=='play'||busy)return;
+  const need=S.bluff?S.bluff.need:bluffNeed();
+  sheet('<div class="sign"><div class="neon a">🎭 ECHAR UN FAROL</div><small>Apuesta a que tu próxima mano llega a <b>'+fm(need)+'</b> puntos. Si llega, cobras el triple. Si no, pierdes lo apostado.</small></div>'+
+    '<div class="row" style="flex-wrap:wrap;justify-content:center">'+[1,2,3,5,10].map(v=>'<button class="btn '+(S.bluff&&S.bluff.stake===v?'y':'m')+' sm" data-a="bluffset" data-v="'+v+'"'+(S.money+(S.bluff?S.bluff.stake:0)<v?' disabled':'')+'>$'+v+'</button>').join('')+'</div>'+
+    (S.bluff?'<button class="btn dark" data-a="bluffset" data-v="0">Retirar el farol (te devuelven $'+S.bluff.stake+')</button>':'')+'<button class="btn dark" data-a="close">Cerrar</button>');
+}
+function sheetLoan(){}
+function sheetCollection(){
+  const am=Object.keys(AM).map(k=>{const d=AM[k],ok=okAm(k);return '<div class="jc '+rar(d.p)+(ok?'':' locked')+'" title="'+(ok?d.n:LOCKS.am[k].d)+'"><span class="art"><span>'+d.e+'</span></span><span class="nm">'+(ok?d.n:'???')+'</span></div>'}).join('');
+  const locks=Object.entries(LOCKS.am).filter(([k])=>!okAm(k)).map(([k,l])=>'<p style="font-size:13px">🔒 <b>'+AM[k].n+'</b>: '+l.d+'</p>').join('')+
+    Object.entries(LOCKS.deck).filter(([k])=>!okDeck(k)).map(([k,l])=>'<p style="font-size:13px">🔒 Baraja <b>'+DECKS[k].n+'</b>: '+l.d+'</p>').join('');
+  sheet('<h2>Colección</h2><p style="font-size:13px;color:var(--muted)">'+Object.keys(AM).filter(okAm).length+' de '+Object.keys(AM).length+' amuletos · '+Object.keys(DECKS).filter(okDeck).length+' de '+Object.keys(DECKS).length+' barajas · apuesta máxima '+(REC.stakeMax||1)+'</p>'+
+    '<div class="coll">'+am+'</div>'+(locks?'<span class="lbl">Por desbloquear</span>'+locks:'<p>¡Lo tienes todo!</p>')+'<button class="btn dark" data-a="close">Cerrar</button>');
+}
 function sheetRecords(){
-  const r=loadRec();
+  const r=REC;
   sheet('<h2>Récords</h2><div class="kv"><span>Partidas</span><b>'+r.runs+'</b></div><div class="kv"><span>Victorias</span><b>'+r.wins+'</b></div><div class="kv"><span>Noche máxima</span><b>'+r.bestNight+'</b></div>'+
     '<div class="kv"><span>Mejor mano</span><b>'+fm(r.bestHand)+'</b></div>'+(r.bestHandName?'<div class="kv"><span></span><span>'+r.bestHandName+'</span></div>':'')+
+    '<div class="kv"><span>Apuesta máxima desbloqueada</span><b>'+(r.stakeMax||1)+'</b></div><div class="kv"><span>Mesas ganadas</span><b>'+r.mesas+'</b></div><div class="kv"><span>Faroles ganados</span><b>'+r.faroles+'</b></div>'+
+    '<button class="btn c sm" data-a="collection">Ver colección y desbloqueos</button>'+
     (r.history.length?'<span class="lbl">Últimas partidas</span><table class="lv"><tbody>'+r.history.map(h=>'<tr><td>'+h.d+' · '+(DECKS[h.deck]?DECKS[h.deck].n:h.deck)+'</td><td>'+(h.win?'🏆':'Noche '+h.night)+'</td><td>'+fm(h.best)+'</td></tr>').join('')+'</tbody></table>':'<p>Aún no has terminado ninguna partida.</p>')+
     '<button class="btn dark" data-a="close">Cerrar</button>');
 }
@@ -1203,7 +1348,8 @@ function sheetHelp(){
   '<p>La tercera mesa de cada noche es un <b>rival</b> con una regla especial. Toca «Regla» para verla.</p>'+
   '<p>Al ganar cobras el premio, $1 por mano sin usar e <b>interés</b> ($1 por cada $5). En la trastienda compras:</p>'+
   '<p>🃏 <b>Amuletos</b>: efectos permanentes, a veces en edición especial (Charol, Neón, Prisma, Fantasma). Actúan de izquierda a derecha.<br>📜 <b>Pergaminos</b>: graban, tiñen, copian o destruyen cartas.<br>🍷 <b>Licores</b>: suben de nivel un tipo de mano.<br>🎫 <b>Vales</b>: una mejora permanente distinta cada noche.<br>🂠 <b>Cartas sueltas</b> y 🎁 <b>sobres</b>.</p>'+
-  '<p>Supera la Noche 8 para ganar.</p><button class="btn y" data-a="close">¡Entendido!</button>');
+  '<p>🎭 <b>Farol</b>: antes de jugar puedes apostar a que tu mano llegará a una cifra. Si llega, cobras el triple.<br>🕴️ <b>Prestamista</b>: en la trastienda te presta dinero; se lo devuelves con un 50 % más al ganar al rival de la noche.<br>⏭️ <b>Saltar mesa</b>: las mesas 1 y 2 se pueden saltar a cambio de una recompensa, sin cobro ni trastienda.<br>🔖 <b>Sellos</b>: algunas cartas llevan un sello que actúa aunque se quede en tu mano.</p>'+
+  '<p>Supera la Noche 8 para ganar. Cada victoria desbloquea una <b>apuesta</b> más difícil, y al jugar desbloqueas amuletos y barajas nuevas (Récords → Colección).</p><button class="btn y" data-a="close">¡Entendido!</button>');
 }
 
 /* ---------- events ---------- */
@@ -1217,7 +1363,14 @@ document.addEventListener('click',e=>{
     case 'menu':closeSheet();S=null;renderMenu();break;
     case 'tomenu':closeSheet();save();S=null;renderMenu();break;
     case 'continue':S=loadSave();busy=false;if(!S){renderMenu();break}if(S.phase==='play')S.played=[];render();break;
-    case 'pickdeck':newRun(b.dataset.k);break;
+    case 'pickdeck':if((REC.stakeMax||1)>1)renderStakes(b.dataset.k);else newRun(b.dataset.k,1);break;
+    case 'pickstake':newRun(b.dataset.k,Number(b.dataset.v));break;
+    case 'skipmesa':skipMesa();break;
+    case 'bluff':sheetBluff();break;
+    case 'bluffset':setBluff(Number(b.dataset.v));break;
+    case 'loan':takeLoan(Number(b.dataset.v));break;
+    case 'payloan':payLoan();break;
+    case 'collection':sheetCollection();break;
     case 'help':sheetHelp();break;
     case 'records':sheetRecords();break;
     case 'close':closeSheet();break;
@@ -1248,7 +1401,7 @@ document.addEventListener('click',e=>{
     case 'reroll':{const sh=S.shop;const c=sh.free?0:sh.rr;if(S.money<c){toast('No te llega el dinero.');break}S.money-=c;if(sh.free)sh.free=false;else sh.rr++;rollShop();save();render();break}
     case 'next':nextMesa();break;
     case 'pick':pickPack(i);break;
-    case 'skip':S.pack=null;S.phase='shop';save();render();break;
+    case 'skip':S.phase=(S.pack&&S.pack.ret)||'shop';S.pack=null;save();render();break;
     case 'endless':S.endless=true;S.phase='cobro';save();render();break;
   }
 });
@@ -1260,6 +1413,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&S&&!busy)s
 if('serviceWorker' in navigator&&location.protocol==='https:'&&!/claude/.test(location.host)){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 
 if(location.protocol==='file:')window.__f=()=>S;
+checkUnlocks(true);
 renderMenu();
 })();
 </script>

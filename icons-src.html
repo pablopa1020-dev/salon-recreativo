@@ -1,23 +1,96 @@
 <!doctype html><html><head><meta charset="utf-8">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Lilita+One&display=swap">
-<style>
-body{margin:0;background:#000}
-.ic{width:512px;height:512px;display:grid;place-items:center;position:relative;overflow:hidden}
-#farol{background:repeating-conic-gradient(from 0deg at 50% 60%,#1b1140 0 9deg,#2c1b66 9deg 18deg)}
-#farol .c{position:absolute;width:170px;height:238px;border-radius:22px;background:#fff8ea;border:10px solid #07031a;box-shadow:0 12px 0 #07031a;font:400 96px Bungee;display:grid;place-items:center}
-#farol .t{position:absolute;bottom:52px;font:400 104px Bungee;color:#ffd23f;text-shadow:0 8px 0 #ff4f9a,0 16px 0 #07031a;transform:rotate(-5deg)}
-#ordago{background:repeating-linear-gradient(-45deg,#0f2b3d 0 40px,#123a52 40px 80px)}
-#ordago .c{position:absolute;width:170px;height:250px;border-radius:22px;background:#fff4e0;border:10px solid #04121b;box-shadow:0 12px 0 #04121b;font-size:110px;display:grid;place-items:center}
-#ordago .t{position:absolute;bottom:56px;font:400 118px "Lilita One";color:#ffc93c;text-shadow:0 8px 0 #ef3e36,0 16px 0 #04121b;transform:rotate(-5deg)}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@700&family=Bungee&family=VT323&display=swap">
+<style>body{margin:0;background:#000}.ic{width:512px;height:512px;position:relative;overflow:hidden}
+#farol{background:radial-gradient(circle at 50% 42%,#5a1260 0%,#2a0b2e 45%,#120617 80%)}
+#farol::after,#ordago::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 5px);pointer-events:none}
+.word{position:absolute;left:0;right:0;text-align:center}
 </style></head><body>
 <div class="ic" id="farol">
-  <div class="c" style="transform:translate(-80px,-60px) rotate(-14deg);color:#3b7bff">A♠&#xFE0E;</div>
-  <div class="c" style="transform:translate(80px,-70px) rotate(12deg);color:#ff3b5c">K♥&#xFE0E;</div>
-  <div class="t">FAROL</div>
+ <svg width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+   <filter id="glowM" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+   <filter id="glowS" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <g opacity=".22" stroke="#ff2bd6" stroke-width="1.5"><path d="M16 300 L-464 512"/><path d="M56 300 L-344 512"/><path d="M96 300 L-224 512"/><path d="M136 300 L-104 512"/><path d="M176 300 L16 512"/><path d="M216 300 L136 512"/><path d="M256 300 L256 512"/><path d="M296 300 L376 512"/><path d="M336 300 L496 512"/><path d="M376 300 L616 512"/><path d="M416 300 L736 512"/><path d="M456 300 L856 512"/><path d="M496 300 L976 512"/><path d="M0 330 H512"/><path d="M0 365 H512"/><path d="M0 410 H512"/><path d="M0 470 H512"/></g>
+  <g transform="rotate(-9 256 220)">
+   <rect x="150" y="70" width="212" height="296" rx="26" fill="rgba(20,6,26,.75)" stroke="#ff2bd6" stroke-width="9" filter="url(#glowM)"/>
+   <rect x="168" y="88" width="176" height="260" rx="16" fill="none" stroke="#ffd0f5" stroke-width="2.5" opacity=".7"/>
+   <path d="M256 118 C298 168 336 196 336 242 C336 272 314 290 290 290 C276 290 266 284 261 276 C263 298 272 316 290 330 H222 C240 316 249 298 251 276 C246 284 236 290 222 290 C198 290 176 272 176 242 C176 196 214 168 256 118Z" fill="none" stroke="#22e4ff" stroke-width="9" stroke-linejoin="round" filter="url(#glowM)"/>
+   <text x="184" y="132" font-family="VT323" font-size="64" fill="#ffb627" filter="url(#glowS)">A</text>
+  </g>
+  <g filter="url(#glowS)">
+   <ellipse cx="390" cy="352" rx="44" ry="14" fill="#ffb627" stroke="#05010a" stroke-width="4"/><ellipse cx="390" cy="336" rx="44" ry="14" fill="#22e4ff" stroke="#05010a" stroke-width="4"/><ellipse cx="390" cy="320" rx="44" ry="14" fill="#ff2bd6" stroke="#05010a" stroke-width="4"/>
+   <ellipse cx="390" cy="320" rx="22" ry="7" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="8 6"/>
+  </g>
+ </svg>
+ <div class="word" style="top:398px;font:700 82px Silkscreen;color:#fff;letter-spacing:4px;text-shadow:0 0 6px #fff,0 0 18px #ff2bd6,0 0 40px #ff2bd6,0 6px 0 #05010a">FAROL</div>
 </div>
 <div class="ic" id="ordago">
-  <div class="c" style="transform:translate(-80px,-60px) rotate(-14deg)">👑</div>
-  <div class="c" style="transform:translate(80px,-70px) rotate(12deg)">🗡️</div>
-  <div class="t">Órdago</div>
+ <svg width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+  <symbol id="s-o" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="#f6c431" stroke="#6b4200" stroke-width="2.5"/><circle cx="20" cy="20" r="11.5" fill="none" stroke="#b07400" stroke-width="2"/><path d="M20 11.5 22.6 17.6 28.5 20 22.6 22.4 20 28.5 17.4 22.4 11.5 20 17.4 17.6Z" fill="#c98a00"/></symbol>
+  <symbol id="s-c" viewBox="0 0 40 40"><path d="M7 5H33Q33 21 22.5 24V30H27Q29.5 30 29.5 34H10.5Q10.5 30 13 30H17.5V24Q7 21 7 5Z" fill="#e0313f" stroke="#5a0a12" stroke-width="2.2" stroke-linejoin="round"/><path d="M10 8.5H30" stroke="#ffd36b" stroke-width="2.4"/><circle cx="20" cy="15" r="2.6" fill="#ffd36b"/></symbol>
+  <symbol id="s-e" viewBox="0 0 40 40"><path d="M20 1.5 24 8V26.5H16V8Z" fill="#a9ccff" stroke="#0e2a66" stroke-width="2" stroke-linejoin="round"/><path d="M20 6V25.5" stroke="#3a7bd5" stroke-width="1.6"/><rect x="8.5" y="26" width="23" height="4" rx="2" fill="#2f6fd6" stroke="#0e2a66" stroke-width="1.8"/><rect x="17.5" y="30" width="5" height="5.5" fill="#7a4a1a" stroke="#0e2a66" stroke-width="1.5"/><circle cx="20" cy="37.2" r="2.4" fill="#2f6fd6" stroke="#0e2a66" stroke-width="1.4"/></symbol>
+  <symbol id="s-b" viewBox="0 0 40 40"><path d="M15.5 37.5Q13 36.5 14 33L17 10Q17.5 2.5 22.5 2.5Q28.5 3 27.5 10L24.5 33Q24 37.5 20 37.5Z" fill="#43b562" stroke="#0f3d1c" stroke-width="2.2" stroke-linejoin="round"/><circle cx="19" cy="13.5" r="2.4" fill="#1f7a3a"/><circle cx="23.7" cy="20" r="2.2" fill="#1f7a3a"/><circle cx="19.5" cy="26.5" r="2" fill="#1f7a3a"/><path d="M24.5 6.5 29 3.5" stroke="#0f3d1c" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="f-10" viewBox="0 0 60 80">
+   <ellipse cx="30" cy="77.5" rx="15" ry="2" fill="rgba(0,0,0,.15)"/>
+   <rect x="23" y="55" width="5.5" height="20" fill="#3a2a4a"/><rect x="31.5" y="55" width="5.5" height="20" fill="#3a2a4a"/>
+   <rect x="20.5" y="73.5" width="8.5" height="3.5" rx="1.5" fill="#1b1a24"/><rect x="31" y="73.5" width="8.5" height="3.5" rx="1.5" fill="#1b1a24"/>
+   <path d="M19 31 15 47" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+   <path d="M19 30Q30 25 41 30L44 58H16Z" fill="currentColor" stroke="#1b1a24" stroke-width="1.8" stroke-linejoin="round"/>
+   <rect x="17.4" y="44" width="25.2" height="3" fill="#f2b33d"/>
+   <path d="M24 29 30 35.5 36 29" fill="#fbefd5" stroke="#1b1a24" stroke-width="1.4"/>
+   <path d="M41 32 47 41" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+   <circle cx="30" cy="19" r="8" fill="#f3c9a0" stroke="#1b1a24" stroke-width="1.8"/>
+   <path d="M22 18.5Q22 10 30 10Q38 10 38 18.5Q35 13.5 30 13.5Q25 13.5 22 18.5Z" fill="#6b3b1a"/>
+   <path d="M19.5 13Q30 3.5 40.5 11.5L41 13.5Q30 9.5 19 14.5Z" fill="currentColor" stroke="#1b1a24" stroke-width="1.5"/><circle cx="39.5" cy="8.5" r="2" fill="#f2b33d" stroke="#1b1a24" stroke-width="1"/>
+   <circle cx="27" cy="19.5" r="1.1" fill="#1b1a24"/><circle cx="33" cy="19.5" r="1.1" fill="#1b1a24"/><path d="M27.5 23Q30 24.5 32.5 23" stroke="#1b1a24" stroke-width="1" fill="none"/>
+  </symbol>
+  <symbol id="f-11" viewBox="0 0 60 80">
+   <ellipse cx="29" cy="77.5" rx="20" ry="2" fill="rgba(0,0,0,.15)"/>
+   <path d="M10 50Q3 57 7 67" stroke="#5a3214" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+   <path d="M15 58V75M21 60V76.5M35 60V76.5M41 58V74" stroke="#a86b32" stroke-width="4.2" stroke-linecap="round"/>
+   <ellipse cx="28" cy="52" rx="18" ry="10" fill="#c98a4a" stroke="#1b1a24" stroke-width="1.8"/>
+   <path d="M40 48 47 32Q49.5 26.5 55 30L57 36.5Q53.5 37.5 50.5 36L46.5 51Z" fill="#c98a4a" stroke="#1b1a24" stroke-width="1.8" stroke-linejoin="round"/>
+   <path d="M45 33 41.5 46" stroke="#5a3214" stroke-width="3"/><circle cx="51.5" cy="32" r="1.1" fill="#1b1a24"/>
+   <path d="M20 42.5H36L34 55H22Z" fill="currentColor" stroke="#1b1a24" stroke-width="1.5"/>
+   <path d="M27 43 24.5 57" stroke="#3a2a4a" stroke-width="4.6" stroke-linecap="round"/>
+   <path d="M23 26Q29 22 35 26L35.5 44H22.5Z" fill="currentColor" stroke="#1b1a24" stroke-width="1.8" stroke-linejoin="round"/>
+   <path d="M34 28 41.5 20" stroke="currentColor" stroke-width="4.6" stroke-linecap="round"/>
+   <circle cx="29" cy="17" r="6.5" fill="#f3c9a0" stroke="#1b1a24" stroke-width="1.8"/>
+   <path d="M20.5 14H37.5L33.5 7.5H24.5Z" fill="#1b1a24"/><circle cx="27" cy="17.5" r="1" fill="#1b1a24"/><circle cx="31.5" cy="17.5" r="1" fill="#1b1a24"/>
+  </symbol>
+  <symbol id="f-12" viewBox="0 0 60 80">
+   <rect x="12" y="20" width="36" height="50" rx="4" fill="#7a2a1a" stroke="#1b1a24" stroke-width="1.8"/><rect x="15" y="23" width="30" height="44" rx="3" fill="#a8402a"/>
+   <rect x="10" y="62" width="40" height="6" fill="#5a1a10" stroke="#1b1a24" stroke-width="1.5"/><rect x="12" y="68" width="4" height="9" fill="#5a1a10"/><rect x="44" y="68" width="4" height="9" fill="#5a1a10"/>
+   <path d="M18 34Q30 28 42 34L45 66H15Z" fill="currentColor" stroke="#1b1a24" stroke-width="1.8" stroke-linejoin="round"/>
+   <path d="M15.5 63.5H44.5" stroke="#fbefd5" stroke-width="4"/><path d="M20 63.5h1M27 63.5h1M34 63.5h1M41 63.5h1" stroke="#1b1a24" stroke-width="1.6"/>
+   <path d="M21 33Q30 40 39 33" fill="none" stroke="#fbefd5" stroke-width="3.6"/>
+   <path d="M41 38 46.5 46.5" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M19 38 16 50" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+   <circle cx="30" cy="22" r="7.5" fill="#f3c9a0" stroke="#1b1a24" stroke-width="1.8"/>
+   <path d="M23 24Q30 37 37 24Q34 28.5 30 28.5Q26 28.5 23 24Z" fill="#eee6d6" stroke="#1b1a24" stroke-width="1.2"/>
+   <path d="M22 16.5V8L26 12 30 5.5 34 12 38 8V16.5Z" fill="#f2b33d" stroke="#1b1a24" stroke-width="1.5" stroke-linejoin="round"/><circle cx="30" cy="12.5" r="1.3" fill="#e0313f"/>
+   <circle cx="27" cy="21.5" r="1.1" fill="#1b1a24"/><circle cx="33" cy="21.5" r="1.1" fill="#1b1a24"/>
+  </symbol>
+ 
+   <radialGradient id="lg"><stop offset="0" stop-color="rgba(255,210,110,.75)"/><stop offset="1" stop-color="rgba(255,210,110,0)"/></radialGradient>
+   <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#101c3a"/><stop offset="1" stop-color="#2a3a78"/></linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#sky)"/>
+  <g fill="#fff" opacity=".7"><circle cx="0" cy="20" r="1.0"/><circle cx="97" cy="73" r="1.7"/><circle cx="194" cy="126" r="2.4"/><circle cx="291" cy="179" r="1.0"/><circle cx="388" cy="232" r="1.7"/><circle cx="485" cy="285" r="2.4"/><circle cx="70" cy="38" r="1.0"/><circle cx="167" cy="91" r="1.7"/><circle cx="264" cy="144" r="2.4"/><circle cx="361" cy="197" r="1.0"/><circle cx="458" cy="250" r="1.7"/><circle cx="43" cy="303" r="2.4"/><circle cx="140" cy="56" r="1.0"/><circle cx="237" cy="109" r="1.7"/><circle cx="334" cy="162" r="2.4"/><circle cx="431" cy="215" r="1.0"/><circle cx="16" cy="268" r="1.7"/><circle cx="113" cy="21" r="2.4"/><circle cx="210" cy="74" r="1.0"/><circle cx="307" cy="127" r="1.7"/><circle cx="404" cy="180" r="2.4"/><circle cx="501" cy="233" r="1.0"/><circle cx="86" cy="286" r="1.7"/><circle cx="183" cy="39" r="2.4"/><circle cx="280" cy="92" r="1.0"/><circle cx="377" cy="145" r="1.7"/><circle cx="474" cy="198" r="2.4"/><circle cx="59" cy="251" r="1.0"/><circle cx="156" cy="304" r="1.7"/><circle cx="253" cy="57" r="2.4"/><circle cx="350" cy="110" r="1.0"/><circle cx="447" cy="163" r="1.7"/><circle cx="32" cy="216" r="2.4"/><circle cx="129" cy="269" r="1.0"/></g>
+  <path d="M-10 40 Q256 120 522 40" stroke="#fbefd5" stroke-width="3" fill="none"/><path d="M3 48.5 h34 l-17 38z" fill="#e23a34" stroke="#040814" stroke-width="2.5"/><path d="M49 59.6 h34 l-17 38z" fill="#f2b33d" stroke="#040814" stroke-width="2.5"/><path d="M95 68.3 h34 l-17 38z" fill="#fbefd5" stroke="#040814" stroke-width="2.5"/><path d="M141 74.6 h34 l-17 38z" fill="#e23a34" stroke="#040814" stroke-width="2.5"/><path d="M187 78.5 h34 l-17 38z" fill="#f2b33d" stroke="#040814" stroke-width="2.5"/><path d="M233 80.0 h34 l-17 38z" fill="#fbefd5" stroke="#040814" stroke-width="2.5"/><path d="M279 79.1 h34 l-17 38z" fill="#e23a34" stroke="#040814" stroke-width="2.5"/><path d="M325 75.8 h34 l-17 38z" fill="#f2b33d" stroke="#040814" stroke-width="2.5"/><path d="M371 70.1 h34 l-17 38z" fill="#fbefd5" stroke="#040814" stroke-width="2.5"/><path d="M417 62.1 h34 l-17 38z" fill="#e23a34" stroke="#040814" stroke-width="2.5"/><path d="M463 51.6 h34 l-17 38z" fill="#f2b33d" stroke="#040814" stroke-width="2.5"/>
+  <circle cx="70" cy="190" r="60" fill="url(#lg)"/><circle cx="442" cy="200" r="60" fill="url(#lg)"/>
+  <ellipse cx="70" cy="190" rx="24" ry="30" fill="#e23a34" stroke="#040814" stroke-width="4"/><rect x="56" y="157" width="28" height="8" fill="#040814"/><rect x="56" y="216" width="28" height="8" fill="#040814"/>
+  <ellipse cx="442" cy="200" rx="24" ry="30" fill="#f2b33d" stroke="#040814" stroke-width="4"/><rect x="428" y="167" width="28" height="8" fill="#040814"/><rect x="428" y="226" width="28" height="8" fill="#040814"/>
+  <g transform="rotate(-7 256 250) translate(156 110)">
+   <rect x="6" y="10" width="200" height="280" rx="20" fill="#040814"/>
+   <rect x="0" y="0" width="200" height="280" rx="20" fill="#fbefd5" stroke="#040814" stroke-width="7"/>
+   <path d="M12 12V268M188 12V268M12 12H188M12 268H188" stroke="#c98a00" stroke-width="4" fill="none" opacity=".8"/>
+   <text x="26" y="58" font-family="VT323" font-size="56" fill="#c98a00" text-anchor="middle">12</text>
+   <g style="color:#c98a00"><use href="#f-12" x="34" y="56" width="136" height="192"/></g>
+   <use href="#s-o" x="120" y="108" width="48" height="48"/>
+  </g>
+ </svg>
+ <div class="word" style="top:392px;font:400 88px Bungee;color:#f2b33d;letter-spacing:1px;text-shadow:0 5px 0 #e23a34,0 10px 0 #040814,0 0 30px rgba(242,179,61,.6);-webkit-text-stroke:3px #040814;transform:rotate(-4deg)">ÓRDAGO</div>
 </div>
 </body></html>

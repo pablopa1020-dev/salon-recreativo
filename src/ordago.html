@@ -183,6 +183,18 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
 .chooser{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;padding-bottom:5px}
 .chooser .btn{padding:9px 2px;font-size:14px}
 .chooser .amt{display:grid;place-items:center;font-family:var(--digits);font-size:32px;line-height:1;background:#08112a;border:3px solid var(--edge);border-radius:10px;color:var(--mustard)}
+.nerve{display:flex;flex-direction:column;align-items:center;gap:2px;width:44px}
+.nerve b{font-size:9px;font-weight:900;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.nerve .nb{width:40px;height:6px;border-radius:4px;background:#08112a;border:2px solid var(--edge);overflow:hidden}
+.nerve .nb i{display:block;height:100%;background:linear-gradient(90deg,#ff7a70,#f2b33d,#6ff09b);transition:width .4s}
+.vacas{font-family:var(--digits);font-size:20px;line-height:1;color:var(--cream);background:#08112a;border:2px solid var(--edge);border-radius:8px;padding:0 6px;white-space:nowrap}
+.senas{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.senas button{display:flex;gap:8px;align-items:center;text-align:left;padding:9px;border-radius:12px;border:3px solid var(--edge);background:#273a70;box-shadow:0 3px 0 var(--edge)}
+.senas button span{font-size:30px}
+.senas button b{display:block;font-family:var(--display);font-weight:400;font-size:12px;color:var(--mustard)}
+.senas button small{font-size:12px;font-weight:800;color:#e6eeff}
+.tile.rome{flex-direction:row;gap:12px;align-items:center}
+.rome .re{font-size:40px;width:60px;height:60px;display:grid;place-items:center;background:#08112a;border:3px solid var(--edge);border-radius:14px;flex:none}
 .info{font-size:12.5px;font-weight:800;color:#d5e2fa;text-align:center;line-height:1.3}
 .info b{color:var(--mustard)}
 
@@ -451,6 +463,23 @@ const FIESTAS=[
   {n:'El Pilar',sky:['#0b1a3c','#1c3e72'],p:'petal',c:['#ffd166','#ef476f','#06d6a0','#ffffff'],f:['#3a7bd5','#f2b33d','#ef476f']}
 ];
 const fiestaOf=f=>FIESTAS[(f-1)%FIESTAS.length];
+/* tells you can show the rival: true ones scare him, false ones are a bluff he may call */
+const SENAS={
+  reyes:{e:'😬',n:'Morderse el labio',m:'dos reyes',l:'grande',t:p=>p.filter(c=>gv(c,true,'grande')===12).length>=2},
+  ases:{e:'😛',n:'Sacar la lengua',m:'dos ases',l:'chica',t:p=>p.filter(c=>gv(c,true,'chica')===1).length>=2},
+  medias:{e:'😏',n:'Torcer la boca',m:'medias',l:'pares',t:p=>{const x=paresOf(p,true);return !!x&&x.t===2}},
+  duples:{e:'🤨',n:'Alzar las cejas',m:'duples',l:'pares',t:p=>{const x=paresOf(p,true);return !!x&&x.t===3}},
+  treintayuna:{e:'😉',n:'Guiñar un ojo',m:'la 31',l:'juego',t:p=>hasJuego(p,true)&&jrank(jsum(p,true),true)===0}
+};
+/* pilgrimage stop between fiestas */
+const ROMERIA={
+  ermita:{e:'⛪',n:'La ermita',d:'Un santo al azar se une a ti. Si no tienes hueco, bendices 2 cartas de tu baraja.',use(){if(S.santos.length<S.maxSa){const k=randSanto([]);S.santos.push({k});return 'Te acompaña '+SANTOS[k].n}shuffle(S.deck.slice()).slice(0,2).forEach(c=>c.enh='bendita');return 'Bendices 2 cartas'}},
+  bodega:{e:'🍷',n:'La bodega',d:'Te bebes dos vinos al azar.',use(){const a=randVino(),b=randVino();con(a).use();con(b).use();return 'Suben '+LANCES[a.slice(2)].n+' y '+LANCES[b.slice(2)].n}},
+  feria:{e:'🎡',n:'La feria',d:'Te juegas la mitad de tus duros a cara o cruz: doble o nada.',use(){const st=Math.floor(S.money/2);if(!st)return 'No llevas duros para jugar';if(Math.random()<.5){S.money+=st;return '¡Cara! Ganas '+st+'$'}S.money-=st;return 'Cruz. Pierdes '+st+'$'}},
+  mercadillo:{e:'🧺',n:'El mercadillo',d:'Tu próximo puesto tendrá todo a mitad de precio.',use(){S.sale=true;return 'El próximo puesto, a mitad de precio'}},
+  fragua:{e:'⚒️',n:'La fragua',d:'Dos cartas bajas al azar de tu baraja se forjan en reyes.',use(){const lo=shuffle(S.deck.filter(c=>c.r>=4&&c.r<=7)).slice(0,2);lo.forEach(c=>c.r=12);return lo.length+' cartas convertidas en reyes'}},
+  pozo:{e:'🪣',n:'El pozo de los deseos',d:'Recuperas una vida (máximo 3).',use(){if(S.lives<3){S.lives++;return 'Recuperas una vida'}S.money+=5;return 'Ya tenías todas las vidas: +5$'}}
+};
 
 /* ---------- state ---------- */
 let S=null,busy=false,fresh=new Set(),bubble=null,UI={choose:null},lastScreen='';
@@ -461,11 +490,11 @@ function loadSave(){try{const t=localStorage.getItem(KEY);return t?migrate(JSON.
 function clearSave(){try{localStorage.removeItem(KEY)}catch(e){}}
 try{const c=JSON.parse(localStorage.getItem(CKEY)||'null');if(c)CFG=Object.assign(CFG,c)}catch(e){}
 function saveCfg(){try{localStorage.setItem(CKEY,JSON.stringify(CFG))}catch(e){}}
-function loadRec(){const z={runs:0,wins:0,bestFiesta:0,matches:0,ordagos:0,history:[]};try{return Object.assign(z,JSON.parse(localStorage.getItem(RKEY)||'{}'))}catch(e){return z}}
+function loadRec(){const z={runs:0,wins:0,bestFiesta:0,matches:0,ordagos:0,faroles:0,history:[]};try{return Object.assign(z,JSON.parse(localStorage.getItem(RKEY)||'{}'))}catch(e){return z}}
 function saveRec(r){try{localStorage.setItem(RKEY,JSON.stringify(r))}catch(e){}}
 function recordRun(win){
   const r=loadRec(),again=!!S.recorded;S.recorded=true;
-  if(!again){r.runs++;if(win)r.wins++;r.matches+=S.stats.won;r.ordagos+=S.stats.ordagos;
+  if(!again){r.runs++;if(win)r.wins++;r.matches+=S.stats.won;r.ordagos+=S.stats.ordagos;r.faroles+=(S.stats.faroles||0);
     r.history.unshift({d:new Date().toISOString().slice(0,10),deck:S.deckKind,f:S.fiesta,win:!!win,won:S.stats.won});r.history=r.history.slice(0,12)}
   r.bestFiesta=Math.max(r.bestFiesta,S.fiesta);saveRec(r);
 }
@@ -475,7 +504,8 @@ function migrate(s){
   if(!s.stats)s.stats={won:0,lances:0,ordagos:0};
   if(s.racha===undefined)s.racha=0;
   if(s.m&&s.m.bet&&s.m.bet.prev===undefined)s.m.bet.prev=s.m.bet.state==='rivRaise'?2:1;
-  s.v=2;return s;
+  if(s.m&&s.m.nerve===undefined)s.m.nerve=60;if(s.m&&s.m.vacas===undefined)s.m.vacas=null;if(!s.stats.faroles)s.stats.faroles=0;
+  s.v=3;return s;
 }
 let NID=1;
 function mk(r,s){return {id:(S?S.nid++:NID++),r,s,enh:null}}
@@ -556,6 +586,7 @@ function hasJuego(cards,mine){return jsum(cards,mine)>=31}
 function strength(lance,cond){
   const R=S.m.rh.map(id=>S.m.rcards[id]);
   if(S.m.boss==='espia'){const P=S.hand.map(DC);return playerWins(lance,P,R)?0:1}
+  const fooled=S.m.belief&&SENAS[S.m.belief].l===lance?0.45:1;
   const pool=[];for(const s of 'oceb')for(const r of RANKS)pool.push({r,s});
   let win=0,n=0,tries=0;
   while(n<70&&tries<500){
@@ -566,18 +597,18 @@ function strength(lance,cond){
     n++;const c=compare(lance,opp,R,false);
     if(c<0||(c===0&&S.m.mano==='riv'))win++;
   }
-  return n?win/n:0.5;
+  return (n?win/n:0.5)*fooled;
 }
 
 /* ---------- match flow ---------- */
 function startMatch(){
   const r=rivalOf(S.fiesta,S.match),t=targets(S.fiesta,S.match);
-  S.m={rival:r.n,re:r.e,boss:r.boss,me:0,riv:0,tMe:t.me,tRiv:t.riv,round:0,mano:Math.random()<.5?'me':'riv'};
+  S.m={rival:r.n,re:r.e,boss:r.boss,me:0,riv:0,tMe:t.me,tRiv:t.riv,round:0,mano:Math.random()<.5?'me':'riv',nerve:r.boss?(r.boss==='campeon'?85:75):60,vacas:r.boss?{me:0,riv:0}:null};
   S.phase='play';newRound();
 }
 function rivalDeck(){const d=[];for(const s of 'oceb')for(const r of RANKS)d.push({r,s});if(S.m.boss==='tramposo')for(const s of 'oceb')d.push({r:12,s});return shuffle(d)}
-function newRound(){
-  const m=S.m;
+function newRound(quiet){
+  const m=S.m;m.senaDone=false;m.belief=null;m.challenge=null;
   m.pdraw=shuffle(S.deck.map(c=>c.id));S.hand=[];S.sel=[];
   m.rdeck=rivalDeck();m.rcards={};m.rh=[];
   for(let i=0;i<4;i++){const c=m.rdeck.pop();const id='r'+i;m.rcards[id]=c;m.rh.push(id)}
@@ -588,7 +619,7 @@ function newRound(){
   m.L=[];m.li=0;m.bet=null;m.reveal=false;
   bubble=null;UI.choose=null;
   if(m.step==='bet')prepLances();
-  save();render();SFX.deal();
+  save();if(!quiet){render();SFX.deal()}
 }
 function drawTo4(){
   const m=S.m;
@@ -644,13 +675,16 @@ function nextLance(){
 function condFor(l){return l.k==='pares'?'pares':l.k==='juego'?'juego':l.k==='punto'?'nojuego':null}
 function curS(){const l=S.m.L[S.m.li];return strength(l.k,condFor(l))}
 function aggr(){return S.m.boss==='gallito'?0.25:S.m.boss==='campeon'?0.12:0}
+/* nerves: below 60 the rival gets scared (accepts and bets less), above 60 he gets bold */
+const nadj=()=>((S.m.nerve==null?60:S.m.nerve)-60)/220;
+function nerve(d){const m=S.m;m.nerve=Math.max(0,Math.min(100,(m.nerve==null?60:m.nerve)+d))}
 const maxBet=()=>Math.max(2,Math.ceil((S.m.tMe-S.m.me)/2));
 /* bigger bets make the rival more careful */
 const betPenalty=x=>0.035*Math.max(0,x-2);
 function rivalOpens(){
   const m=S.m,s=curS(),l=m.L[m.li];
   if(s>0.93&&Math.random()<0.22&&canOrdago()){m.bet={state:'rivOrdago',amt:1,prev:1};l.by='riv';say('¡ÓRDAGO!');ordagoScene('El rival');return}
-  if(s>0.68-aggr()||Math.random()<0.07+aggr()){
+  if(s>0.68-aggr()-nadj()||Math.random()<0.07+aggr()+Math.max(0,nadj())){
     const a=s>0.86?rnd([3,4,5]):2;m.bet={state:'rivEnv',amt:a,prev:1};l.by='riv';l.offer=a;say(a===2?'¡Envido!':'¡Envido '+a+'!');return}
   say('Paso');
 }
@@ -661,7 +695,19 @@ function award(side,n){
   const l=m.L[m.li];l.deje={side,n};
   popupLance(m.li,'+'+n,side==='me'?'':'riv');dropStones(side,n);SFX.stone();
 }
-function checkEnd(){const m=S.m;if(m.me>=m.tMe){endMatch(true);return true}if(m.riv>=m.tRiv){endMatch(false);return true}return false}
+function checkEnd(){
+  const m=S.m;let side=null;if(m.me>=m.tMe)side='me';else if(m.riv>=m.tRiv)side='riv';if(!side)return false;
+  if(m.vacas){m.vacas[side]++;if(m.vacas[side]<2){vacaWon(side);return true}}
+  endMatch(side==='me');return true;
+}
+/* best of three against the fiesta boss: a won game is a 'vaca' */
+async function vacaWon(side){
+  const m=S.m;busy=true;m.step='done';
+  m.me=0;m.riv=0;m.round++;m.mano=m.mano==='me'?'riv':'me';
+  newRound(true);
+  if(side==='me')await celebrate('¡Vaca<br>para ti!');else await mourn('Vaca para<br>el rival');
+  busy=false;render();SFX.deal();
+}
 
 async function act(a,x){
   if(busy||!S.m||S.m.step!=='bet')return;
@@ -678,7 +724,7 @@ async function act2(a,x){
   if(a==='ordago'){
     if(!canOrdago())return toast('El Padre Ramón no permite órdagos.');
     say('¡Órdago!','me');l.by='me';render();await ordagoScene('Tú');
-    const acc=S.m.boss==='espia'?s>0.5:s>0.7-aggr();
+    const acc=S.m.boss==='espia'?s>0.5:s>0.7-aggr()-nadj();
     S.stats.ordagos++;
     if(acc){say('¡Quiero!');render();await wait(600);return resolveOrdago(l)}
     say('No quiero');award('me',Math.max(1,b.state==='open'?1:b.amt)+fb);render();await wait(500);return finish();
@@ -693,9 +739,9 @@ async function act2(a,x){
       const X=Math.max(2,Math.min(maxBet(),x||2));
       l.by='me';l.offer=X;say(X===2?'¡Envido!':'¡Envido '+X+'!','me');SFX.chip();render();await wait(450);
       const pen=betPenalty(X);
-      const raise=s>0.82-aggr()+pen&&Math.random()<0.55;
+      const raise=s>0.82-aggr()+pen-nadj()&&Math.random()<0.55;
       if(raise){const r=s>0.9?3:2;m.bet={state:'rivRaise',amt:X+r,prev:X};l.offer=X+r;say('¡'+r+' más!');save();render();return}
-      const acc=s>0.45+fear-aggr()+pen||(S.m.boss==='gallito'&&Math.random()<.7-pen);
+      const acc=s>0.45+fear-aggr()+pen-nadj()||(S.m.boss==='gallito'&&Math.random()<.7-pen);
       if(acc){l.stake=X;say('¡Quiero!');render();await wait(350);return finish()}
       say('No quiero');award('me',1+fb);render();await wait(400);return finish();
     }
@@ -706,7 +752,7 @@ async function act2(a,x){
     if(a==='subir'&&b.state==='rivEnv'){
       const X=Math.max(2,Math.min(maxBet(),x||2)),tot=b.amt+X;
       l.offer=tot;say('¡'+X+' más!','me');SFX.chip();render();await wait(450);
-      if(s>0.6+fear-aggr()+betPenalty(tot)){l.stake=tot;say('¡Quiero!');render();await wait(350);return finish()}
+      if(s>0.6+fear-aggr()+betPenalty(tot)-nadj()){l.stake=tot;say('¡Quiero!');render();await wait(350);return finish()}
       say('No quiero');award('me',b.amt+fb);render();await wait(400);return finish();
     }
   }
@@ -715,15 +761,25 @@ async function act2(a,x){
     if(a==='noquiero'){say('No quiero','me');award('riv',1);render();await wait(400);return finish()}
   }
 }
+function doSena(k){
+  const m=S.m;if(busy||!m||m.step!=='bet'||m.senaDone)return;
+  m.senaDone=true;closeSheet();const d=SENAS[k];
+  const caught=m.boss==='espia'||Math.random()<0.75;
+  if(!caught){say('…','riv');toast('Haces '+d.n.toLowerCase()+', pero el rival no se ha dado cuenta.');save();render();return}
+  const believe=Math.random()<0.45+(60-(m.nerve==null?60:m.nerve))/150;
+  if(believe){m.belief=k;say('Uy, uy, uy…');toast('El rival se cree que llevas '+d.m+'.')}
+  else{m.challenge=k;say('¡Te he visto! Dices '+d.m,'riv');bubble.t='¡Te he visto! Dices '+d.m+'. Ya veremos…';toast('Te ha pillado la seña: al enseñar las cartas tendrás que confirmarla.');shake(6)}
+  SFX.talk();save();render();
+}
 async function resolveOrdago(l){
   const m=S.m;busy=true;m.reveal=true;m.step='ordago';render();SFX.drum();await wait(800);
   const win=playerWins(l.k,P(),R());
   l.res={side:win?'me':'riv',n:'TODO'};render();
   await wait(800);busy=false;
-  if(win){m.me=Math.max(m.me,m.tMe);return endMatch(true,'¡Órdago<br>ganado!')}
+  if(win){m.me=Math.max(m.me,m.tMe);if(m.vacas){busy=true;return checkEnd()}return endMatch(true,'¡Órdago<br>ganado!')}
   const ci=S.santos.findIndex(x=>x.k==='cura');
   if(ci>=0){S.santos.splice(ci,1);toast('El Cura te salva del órdago y se marcha');m.step='roundEnd';save();render();return}
-  m.riv=Math.max(m.riv,m.tRiv);endMatch(false,'Órdago<br>perdido');
+  m.riv=Math.max(m.riv,m.tRiv);if(m.vacas){busy=true;return checkEnd()}endMatch(false,'Órdago<br>perdido');
 }
 
 /* ---------- reveal & scoring ---------- */
@@ -742,6 +798,9 @@ async function runReveal(){
   const bend=p.filter(c=>enhOf(c,true)==='bendita').length,dor=p.filter(c=>enhOf(c,true)==='dorada').length;
   for(let i=0;i<m.L.length;i++){
     const l=m.L[i];if(l.mode==='skip')continue;
+    /* a refused bet of yours that you would have lost is a bluff that worked */
+    if(l.deje&&l.deje.side==='me'&&l.by==='me'&&l.mode==='bet'&&!playerWins(l.k,p,r)){
+      nerve(-15);S.stats.faroles=(S.stats.faroles||0)+1;m.li=i;render();popupLance(i,'¡Farol colado!','d');SFX.win1();await wait(700)}
     if(l.deje&&!['pares','juego'].includes(l.k))continue;
     m.li=i;render();lit(i);await wait(380);
     let side;
@@ -766,6 +825,7 @@ async function runReveal(){
       if(du){S.money+=du;extra.push('+'+du+'$')}
     }else if(l.k==='grande'){S.racha=0}
     l.res={side,n};
+    if(l.stake>0&&l.by==='me'&&side==='riv')nerve(8);
     if(side==='me')roundMe+=n;
     if(side==='me')m.me+=n;else m.riv+=n;
     render();
@@ -775,6 +835,13 @@ async function runReveal(){
     await wait(650);
     if(checkEnd()){return}
   }
+  if(m.challenge){
+    const d=SENAS[m.challenge],ok=d.t(p);m.challenge=null;
+    if(ok){m.me+=2;nerve(-12);dropStones('me',2);bubble={t:'¡Era verdad!',side:'me'};toast('¡Tenías '+d.m+' de verdad! +2 piedras y el rival se pone nervioso.')}
+    else{m.riv+=2;nerve(15);dropStones('riv',2);bubble={t:'¡Pillado!',side:'riv'};toast('No tenías '+d.m+': el rival se lleva 2 piedras.')}
+    render();await wait(900);if(checkEnd())return;
+  }
+  if(m.belief){if(!SENAS[m.belief].t(p)){nerve(-8);S.stats.faroles=(S.stats.faroles||0)+1;toast('El rival se tragó tu seña falsa.')}m.belief=null}
   let bonus=0;
   if(has('pleno')&&wins===played&&played>=3){bonus+=roundMe;toast('¡Pleno! Ronda ×2')}
   if(has('abuela')&&wins===0&&played>0){bonus+=4;toast('La Abuela te consuela: +4')}
@@ -808,11 +875,12 @@ async function endMatch(won,why){
 
 /* ---------- shop ---------- */
 function cobrar(){S.money+=S.cobro.total;S.cobro=null;genShop();S.phase='shop';save();render();SFX.coin()}
-function genShop(){S.shop={rr:3};rollShop();const pk=Object.keys(PK);S.shop.pk=[{k:rnd(pk)},{k:rnd(pk)}]}
+function genShop(){S.shop={rr:3,sale:!!S.sale};S.sale=false;rollShop();const pk=Object.keys(PK);S.shop.pk=[{k:rnd(pk)},{k:rnd(pk)}]}
+const shopPrice=p=>S.shop&&S.shop.sale?Math.ceil(p/2):p;
 function rollShop(){const a=randSanto([]),b=randSanto([a]);S.shop.sa=[{k:a},{k:b}];S.shop.co=[{k:randCon()},{k:randCon()}]}
 function buy(kind,i){
   const it=S.shop[kind][i];if(!it||it.sold)return;
-  const p=kind==='sa'?SANTOS[it.k].p:kind==='co'?con(it.k).p:PK[it.k].p;
+  const p=shopPrice(kind==='sa'?SANTOS[it.k].p:kind==='co'?con(it.k).p:PK[it.k].p);
   if(S.money<p){SFX.no();return toast('No te llegan los duros.')}
   if(kind==='sa'&&S.santos.length>=S.maxSa){SFX.no();return toast('No te quedan huecos de santo. Vende uno.')}
   if(kind==='co'&&S.cons.length>=S.maxCo){SFX.no();return toast('No te quedan huecos de consumible.')}
@@ -836,7 +904,14 @@ function pickPack(i){
   else S.deck.push(Object.assign({id:S.nid++},o));
   SFX.coin();S.pack=null;S.phase='shop';save();render();
 }
-function nextMatch(){if(S.match<2)S.match++;else{S.match=0;S.fiesta++;BG.setFiesta(S.fiesta)}S.shop=null;S.m=null;S.phase='previa';save();render()}
+function nextMatch(){
+  let rome=false;
+  if(S.match<2)S.match++;else{S.match=0;S.fiesta++;BG.setFiesta(S.fiesta);rome=true}
+  S.shop=null;S.m=null;
+  if(rome){S.rome=shuffle(Object.keys(ROMERIA)).slice(0,3);S.phase='romeria'}else S.phase='previa';
+  save();render();
+}
+function pickRome(k){if(!S.rome||!S.rome.includes(k))return;const msg=ROMERIA[k].use();S.rome=null;S.phase='previa';SFX.coin();BG.boom();toast(ROMERIA[k].n+': '+msg);save();render()}
 function useCon(i){
   const k=S.cons[i],d=con(k);
   if(d.need){
@@ -1041,6 +1116,11 @@ function santosHTML(){
     else h+='<div class="jc empty"><span>Santo</span></div>'}
   return h+'</div>';
 }
+function sheetSena(){
+  const m=S.m;if(!m||m.step!=='bet'||m.senaDone||busy)return;
+  sheet('<h2>Hacer una seña</h2><p style="font-size:13px">El rival puede no verla, creérsela (y achantarse en ese lance) o pillarla y exigir que la confirmes al enseñar las cartas. Si era verdad, ganas 2 piedras y se pone nervioso; si era mentira, se lleva él 2 piedras. Una por ronda.</p><div class="senas">'+
+    Object.entries(SENAS).map(([k,d])=>'<button data-a="dosena" data-k="'+k+'"><span>'+d.e+'</span><div><b>'+d.n+'</b><small>«Llevo '+d.m+'» · '+(d.t(P())?'verdad':'farol')+'</small></div></button>').join('')+'</div><button class="btn dark" data-a="close">Cerrar</button>');
+}
 function toolsHTML(){
   let h='<div class="tools">';
   for(let i=0;i<S.maxCo;i++){const k=S.cons[i];if(k){const d=con(k);h+='<button class="tool '+d.cls+'" data-a="co" data-i="'+i+'"><i>'+d.e+'</i><span>'+d.n+'</span></button>'}else h+='<div class="tool empty">Consumible</div>'}
@@ -1056,14 +1136,14 @@ function hudHTML(){
   const r=S.m;const rv=rivalOf(S.fiesta,S.match);
   let h='<div class="hud box"><div class="hrow"><div class="where"><span class="lbl">'+fiestaName(S.fiesta)+' · '+(S.match+1)+'/3</span><b>'+rv.e+' '+rv.n+'</b>'+(rv.boss?'<button class="pill" data-a="boss">Regla</button>':'')+'</div>'+
     '<div class="row"><span class="vidas" aria-label="Vidas">'+'❤️'.repeat(Math.max(0,S.lives))+'</span><span class="duros num">'+S.money+'$</span></div></div>';
-  if(S.phase==='play'&&r)h+='<div class="bowls">'+bowlHTML('me',r.me,r.tMe)+bowlHTML('riv',r.riv,r.tRiv)+'</div>';
+  if(S.phase==='play'&&r)h+='<div class="bowls">'+bowlHTML('me',r.me,r.tMe)+bowlHTML('riv',r.riv,r.tRiv)+'</div>'+(r.vacas?'<div class="hrow"><span class="lbl">Al mejor de tres juegos</span><span class="vacas" title="Vacas">🐄 '+r.vacas.me+' – '+r.vacas.riv+'</span></div>':'');
   return h+'</div>';
 }
 function render(){
   if(!S)return renderMenu();
   const key=S.phase+':'+S.fiesta+':'+S.match;
   app.classList.toggle('fix',S.phase==='play');
-  ({previa:renderPrevia,play:renderPlay,cobro:renderCobro,shop:renderShop,pack:renderPack,over:renderOver,win:renderWin,lost:renderLost})[S.phase]();
+  ({previa:renderPrevia,play:renderPlay,cobro:renderCobro,shop:renderShop,pack:renderPack,over:renderOver,win:renderWin,lost:renderLost,romeria:renderRome})[S.phase]();
   if(key!==lastScreen){app.scrollTop=0;window.scrollTo(0,0);lastScreen=key}
   fresh.clear();
 }
@@ -1086,7 +1166,7 @@ function renderPrevia(){
   for(let m=0;m<3;m++){
     const rv=rivalOf(S.fiesta,m),tg=targets(S.fiesta,m),st=m<S.match?' done':m===S.match?' cur':'';
     t+='<div class="tile box'+st+(rv.boss?' bossy':'')+'"><div class="kv"><span class="lbl">'+(rv.boss?'Jefe de la fiesta':'Partida '+(m+1))+'</span><span>'+(m<S.match?'✔ Ganada':'Premio <b>'+rewardFor(m)+'$</b>')+'</span></div>'+
-      '<h3>'+rv.e+' '+rv.n+'</h3>'+(rv.boss?'<p>'+BOSSES[rv.boss].d+'</p>':'')+
+      '<h3>'+rv.e+' '+rv.n+'</h3>'+(rv.boss?'<p>'+BOSSES[rv.boss].d+'</p><p>🐄 Se juega a <b>vacas</b>: al mejor de tres juegos.</p>':'')+
       '<div class="kv"><span>Tú necesitas</span><b class="num">'+tg.me+' piedras</b></div><div class="kv"><span>El rival necesita</span><b class="num">'+tg.riv+' piedras</b></div></div>';
   }
   setScreen('<div class="screen">'+hudHTML()+santosHTML()+toolsHTML()+'<div class="cartel"><b>'+fiestaName(S.fiesta)+'</b><small>'+(S.endless?'Modo infinito':'Fiesta '+S.fiesta+' de 6')+'</small></div><div class="col">'+t+'</div>'+
@@ -1137,7 +1217,7 @@ function renderPlay(){
   }else if(m.step==='bet'&&m.bet&&UI.choose&&!busy){acts=chooserHTML();n=0}
   else if(m.step==='bet'&&m.bet){
     const b=m.bet;const dis=busy?' disabled':'';const ord=canOrdago()?'':' disabled';
-    if(b.state==='open'){acts='<button class="btn dark" data-a="paso"'+dis+'>Paso</button><button class="btn b" data-a="envido"'+dis+'>Envido…</button><button class="btn r" data-a="ordago"'+dis+ord+'>Órdago</button>'}
+    if(b.state==='open'){n=m.senaDone?3:4;acts='<button class="btn dark" data-a="paso"'+dis+'>Paso</button><button class="btn b" data-a="envido"'+dis+'>Envido…</button><button class="btn r" data-a="ordago"'+dis+ord+'>Órdago</button>'+(m.senaDone?'':'<button class="btn y" data-a="sena"'+dis+'>Seña</button>')}
     else if(b.state==='rivOrdago'){n=2;acts='<button class="btn dark" data-a="noquiero"'+dis+'>No quiero</button><button class="btn r" data-a="quiero"'+dis+'>¡Quiero!</button>'}
     else{n=4;acts='<button class="btn dark" data-a="noquiero"'+dis+'>No</button><button class="btn g" data-a="quiero"'+dis+'>Quiero</button>'+
       (b.state==='rivEnv'?'<button class="btn b" data-a="subir"'+dis+'>Subir…</button>':'<button class="btn b" disabled>Subir</button>')+'<button class="btn r" data-a="ordago"'+dis+ord+'>Órdago</button>'}
@@ -1147,11 +1227,15 @@ function renderPlay(){
   app.innerHTML='<div class="playwrap">'+
     '<div class="pa-hud">'+hudHTML()+'</div>'+
     '<div class="pa-top">'+santosHTML()+toolsHTML()+'</div>'+
-    '<div class="pa-riv"><div class="rivzone"><span class="rivface">'+m.re+'</span><div class="rivhand">'+rivHTML+'</div>'+bub+'</div></div>'+
+    '<div class="pa-riv"><div class="rivzone">'+nerveHTML()+'<span class="rivface">'+m.re+'</span><div class="rivhand">'+rivHTML+'</div>'+bub+'</div></div>'+
     '<div class="pa-lances"><div class="lances box">'+lances+'</div></div>'+
     '<div class="pa-info"><div class="info">'+info+'</div></div>'+
     '<div class="pa-hand"><div class="hand">'+S.hand.map((id,i)=>cardHTML(DC(id),{cls:S.sel.includes(id)?'sel':'',act:m.step==='mus'||m.step==='bet',mine:true,i})).join('')+'</div></div>'+
     '<div class="pa-act">'+(n?'<div class="actions" style="--n:'+n+'">'+acts+'</div>':acts)+'</div></div>';
+}
+function nerveHTML(){
+  const v=S.m.nerve==null?60:S.m.nerve,face=v>=75?'😎':v>=45?'😐':v>=20?'😰':'😱';
+  return '<div class="nerve" title="Nervios del rival"><b>Nervios</b><span style="font-size:18px;line-height:1">'+face+'</span><div class="nb"><i style="width:'+v+'%"></i></div></div>';
 }
 function popupLance(i,txt,cls){const el=app.querySelector('.lance[data-li="'+i+'"]');if(!el)return;const p=document.createElement('span');p.className='pop '+(cls||'');p.textContent=txt;el.appendChild(p);setTimeout(()=>p.remove(),1000)}
 async function renderCobro(){
@@ -1171,12 +1255,13 @@ function itemHTML(kind,i,it){
   if(kind==='sa'){card=saBig({k:it.k});p=SANTOS[it.k].p}
   else if(kind==='co'){card=coBig(it.k);p=con(it.k).p}
   else{const d=PK[it.k];card=bigCard({cls:'pk',style:'--frame:#ffd36b;--tint:#fff1c2',e:d.e,tag:'Sobre',n:d.n,d:d.d});p=d.p}
+  p=shopPrice(p);
   return '<div class="item'+(it.sold?' sold':'')+'">'+card+'<button class="btn '+(S.money>=p&&!it.sold?'y':'dark')+' sm" data-a="buy" data-k="'+kind+'" data-i="'+i+'"'+(it.sold?' disabled':'')+'>'+(it.sold?'Comprado':'Comprar '+p+'$')+'</button></div>';
 }
 function renderShop(){
   const sh=S.shop;
   setScreen('<div class="screen">'+hudHTML()+santosHTML()+toolsHTML()+
-    '<div class="cartel"><b>El puesto</b><small>Santos, estampas y buen vino</small></div><div class="sec-h"><span class="lbl">Santos</span><button class="btn r sm" data-a="reroll">Cambiar '+sh.rr+'$</button></div>'+
+    '<div class="cartel"><b>El puesto</b><small>'+(sh.sale?'¡Todo a mitad de precio!':'Santos, estampas y buen vino')+'</small></div><div class="sec-h"><span class="lbl">Santos</span><button class="btn r sm" data-a="reroll">Cambiar '+sh.rr+'$</button></div>'+
     '<div class="grid2">'+sh.sa.map((it,i)=>itemHTML('sa',i,it)).join('')+'</div>'+
     '<span class="lbl">Estampas y vinos</span><div class="grid2">'+sh.co.map((it,i)=>itemHTML('co',i,it)).join('')+'</div>'+
     '<span class="lbl">Sobres</span><div class="grid2">'+sh.pk.map((it,i)=>itemHTML('pk',i,it)).join('')+'</div>'+
@@ -1189,7 +1274,11 @@ function renderPack(){
   else opts=p.opts.map((k,i)=>'<button class="item" data-a="pick" data-i="'+i+'">'+coBig(k)+'</button>').join('');
   setScreen('<div class="screen">'+hudHTML()+'<div class="cartel"><b>'+PK[p.k].e+' '+PK[p.k].n+'</b><small>Toca la que quieras</small></div><div class="'+(p.k==='cartas'?'col':'grid2')+'">'+opts+'</div><button class="btn dark" data-a="skip">No quiero ninguna</button></div>');
 }
-function statsHTML(){return '<div class="kv"><span>Fiesta alcanzada</span><span style="color:#fff">'+fiestaName(S.fiesta)+'</span></div><div class="kv"><span>Partidas ganadas</span><b>'+S.stats.won+'</b></div><div class="kv"><span>Lances ganados</span><b>'+S.stats.lances+'</b></div><div class="kv"><span>Órdagos echados</span><b>'+S.stats.ordagos+'</b></div><div class="kv"><span>Baraja</span><span style="color:#fff">'+DECKS[S.deckKind].n+'</span></div>'}
+function statsHTML(){return '<div class="kv"><span>Fiesta alcanzada</span><span style="color:#fff">'+fiestaName(S.fiesta)+'</span></div><div class="kv"><span>Partidas ganadas</span><b>'+S.stats.won+'</b></div><div class="kv"><span>Lances ganados</span><b>'+S.stats.lances+'</b></div><div class="kv"><span>Órdagos echados</span><b>'+S.stats.ordagos+'</b></div><div class="kv"><span>Faroles colados</span><b>'+(S.stats.faroles||0)+'</b></div><div class="kv"><span>Baraja</span><span style="color:#fff">'+DECKS[S.deckKind].n+'</span></div>'}
+function renderRome(){
+  setScreen('<div class="screen">'+hudHTML()+'<div class="cartel"><b>Romería</b><small>Camino de '+fiestaName(S.fiesta)+': elige una parada</small></div><div class="col">'+
+    (S.rome||[]).map(k=>{const d=ROMERIA[k];return '<button class="tile box rome" data-a="rome" data-k="'+k+'"><span class="re">'+d.e+'</span><div><h3>'+d.n+'</h3><p>'+d.d+'</p></div></button>'}).join('')+'</div></div>');
+}
 function renderLost(){
   setScreen('<div class="screen">'+hudHTML()+'<div class="tile box bossy"><h3>Te han ganado</h3><p>'+(S.m?S.m.re+' '+S.m.rival:'El rival')+' se lleva la partida. Pierdes una vida; te quedan '+S.lives+'.</p></div>'+
     '<button class="btn y" data-a="revancha">Revancha</button></div>');
@@ -1233,7 +1322,7 @@ function sheetSettings(){
 function sheetRecords(){
   const r=loadRec();
   sheet('<h2>Récords</h2><div class="kv"><span>Partidas</span><b>'+r.runs+'</b></div><div class="kv"><span>Victorias</span><b>'+r.wins+'</b></div><div class="kv"><span>Fiesta máxima</span><b>'+r.bestFiesta+'</b></div>'+
-    '<div class="kv"><span>Partidas ganadas a rivales</span><b>'+r.matches+'</b></div><div class="kv"><span>Órdagos echados</span><b>'+r.ordagos+'</b></div>'+
+    '<div class="kv"><span>Partidas ganadas a rivales</span><b>'+r.matches+'</b></div><div class="kv"><span>Órdagos echados</span><b>'+r.ordagos+'</b></div><div class="kv"><span>Faroles colados</span><b>'+r.faroles+'</b></div>'+
     (r.history.length?'<span class="lbl">Últimas partidas</span><table class="lv"><tbody>'+r.history.map(h=>'<tr><td>'+h.d+' · '+(DECKS[h.deck]?DECKS[h.deck].n:h.deck)+'</td><td>'+(h.win?'🏆':fiestaName(h.f))+'</td><td>'+h.won+' ganadas</td></tr>').join('')+'</tbody></table>':'<p>Aún no has terminado ninguna partida.</p>')+
     '<button class="btn dark" data-a="close">Cerrar</button>');
 }
@@ -1249,6 +1338,9 @@ function sheetHelp(){
   '<h3>La ronda</h3><p><b>1. Mus.</b> Selecciona las cartas que quieres cambiar y pulsa <b>Mus</b>. Si el rival va bien servido, te cortará: «¡No hay mus!». <b>Soltar</b> deselecciona todo.</p>'+
   '<p><b>2. Lances.</b> Grande, Chica, Pares (pareja 1, medias 2, duples 3) y Juego o Punto. En cada lance puedes pasar, <b>envidar</b> las piedras que elijas (2, 3, 5 o lo que marques con − y +) o echar un <b>órdago</b>: si lo aceptan, quien gane ese lance gana la partida entera. Si el rival envida, puedes querer, no querer o subir.</p>'+
   '<p>Si no quieren tu envite te llevas el «deje»: 1 piedra si era el primer envite, o lo que hubiera en la mesa si ya se había subido. Al final se enseñan las cartas y se cuentan los lances en orden. Los empates los gana quien es mano.</p>'+
+  '<h3>Faroles y señas</h3><p>😐 El rival tiene <b>nervios</b>. Cada vez que no quiere un envite tuyo que habrías perdido, te ha colado un farol y se pone más nervioso: acepta menos y se arriesga menos. Si le pillas faroleando, se envalentona.</p>'+
+  '<p>😉 Una vez por ronda puedes hacer una <b>seña</b> (guiño, labio, lengua…). Puede no verla, creérsela y achantarse en ese lance, o pillarla y exigir que la confirmes: si era verdad ganas 2 piedras; si era mentira, se las lleva él.</p>'+
+  '<h3>Jefes y romería</h3><p>🐄 Al jefe de cada fiesta se le gana <b>a vacas</b>, al mejor de tres juegos. Entre fiesta y fiesta haces una <b>romería</b>: eliges una parada (ermita, bodega, feria, mercadillo, fragua o pozo).</p>'+
   '<p>⛪ <b>Santos</b>: efectos permanentes. 🖼️ <b>Estampas</b>: cambian cartas de tu baraja. 🍷 <b>Vinos</b>: suben de nivel un lance. Tienes 3 vidas: si pierdes una partida, te toca revancha. Gana las 6 fiestas para ser el campeón.</p>'+
   '<button class="btn y" data-a="close">¡Vamos!</button>');
 }
@@ -1281,6 +1373,9 @@ document.addEventListener('click',e=>{
     case 'amtgo':{const c=UI.choose;act(c.mode==='env'?'envido':'subir',c.amt);break}
     case 'paso':case 'ordago':case 'quiero':case 'noquiero':act(a);break;
     case 'nextround':nextRound();break;
+    case 'sena':sheetSena();break;
+    case 'dosena':doSena(b.dataset.k);break;
+    case 'rome':pickRome(b.dataset.k);break;
     case 'sa':sheetSa(i);break;
     case 'co':sheetCo(i);break;
     case 'sellsa':{if(busy)break;S.money+=Math.floor(SANTOS[S.santos[i].k].p/2);S.santos.splice(i,1);closeSheet();SFX.coin();save();render();break}
