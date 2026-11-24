@@ -332,7 +332,7 @@ table.lv td:nth-child(n+2){text-align:right;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 <style>html{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<!-- version 5.0 -->
+<!-- version 5.1 -->
 </head>
 <body>
 
@@ -627,7 +627,7 @@ Object.assign(AM,{
   pobrediablo:{n:'Pobre diablo',p:6,e:'🥲',d:'×2 Multi si tienes $5 o menos.',hand:(a,x,h)=>{if(S.money<=5)h.x(2)}},
   cleptomano:{n:'Cleptómano',p:5,e:'🫳',d:'+$2 por cada carta grabada que descartes.',disc:(a,cs)=>2*cs.filter(c=>c.enh).length},
   chatarrero:{n:'Chatarrero',p:5,e:'🔧',d:'+$2 extra cada vez que vendes un amuleto.',sell:a=>{S.money+=2}},
-  carapoker:{n:'Cara de póker',p:7,e:'😐',d:'Los faroles ganados pagan ×3 lo apostado en vez de ×2.'},
+  carapoker:{n:'Cara de póker',p:7,e:'😐',d:'Los faroles ganados pagan ×1 más de lo normal.'},
   chivato:{n:'Chivato',p:6,e:'🐀',d:'Los faroles exigen un 15 % menos de puntos.'},
   manotemblorosa:{n:'Mano temblorosa',p:7,e:'🫨',d:'×2 Multi si la mano lleva un farol encima.',hand:(a,x,h)=>{if(x.bluff)h.x(2)}},
   maton:{n:'Matón',p:7,e:'🦍',d:'×2 Multi mientras debas dinero al prestamista.',hand:(a,x,h)=>{if(S.debt>0)h.x(2)}},
@@ -768,7 +768,7 @@ Object.assign(VALES,{
   garantia:{n:'Garantía',e:'📑',d:'El prestamista solo cobra un 25 % de recargo.'},
   plazo:{n:'Plazo extra',req:'garantia',e:'⏰',d:'Las deudas vencen una noche más tarde.'},
   antifaz:{n:'Antifaz',e:'🎭',d:'Los faroles exigen un 10 % menos de puntos.'},
-  mascara:{n:'Máscara veneciana',req:'antifaz',e:'🎊',d:'Los faroles ganados pagan ×2,5 lo apostado.'},
+  mascara:{n:'Máscara veneciana',req:'antifaz',e:'🎊',d:'Los faroles ganados pagan ×0,5 más de lo normal.'},
   guante:{n:'Guante de seda',e:'🧤',d:'+1 carta en la mano.'},
   manopla:{n:'Manopla',req:'guante',e:'🥊',d:'El primer descarte de cada mesa no gasta descarte.'}
 });
@@ -1056,7 +1056,7 @@ async function playHand(){
   S.hlog=(S.hlog||[]).concat(R.total).slice(-8);
   let bluffMsg='',bluffWon=false;
   if(S.bluff){const bf=S.bluff;S.bluff=null;S.bluffUsed=true;
-    const mult=has('carapoker')?3:hasV('mascara')?2.5:2;
+    const mult=bf.pay||2;
     if(R.total>=bf.need){bluffWon=true;const g=Math.floor(bf.stake*mult);S.money+=g;bluffMsg='¡Farol ganado! Cobras $'+g}
     else{const back=has('malperdedor')?Math.floor(bf.stake/2):0;S.money+=back;bluffMsg='Farol perdido: -$'+(bf.stake-back)}
     S.lastBluffWon=bluffWon;fire('bluff',bluffWon)}
@@ -1201,17 +1201,24 @@ function skipMesa(){
 }
 function skipOf(n,m){S.skips=S.skips||{};const k=n+'-'+m;if(!S.skips[k])S.skips[k]=rnd(Object.keys(SKIPS));return S.skips[k]}
 const niceUp=v=>{if(v<100)return Math.ceil(v/5)*5;const p=Math.pow(10,Math.floor(Math.log10(v))-1);return Math.ceil(v/p)*p};
-/* the bar follows what you have been scoring lately, so a bluff is always a real gamble */
-function bluffNeed(){
-  const log=(S.hlog||[]).slice(-5),rem=Math.max(0,S.target-S.score)/Math.max(1,S.handsLeft);
-  let base=log.length?Math.max(Math.max(...log)*1.1,log.reduce((a,b)=>a+b,0)/log.length*1.6):S.target*0.5;
-  base=Math.max(base,rem*1.25,S.target*0.3);
-  return niceUp(base*(1-(has('chivato')?0.15:0)-(hasV('antifaz')?0.1:0)));
+/* three risk levels: how high the bar is and how much it pays */
+const BLUFF={seguro:{n:'Seguro',k:0.85,pay:1.5},normal:{n:'Normal',k:1.2,pay:2},atrevido:{n:'Atrevido',k:1.6,pay:3}};
+let bluffTier='normal';
+const bluffPay=t=>BLUFF[t].pay+(has('carapoker')?1:0)+(hasV('mascara')?0.5:0);
+/* your typical hand: the median of the last 8, so one great or one poor hand barely moves it */
+function typicalHand(){const l=(S.hlog||[]).slice(-8).sort((a,b)=>a-b);if(l.length<3)return 0;const m=l.length>>1;return l.length%2?l[m]:(l[m-1]+l[m])/2}
+/* the pace this table asks for; it grows table after table */
+const tablePace=()=>S.target/Math.max(1,handsPer());
+/* the bar sits around your typical hand (a coin flip on Normal); if you are scoring below the
+   table's pace it is pulled up towards the pace, so it keeps growing night after night */
+function bluffNeed(t){
+  const pace=tablePace(),typ=typicalHand(),base=typ?Math.max(Math.sqrt(typ*pace),typ*0.85):pace;
+  return niceUp(base*BLUFF[t||'normal'].k*(1-(has('chivato')?0.15:0)-(hasV('antifaz')?0.1:0)));
 }
-function setBluff(v){
+function setBluff(v,t){t=t||bluffTier;
   if(S.bluffUsed&&!S.bluff)return toast('Ya has echado un farol en esta mesa.');
   if(S.bluff){S.money+=S.bluff.stake;S.bluff=null}
-  if(v>0){if(S.money<v){SFX.no();return toast('No te llega el dinero.')}S.money-=v;S.bluff={stake:v,need:bluffNeed()};SFX.coin()}
+  if(v>0){if(S.money<v){SFX.no();return toast('No te llega el dinero.')}S.money-=v;S.bluff={stake:v,need:bluffNeed(t),pay:bluffPay(t),tier:t};SFX.coin()}
   closeSheet();save();render();
 }
 const loanRate=()=>has('avalista')?0.2:hasV('garantia')?0.25:0.5;
@@ -1669,11 +1676,14 @@ function sheetSettings(){
 function sheetBluff(){
   if(S.phase!=='play'||busy)return;
   if(S.bluffUsed&&!S.bluff)return toast('Ya has echado un farol en esta mesa.');
-  const need=S.bluff?S.bluff.need:bluffNeed(),mult=has('carapoker')?3:hasV('mascara')?2.5:2;
-  sheet('<div class="sign"><div class="neon a">🎭 ECHAR UN FAROL</div><small>Apuesta a que tu próxima mano llega a <b>'+fm(need)+'</b> puntos. Si llega, cobras ×'+fm(mult)+' lo apostado; si no, lo pierdes. La cifra sigue a tus mejores manos recientes, y solo puedes echar un farol por mesa.</small></div>'+
+  const t=S.bluff?S.bluff.tier||'normal':bluffTier,need=S.bluff?S.bluff.need:bluffNeed(t),pay=S.bluff?S.bluff.pay||2:bluffPay(t),typ=typicalHand();
+  sheet('<div class="sign"><div class="neon a">🎭 ECHAR UN FAROL</div><small>Apuesta a que tu próxima mano llega a <b>'+fm(need)+'</b> puntos. Si llega, cobras <b>×'+fm(pay)+'</b> lo apostado; si no, lo pierdes. Uno por mesa.</small></div>'+
+    (S.bluff?'':'<div class="seg">'+Object.entries(BLUFF).map(([k,o])=>'<button data-a="blufftier" data-v="'+k+'" class="'+(k===t?'on':'')+'">'+o.n+' ×'+fm(bluffPay(k))+'</button>').join('')+'</div>')+
+    '<div class="kv"><span>Ritmo de esta mesa</span><b>'+fm(Math.round(tablePace()))+'</b></div><div class="kv"><span>Tu mano típica (mediana de las últimas)</span><b>'+(typ?fm(Math.round(typ)):'—')+'</b></div>'+
     '<div class="row" style="flex-wrap:wrap;justify-content:center">'+[1,2,3,5,10].map(v=>'<button class="btn '+(S.bluff&&S.bluff.stake===v?'y':'m')+' sm" data-a="bluffset" data-v="'+v+'"'+(S.money+(S.bluff?S.bluff.stake:0)<v?' disabled':'')+'>$'+v+'</button>').join('')+'</div>'+
     (S.bluff?'<button class="btn dark" data-a="bluffset" data-v="0">Retirar el farol (te devuelven $'+S.bluff.stake+')</button>':'')+'<button class="btn dark" data-a="close">Cerrar</button>');
 }
+
 function sheetLoan(){}
 function sheetCollection(){
   const am=Object.keys(AM).map(k=>{const d=AM[k],ok=okAm(k);return '<div class="jc '+rarOf(d)+(ok?'':' locked')+'" title="'+(ok?d.n:LOCKS.am[k].d)+'"><span class="art"><span>'+d.e+'</span></span><span class="nm">'+(ok?d.n:'???')+'</span></div>'}).join('');
@@ -1699,7 +1709,7 @@ function sheetHelp(){
   '<p>La tercera mesa de cada noche es un <b>rival</b> con una regla especial. Toca «Regla» para verla.</p>'+
   '<p>Al ganar cobras el premio, $1 por mano sin usar e <b>interés</b> ($1 por cada $5). En la trastienda compras:</p>'+
   '<p>🃏 <b>Amuletos</b>: efectos permanentes, a veces en edición especial (Charol, Neón, Prisma, Fantasma). Actúan de izquierda a derecha.<br>📜 <b>Pergaminos</b>: graban, tiñen, copian o destruyen cartas.<br>🍷 <b>Licores</b>: suben de nivel un tipo de mano.<br>🔯 <b>Talismanes</b>: muy poderosos, pero con un precio.<br>🎫 <b>Vales</b>: una mejora permanente distinta cada noche.<br>🂠 <b>Cartas sueltas</b> y 🎁 <b>sobres</b>.</p>'+
-  '<p>🎭 <b>Farol</b>: antes de jugar puedes apostar a que tu mano llegará a una cifra. Si llega, cobras el doble. Uno por mesa, y la cifra sigue a tus mejores manos.<br>🕴️ <b>Prestamista</b>: en la trastienda te presta dinero, a devolver con un 50 % más al ganar al rival de la noche. Si entonces no puedes pagar, pierdes la partida.<br>⏭️ <b>Saltar mesa</b>: las mesas 1 y 2 se pueden saltar a cambio de una recompensa, sin cobro ni trastienda.<br>🔖 <b>Sellos</b>: algunas cartas llevan un sello que actúa aunque se quede en tu mano.</p>'+
+  '<p>🎭 <b>Farol</b>: antes de jugar puedes apostar a que tu mano llegará a una cifra. Si llega, cobras el doble (o ×1,5 en Seguro y ×3 en Atrevido). Uno por mesa; la cifra combina el ritmo de la mesa con tu mano típica.<br>🕴️ <b>Prestamista</b>: en la trastienda te presta dinero, a devolver con un 50 % más al ganar al rival de la noche. Si entonces no puedes pagar, pierdes la partida.<br>⏭️ <b>Saltar mesa</b>: las mesas 1 y 2 se pueden saltar a cambio de una recompensa, sin cobro ni trastienda.<br>🔖 <b>Sellos</b>: algunas cartas llevan un sello que actúa aunque se quede en tu mano.</p>'+
   '<p>Supera la Noche 8 para ganar. Cada victoria desbloquea una <b>apuesta</b> más difícil, y al jugar desbloqueas amuletos y barajas nuevas (Récords → Colección).</p><button class="btn y" data-a="close">¡Entendido!</button>');
 }
 
@@ -1719,6 +1729,7 @@ document.addEventListener('click',e=>{
     case 'skipmesa':skipMesa();break;
     case 'bluff':sheetBluff();break;
     case 'bluffset':setBluff(Number(b.dataset.v));break;
+    case 'blufftier':bluffTier=b.dataset.v;sheetBluff();break;
     case 'loan':takeLoan(Number(b.dataset.v));break;
     case 'payloan':payLoan();break;
     case 'collection':sheetCollection();break;
