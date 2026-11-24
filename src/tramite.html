@@ -1,0 +1,1277 @@
+<title>Último Trámite</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Trámite">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Pixelify+Sans:wght@400;600;700&family=Special+Elite&family=VT323&display=swap">
+<style>
+:root{--bg:#120e18;--night:#1d1730;--wood:#3a2c22;--wood2:#2c2119;--paper:#efe4c8;--ink:#2b211b;--ok:#3c8f55;--no:#b8402f;--gold:#e0b04a;--glow:#a8e6ff;--ui:#e9dfc9;--mut:#a89c88;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ui);font-family:'Pixelify Sans',system-ui,sans-serif;overscroll-behavior:none}
+body{-webkit-user-select:none;user-select:none;touch-action:manipulation}
+button{font:inherit;color:inherit;cursor:pointer}
+#app{height:100vh;height:100dvh;overflow:hidden;position:relative}
+.pix{image-rendering:pixelated;image-rendering:crisp-edges}
+.scr{height:100%;overflow:auto;-webkit-overflow-scrolling:touch}
+.btn{border:2px solid #000;background:#5b4a3a;color:#fff3dc;border-radius:6px;padding:9px 13px;font-weight:600;box-shadow:0 3px 0 #000,inset 0 1px 0 rgba(255,255,255,.18);font-size:15px;letter-spacing:.3px;display:inline-flex;align-items:center;justify-content:center;gap:4px;line-height:1.1}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #000}
+.btn:disabled{opacity:.38;pointer-events:none}
+.btn.gold{background:#a7782a;color:#fff7e0}
+.btn.ok{background:var(--ok)}
+.btn.no{background:var(--no)}
+.btn.dark{background:#2a2333}
+.btn.big{font-size:18px;padding:12px 18px}
+/* ---------- title ---------- */
+.title{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:100%;padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px));background:radial-gradient(ellipse at 50% 30%,#3b2f5a 0,#1a1426 55%,#0d0a12 100%);text-align:center;position:relative;overflow:hidden}
+.title h1{font-family:'Pixelify Sans';font-weight:700;font-size:clamp(40px,12vw,76px);line-height:.95;margin:0;color:#e9fbff;text-shadow:0 0 18px rgba(168,230,255,.75),0 4px 0 #3a2c56,0 8px 0 #000;letter-spacing:1px}
+.title .sub{font-family:'Special Elite';color:#cfc2a8;font-size:15px;margin:0 0 6px}
+.title .menu{display:flex;flex-direction:column;gap:9px;width:min(320px,100%);position:relative;z-index:2}
+.title .menu .btn{width:100%}
+.title .foot{font-size:12px;color:#8c80a6;position:relative;z-index:2}
+.title .stampdeco{font-family:'Special Elite';border:3px solid #b8402f;color:#e06a55;transform:rotate(-8deg);padding:2px 10px;font-size:16px;letter-spacing:3px;opacity:.85;border-radius:4px}
+.fog{position:absolute;left:0;right:0;bottom:0;height:120px;pointer-events:none;opacity:.8}
+.fog .gh{position:absolute;bottom:14px;width:26px;height:34px;border-radius:13px 13px 4px 4px;background:rgba(190,235,255,.28);box-shadow:0 0 14px rgba(168,230,255,.5);animation:walk 26s linear infinite}
+.gh::before,.gh::after{content:'';position:absolute;top:11px;width:4px;height:5px;background:rgba(20,20,40,.7);border-radius:2px}
+.gh::before{left:7px}.gh::after{right:7px}
+@keyframes walk{from{transform:translateX(-60px)}to{transform:translateX(110vw)}}
+@keyframes bob{0%,100%{translate:0 0}50%{translate:0 -4px}}
+/* ---------- paper / circular ---------- */
+.news{min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:16px 12px calc(90px + env(safe-area-inset-bottom,0px));background:#16121c}
+.np{background:#e9e0c9;color:#1f1a16;width:min(560px,100%);padding:16px 16px 20px;box-shadow:0 10px 40px #000;transform:rotate(-.6deg);font-family:Georgia,'Times New Roman',serif;animation:drop .6s ease-out}
+@keyframes drop{from{transform:rotate(-14deg) scale(.6);opacity:0}to{transform:rotate(-.6deg) scale(1);opacity:1}}
+.np .mast{font-family:'IM Fell English SC',Georgia,serif;font-size:clamp(30px,9vw,48px);text-align:center;line-height:1;border-bottom:3px double #1f1a16;padding-bottom:6px}
+.np .dl{display:flex;justify-content:space-between;font-size:12px;border-bottom:1px solid #1f1a16;padding:3px 0;margin-bottom:10px;font-style:italic}
+.np h2{font-family:'IM Fell English SC',Georgia,serif;font-size:clamp(24px,6.6vw,34px);line-height:1.05;margin:4px 0 8px;text-align:center}
+.np .lead{font-size:15px;line-height:1.4;margin:0 0 10px;text-align:justify}
+.np .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid #1f1a16;padding-top:8px}
+.np .cols h3{font-family:'IM Fell English SC';font-size:17px;margin:0 0 4px;line-height:1.05}
+.np .cols p{font-size:13px;line-height:1.35;margin:0;text-align:justify}
+.np .ill{display:block;margin:4px auto 10px;width:100%;max-height:150px;background:#cfc4a8;border:1px solid #1f1a16}
+.floatbar{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;gap:10px;background:linear-gradient(transparent,rgba(0,0,0,.85) 40%);z-index:5}
+/* ---------- booth layout ---------- */
+.game{display:grid;height:100%;grid-template-columns:100%;grid-template-rows:auto minmax(0,37%) minmax(0,1fr) auto;grid-template-areas:"hud" "booth" "desk" "bar";padding-bottom:env(safe-area-inset-bottom,0px);background:#0d0a12}
+.hud{grid-area:hud;display:flex;align-items:center;gap:8px;padding:calc(5px + env(safe-area-inset-top,0px)) 10px 5px;background:#0d0a12;border-bottom:2px solid #000;font-size:13px;white-space:nowrap;overflow:hidden}
+.hud .sp{flex:1}
+.hud b{font-family:VT323,monospace;font-size:19px;font-weight:400;color:var(--gold)}
+.hud .cit{color:#ff8b76}
+.hud .ib{border:0;background:#2a2333;border-radius:5px;padding:4px 8px;font-size:14px}
+.booth{grid-area:booth;position:relative;display:flex;flex-direction:column;background:linear-gradient(#2a2244,#1a1528 55%,#120e18);overflow:hidden;min-height:0}
+.queue{height:30px;flex:none;position:relative;border-bottom:3px solid #0a0810;background:linear-gradient(#3d3460,#28213e);overflow:hidden}
+.queue .gh{position:absolute;bottom:2px;width:16px;height:22px;border-radius:8px 8px 3px 3px;background:rgba(190,235,255,.35);box-shadow:0 0 8px rgba(168,230,255,.5);animation:bob 2.4s ease-in-out infinite}
+.queue .gh::before,.queue .gh::after{top:7px;width:3px;height:3px}
+.queue .gh::before{left:4px}.queue .gh::after{right:4px}
+.queue .lbl{position:absolute;right:6px;top:6px;font-size:11px;color:#bfb2df;font-family:'Special Elite'}
+.win{flex:1;display:flex;gap:8px;padding:8px 10px 4px;min-height:0;align-items:stretch}
+.frame{flex:1;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;border:4px solid #0a0810;border-bottom-width:0;border-radius:6px 6px 0 0;background:radial-gradient(ellipse at 50% 60%,#4b4278 0,#2d2650 50%,#1c1733 100%);overflow:hidden}
+.frame::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.08) 0 18%,transparent 18% 30%,rgba(255,255,255,.05) 30% 34%,transparent 34%);pointer-events:none}
+.frame .bars{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 23%,rgba(10,8,16,.55) 23% 24.5%);pointer-events:none;z-index:3}
+.frame .sign{position:absolute;top:4px;left:50%;transform:translateX(-50%);font-family:'Special Elite';font-size:11px;background:#d9cfb2;color:#2b211b;padding:1px 8px;border:1px solid #000;z-index:4;white-space:nowrap}
+.por{height:92%;max-height:420px;max-width:100%;aspect-ratio:32/40;position:relative;z-index:2;cursor:default}
+.por img{width:100%;height:100%;display:block}
+.por.ghost img{filter:drop-shadow(0 0 6px rgba(168,230,255,.85));opacity:.93;animation:bob 3s ease-in-out infinite}
+.por.in{animation:pin .55s ease-out}
+.por.outok{animation:pok .8s ease-in forwards}
+.por.outno{animation:pno .7s ease-in forwards}
+.por.outdet{animation:pdet .9s ease-in forwards}
+@keyframes pin{from{transform:translateX(-120%);opacity:0}to{transform:none;opacity:1}}
+@keyframes pok{to{transform:translate(60%,-30%) scale(.8);opacity:0;filter:brightness(3)}}
+@keyframes pno{to{transform:translateX(-130%);opacity:0}}
+@keyframes pdet{20%{transform:translateX(-6%)}40%{transform:translateX(6%)}to{transform:translateY(80%);opacity:0;filter:hue-rotate(160deg) brightness(.5)}}
+.xray{position:absolute;inset:0;z-index:5;display:flex;align-items:flex-end;justify-content:center;background:#06142a;animation:xr .25s}
+.xray img{height:92%;aspect-ratio:32/40}
+.xray span{position:absolute;top:24px;left:0;right:0;text-align:center;color:#8ff;font-size:13px;text-shadow:0 0 6px #0ff}
+@keyframes xr{from{opacity:0}to{opacity:1}}
+.empty{color:#8f84b0;font-family:'Special Elite';font-size:14px;margin-bottom:30%;z-index:2;text-align:center;padding:0 10px}
+.side{width:84px;flex:none;display:flex;flex-direction:column;gap:6px}
+.wid{background:#0f0c16;border:2px solid #000;border-radius:5px;padding:3px 4px;text-align:center;box-shadow:inset 0 0 0 1px #3b3350}
+.wid small{display:block;font-size:10px;color:#9d93b8;letter-spacing:.5px}
+.clock{font-family:VT323,monospace;font-size:26px;line-height:1;color:#ffcf6a;text-shadow:0 0 6px rgba(255,190,60,.6)}
+.clock.late{color:#ff7a66;text-shadow:0 0 6px rgba(255,90,60,.7)}
+.cal{background:#e9e0c9;color:#2b211b;font-family:'Special Elite';font-size:12px;line-height:1.15;border-radius:3px}
+.cal b{display:block;font-size:20px;font-family:VT323;font-weight:400;line-height:.9}
+.scale .gr{font-family:VT323,monospace;font-size:24px;color:#8ff;text-shadow:0 0 6px rgba(120,255,255,.6);line-height:1}
+.scale.off .gr{color:#444;text-shadow:none}
+.talk{flex:none;height:58px;overflow:hidden;padding:3px 10px 5px;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;font-family:'Special Elite';font-size:13px;line-height:1.25;background:#0d0a12;border-top:2px solid #000}
+.talk p{margin:0;animation:fadein .3s}
+.talk .me{color:#e8c88a}.talk .me::before{content:'Tú: ';color:#8d7a5a}
+.talk .them{color:#c6efff}
+.talk .sys{color:#ff9b85}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+/* ---------- desk ---------- */
+.desk{grid-area:desk;overflow:auto;-webkit-overflow-scrolling:touch;background:#3a2c22 repeating-linear-gradient(92deg,rgba(0,0,0,.08) 0 3px,transparent 3px 11px),linear-gradient(#3e2f24,#2e231b);padding:8px 8px 14px;position:relative;border-top:3px solid #000;min-height:0}
+.desk.insp{box-shadow:inset 0 0 0 3px #d94b3a}
+.docs{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;justify-content:center}
+.ires{position:sticky;top:-8px;z-index:20;margin:-8px -8px 8px;padding:6px 10px;font-size:13.5px;text-align:center;font-weight:600;border-bottom:2px solid #000;background:#2a2333}
+.ires.bad{background:#7d2219;color:#fff}
+.ires.ok{background:#245a36}
+.ires.none{background:#3b3350}
+.ires.tip{background:#5a4826;color:#fff2cf;font-weight:400}
+.doc{background:var(--paper);color:var(--ink);font-family:'Special Elite',monospace;font-size:13px;width:min(100%,318px);padding:9px 11px 10px;border-radius:2px;box-shadow:0 4px 0 rgba(0,0,0,.35),0 8px 18px rgba(0,0,0,.45);position:relative;line-height:1.3}
+.docs.fresh .doc{animation:slidedoc .45s ease-out both}
+@keyframes slidedoc{from{transform:translateY(-40px) rotate(-6deg);opacity:0}}
+.doc h4{margin:0 0 6px;font-size:13px;letter-spacing:1px;text-align:center;border-bottom:1.5px solid currentColor;padding-bottom:3px;font-weight:400}
+.doc .row{display:flex;gap:6px;align-items:baseline;margin:2px 0}
+.doc .lb{font-size:10px;text-transform:uppercase;letter-spacing:.6px;opacity:.68;flex:none;width:86px}
+.doc .grid{display:flex;gap:9px}
+.doc .grid .ph{width:74px;flex:none}
+.doc .ph img{width:100%;display:block;border:1px solid #2b211b;filter:sepia(.55) contrast(1.05)}
+.f{border-radius:2px;padding:0 2px;transition:background .15s}
+.insp .f,.insp-on .f{outline:1.5px dashed rgba(190,40,30,.55);outline-offset:1px;cursor:crosshair}
+.f.sel{background:rgba(255,206,40,.55)!important;outline:2px solid #c98a00!important}
+.f.bad{background:rgba(220,40,30,.45)!important;outline:2px solid #b0251a!important}
+.f.good{background:rgba(60,170,90,.4)!important;outline:2px solid #2d7a44!important}
+.ced{background:#ede1c2}
+.ced .band{margin:-9px -11px 7px;padding:4px 10px;color:#fff;font-size:12px;letter-spacing:1.5px;display:flex;justify-content:space-between;align-items:center}
+.ced .seal{position:absolute;right:8px;bottom:6px;width:52px;height:52px}
+.ced .seal svg{width:100%;height:100%}
+.ced.crayon{background:#fffdf4;font-family:'Comic Sans MS','Chalkboard SE',cursive;transform:rotate(1.5deg)}
+.ced.wet{background:#d9cfb5 radial-gradient(circle at 70% 40%,rgba(70,90,110,.25),transparent 45%)}
+.cert{background:#e6e4dc;border:1px solid #888}
+.cert .fx{position:absolute;right:10px;bottom:8px;border:2px solid #a8281f;color:#a8281f;font-size:10px;padding:1px 5px;transform:rotate(-9deg);letter-spacing:1px;opacity:.85}
+.pase{background:#d6e3e8}
+.min{background:#e8d6a0;border:2px solid #7a5a12}
+.bul{background:#ece08f;width:min(100%,318px)}
+.bul .ws{display:flex;gap:6px;justify-content:space-between}
+.bul .w{flex:1;text-align:center;font-size:11px}
+.bul .w img{width:100%;max-width:70px;display:block;margin:0 auto 2px;border:1px solid #2b211b;filter:grayscale(1) contrast(1.2)}
+.note{background:#f3d9d4;transform:rotate(-1deg);font-size:13.5px}
+.note.cof{background:#2a2420;color:#f1e3c4;border:1px solid #000}
+.note.cof h4{color:#ffcf6a}
+.note.jefa{background:#fff8d6}
+.circ{background:#dfe8d1}
+.circ ul{margin:4px 0 0;padding-left:18px}
+.circ li{margin:2px 0}
+.slip{background:#f6c9c0;border-top:5px dashed #b8402f;width:min(100%,318px);animation:slip .5s ease-out both}
+@keyframes slip{from{transform:translateY(-80px);opacity:0}}
+.stampmk{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-12deg);font-size:30px;letter-spacing:4px;padding:2px 12px;border:5px double;border-radius:5px;font-family:'Special Elite';pointer-events:none;opacity:.92;animation:stmp .25s ease-out;z-index:4;white-space:nowrap;background:rgba(255,255,255,.25);font-weight:700}
+.stampmk.ok{color:#2d7a44;border-color:#2d7a44}
+.stampmk.no{color:#b0251a;border-color:#b0251a}
+@keyframes stmp{from{transform:translate(-50%,-50%) rotate(-12deg) scale(2.2);opacity:0}}
+.waitmsg{color:#cbb89a;font-family:'Special Elite';text-align:center;padding:14px 10px 4px;font-size:14px;width:100%}
+/* ---------- bar ---------- */
+.bar{grid-area:bar;display:flex;flex-wrap:wrap;gap:6px;padding:7px 8px 8px;background:#18131f;border-top:2px solid #000;justify-content:center}
+.bar .btn{padding:8px 7px;font-size:13.5px;flex:1 1 auto;min-width:0}
+.bar .btn.on{background:#d94b3a;box-shadow:0 1px 0 #000;transform:translateY(2px)}
+.bar .stmp{min-width:86px}
+.bar .main{flex:1 1 40%}
+.bookside{grid-area:book;display:none;overflow:auto;background:#7a2a22;border-left:3px solid #000;padding:8px}
+/* rulebook */
+.book{background:#f0e6cd;color:var(--ink);font-family:'Special Elite';font-size:13.5px;border-radius:3px;padding:10px 12px;line-height:1.35}
+.book .tabs{display:flex;gap:4px;margin:-4px -4px 8px;flex-wrap:wrap}
+.book .tabs button{flex:1;border:1px solid #2b211b;background:#d8c9a4;padding:6px 4px;font-family:'Special Elite';font-size:12.5px;border-radius:3px;color:#2b211b}
+.book .tabs button.cur{background:#2b211b;color:#f0e6cd}
+.book h3{font-size:15px;margin:6px 0;letter-spacing:1px;border-bottom:1px solid #2b211b}
+.book ol{margin:0;padding-left:20px}
+.book li{margin:4px 0}
+.book .rg{border:1px solid #2b211b55;border-radius:3px;padding:6px 8px;margin:6px 0;display:flex;gap:8px;align-items:center}
+.book .rg svg{width:44px;height:44px;flex:none}
+.book .rg b{display:block;font-weight:400;font-size:15px;letter-spacing:1px}
+.book .new{background:#d94b3a;color:#fff;font-size:10px;padding:0 4px;border-radius:2px;margin-left:4px;vertical-align:middle}
+/* ---------- sheet ---------- */
+#sheet{position:fixed;inset:0;z-index:50;background:rgba(5,3,10,.78);display:flex;align-items:flex-end;justify-content:center;padding:calc(10px + env(safe-area-inset-top,0px)) 8px 0;animation:fadein .2s}
+#sheet[hidden]{display:none}
+.sh{background:#231c2e;border:2px solid #000;border-bottom:0;border-radius:12px 12px 0 0;width:min(620px,100%);max-height:100%;overflow:auto;padding:14px 14px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 40px #000}
+.sh h2{margin:0 0 8px;font-size:20px;color:#ffe2a8}
+.sh p{line-height:1.45;margin:6px 0;font-size:15px}
+.sh .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.sh .acts .btn{flex:1 1 140px}
+.sh .close{float:right;border:0;background:#3a3046;border-radius:6px;padding:4px 10px}
+.sh.story{background:#1a1520}
+.sh .speaker{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.sh .speaker img{width:64px;border:2px solid #000;background:#3b3460}
+.sh .quote{font-family:'Special Elite';font-size:15px;color:#d8f2ff;line-height:1.45}
+.help h3{color:#ffcf6a;margin:14px 0 4px;font-size:16px}
+.help p,.help li{font-size:14.5px;line-height:1.45}
+.help ul{padding-left:18px;margin:4px 0}
+/* ---------- night ---------- */
+.nightscr{min-height:100%;padding:16px 12px calc(96px + env(safe-area-inset-bottom,0px));background:radial-gradient(ellipse at 50% 0,#2a2342,#0d0a12 70%);display:flex;flex-direction:column;align-items:center;gap:12px}
+.ledger{background:#efe6cf;color:#2b211b;font-family:'Special Elite';width:min(480px,100%);padding:12px 14px;box-shadow:0 8px 30px #000;border-radius:2px}
+.ledger h2{margin:0 0 6px;text-align:center;font-size:20px;letter-spacing:2px;font-weight:400}
+.ledger .ln{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted #8a7a5f;font-size:15px;align-items:center;gap:8px}
+.ledger .ln.tot{border-top:2px solid #2b211b;border-bottom:0;font-size:18px;margin-top:4px;padding-top:6px}
+.ledger label.ln{cursor:pointer}
+.ledger input{width:20px;height:20px;accent-color:#2b211b;margin:0 6px 0 0;vertical-align:middle}
+.ledger .neg{color:#a8281f}.ledger .pos{color:#2d6a3e}
+.fam{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.fam .m{text-align:center;font-size:12.5px;line-height:1.2}
+.fam .m img{width:58px;display:block;margin:0 auto 3px;border:2px solid #2b211b;background:#c8bc9c}
+.fam .st{display:block;font-size:11.5px;margin-top:2px}
+.st.bad{color:#a8281f}.st.mid{color:#9a6a10}.st.gone{color:#4a6aa0}
+.events{width:min(480px,100%);font-family:'Special Elite';font-size:14px;color:#e6dac0;line-height:1.45}
+.events p{margin:4px 0;padding-left:14px;text-indent:-14px}
+.events p::before{content:'· '}
+/* ---------- endings ---------- */
+.endscr{min-height:100%;padding:24px 16px calc(40px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;background:radial-gradient(ellipse at 50% 20%,#3b2f5a,#0d0a12 70%)}
+.endscr h1{font-size:clamp(30px,9vw,48px);margin:8px 0 0;color:#e9fbff;text-shadow:0 0 16px rgba(168,230,255,.6),0 4px 0 #000}
+.endscr .tag{font-family:'Special Elite';color:#ffcf6a;letter-spacing:2px}
+.endscr .txt{font-family:'Special Elite';max-width:560px;line-height:1.55;font-size:15.5px;color:#e6dac0;text-align:left}
+.endscr .txt p{margin:8px 0}
+.endscr .btns{display:flex;flex-direction:column;gap:8px;width:min(320px,100%)}
+.blackout{position:fixed;inset:0;background:#000;z-index:60;display:flex;align-items:center;justify-content:center;color:#ffcf6a;font-family:'Special Elite';font-size:18px;text-align:center;padding:20px;animation:bo 2.6s steps(1) forwards}
+@keyframes bo{0%{opacity:1}8%{opacity:0}12%{opacity:1}18%{opacity:.2}24%{opacity:1}}
+.flash{position:fixed;inset:0;pointer-events:none;z-index:40;animation:fl .5s forwards}
+@keyframes fl{from{background:rgba(255,60,40,.35)}to{background:transparent}}
+/* ---------- landscape phone ---------- */
+@media (orientation:landscape) and (max-height:620px){
+  .game{grid-template-columns:40% 60%;grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"hud hud" "booth desk" "booth bar"}
+  .booth{border-right:3px solid #000}
+  .talk{height:64px}
+  .bar .main{flex-basis:auto}
+  .bar .btn{padding:7px 8px;font-size:13px}
+  .side{width:76px}
+  .clock{font-size:22px}
+}
+/* ---------- computer ---------- */
+@media (min-width:1000px) and (min-height:600px){
+  .game{grid-template-columns:minmax(330px,34%) 1fr minmax(320px,26%);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"hud hud hud" "booth desk book" "booth bar book"}
+  .booth{border-right:3px solid #000}
+  .bookside{display:block}
+  .bar .bk{display:none}
+  .bar .main{flex-basis:auto}
+  .talk{height:120px;font-size:14px}
+  .frame .sign{font-size:13px}
+  .side{width:100px}
+  .doc{width:calc(50% - 6px);min-width:280px;max-width:380px;font-size:14px}
+  .desk{padding:12px}
+  .sh{border-radius:12px;border-bottom:2px solid #000;margin-bottom:auto;margin-top:auto}
+  #sheet{align-items:center}
+}
+.kk{display:none}
+@media (hover:hover) and (pointer:fine){
+  .kk{display:inline-block;margin-left:6px;padding:1px 5px;border-radius:4px;border:1px solid currentColor;font:600 10px/1.3 ui-monospace,Menlo,monospace;opacity:.55;vertical-align:middle;letter-spacing:0;text-transform:none;text-shadow:none;white-space:nowrap}
+  .f:hover{background:rgba(255,206,40,.2)}
+}
+</style>
+<div id="app"></div>
+<div id="sheet" hidden></div>
+<script>
+'use strict';
+/* =========================================================
+   ÚLTIMO TRÁMITE — Ventanilla 3 de la Oficina Central de Tránsito
+   ========================================================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function rng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const pick=(r,a)=>a[Math.floor(r()*a.length)];
+const ri=(r,a,b)=>a+Math.floor(r()*(b-a+1));
+const pad=n=>String(n).padStart(2,'0');
+const dn=(y,m,d)=>Math.round(Date.UTC(y,m-1,d)/864e5);
+const fd=n=>{const d=new Date(n*864e5);return pad(d.getUTCDate())+'.'+pad(d.getUTCMonth()+1)+'.'+d.getUTCFullYear()};
+const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const DOW=['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+const lsGet=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const SAVE='tramite-save-v1',CFGK='tramite-cfg-v1',RECK='tramite-records-v1';
+const CFG=Object.assign({snd:1,slow:0},lsGet(CFGK)||{});
+const REC=Object.assign({ends:[],best:0},lsGet(RECK)||{});
+
+/* ---------------- world data ---------------- */
+const REG={
+  animas:{n:'Ánimas',c:['Ánimas','Villasombra','Puerto Cirio'],seal:'circle',col:'#6b3fa0',code:'ANI'},
+  gelida:{n:'Gélida',c:['Escarcha','Hielonor','Bruma Alta'],seal:'hex',col:'#2f6fb3',code:'GEL'},
+  solana:{n:'Solana',c:['Albaria','Doradilla','Mirasol'],seal:'star',col:'#b9801c',code:'SOL'},
+  marisma:{n:'Marisma',c:['Salobre','Juncal','Costavieja'],seal:'diamond',col:'#2f7f4a',code:'MAR'},
+  altiplano:{n:'Altiplano',c:['Cumbrera','Pedregal','Altamesa'],seal:'tri',col:'#a8352b',code:'ALT'},
+  ultramar:{n:'Ultramar',c:['Isla Faro','Coralina','Nueva Ultra'],seal:'square',col:'#1f8a8a',code:'ULT'},
+};
+const RK=Object.keys(REG);
+const FAKECITY=['Valdemuerto','Sinsalida','Lugarnuevo','Tierra Media','Quintanilla','Mi casa'];
+const FN_M=['Aurelio','Basilio','Cándido','Dámaso','Eusebio','Faustino','Gervasio','Hilario','Ignacio','Jacinto','Leandro','Marcelino','Nicanor','Olegario','Pascual','Rufino','Saturnino','Teodoro','Urbano','Valentín','Anselmo','Benigno','Ciriaco','Demetrio','Emiliano','Fermín','Germán','Higinio','Isidro','Julián','Lorenzo','Matías','Norberto','Primitivo','Ramiro','Severino'];
+const FN_F=['Adoración','Benita','Casilda','Delfina','Eulalia','Felisa','Genoveva','Herminia','Inés','Jacinta','Leocadia','Macarena','Nieves','Obdulia','Petra','Quiteria','Rosalía','Sagrario','Teresa','Urbana','Visitación','Amparo','Brígida','Consuelo','Dolores','Encarna','Fidela','Gloria','Hortensia','Inmaculada','Josefa','Luciana','Milagros','Purificación','Rogelia','Socorro'];
+const SUR=['Albarrán','Bermejo','Calvete','Domínguez','Escribano','Ferrán','Galindo','Huerta','Iriarte','Jaramillo','Lozano','Merino','Navarro','Ortega','Pardo','Quiroga','Rubio','Salcedo','Tejedor','Urrutia','Vallejo','Zamora','Alcázar','Barrios','Cabello','Delgado','Espejo','Fuentes','Garrido','Hidalgo','Lago','Montero','Nieto','Olmedo','Pizarro','Romero','Sanz','Toledo','Velasco','Yuste'];
+const CAUSAS=['Vejez','Neumonía','Infarto','Caída por la escalera','Ahogamiento','Gripe','Accidente de tranvía','Rayo','Coz de mula','Indigestión de setas','Pena','Tuberculosis','Susto','Frío','Accidente de carro','Fiebres','Atragantamiento','Derrumbe en la mina'];
+const MEDICOS=['Dr. L. Quintana','Dra. A. Beltrán','Dr. S. Ochoa','Dra. M. Ribas','Dr. E. Calleja','Dra. P. Soler'];
+const ITEMS=[{k:'joyas',n:'un collar de perlas'},{k:'reloj',n:'un reloj de oro'},{k:'monedas',n:'un puñado de monedas'},{k:'llave',n:'una llave de hierro'},{k:'botella',n:'una botella de anís'},{k:'carta',n:'un fajo de cartas de amor'}];
+const GREET=['Buenos días.','Hola... ¿es aquí lo del Otro Lado?','Tome, mis papeles.','Llevo tres días en la cola.','¿Duele? Lo de cruzar, digo.','Qué frío hace aquí dentro.','Me dijeron que trajera esto.','Buenas. Vengo a lo mío.','Mi nieto dice que siempre fui puntual. Hasta para esto.','No sabía que en la muerte también había colas.','Perdone, ¿tiene usted hora? Ah, ya no la necesito.','¿Esto es el cielo? Pues vaya.','Rápido, por favor, que me espera mi madre.','Buenas tardes. Creo que me morí el martes.','Me han dicho que usted es de los amables.'];
+const BYE_OK=['Gracias. Por fin.','Adiós, entonces.','¿Por dónde? ¿Hacia la luz?','Que Dios se lo pague. Si existe.','Ya era hora.','Saludaré a los suyos.'];
+const BYE_NO=['¿Y ahora qué hago?','Volveré mañana.','Esto es una injusticia.','Pues me quedo rondando, ¿eh?','Mi familia se va a enterar.','Llevo toda la muerte esperando...'];
+const BYE_DET=['¡No! ¡Las farolas no!','¡Suéltenme! ¡No he hecho nada!','¿A dónde me llevan?','¡Por favor, la luz no!'];
+const ISS={
+  local:{m:'Solo se admiten ánimas de Ánimas',q:'Hoy solo atendemos a ánimas de Ánimas.'},
+  ban:{m:'Su provincia está prohibida hoy',q:'Su provincia tiene prohibida la entrada.'},
+  foto:{m:'La foto de la cédula no coincide',q:'Esta foto no es usted.'},
+  cad:{m:'Cédula caducada',q:'Su cédula está caducada.'},
+  ciudad:{m:'Ciudad de expedición no válida',q:'Esa ciudad no es de su provincia.'},
+  sello:{m:'Sello de la cédula falsificado',det:1,q:'Este sello no es el oficial.'},
+  sinCert:{m:'Falta el certificado de defunción',q:'Necesito su certificado de defunción.'},
+  nombre:{m:'Los nombres no coinciden',q:'Los nombres no coinciden.'},
+  num:{m:'Los números de cédula no coinciden',q:'El número de cédula no coincide.'},
+  plazo:{m:'Fuera de plazo: más de 40 días',q:'Han pasado más de cuarenta días.'},
+  futuro:{m:'Fecha de defunción imposible',q:'Esta fecha de defunción es posterior a hoy.'},
+  forense:{m:'Certificado sin sello del forense',q:'El certificado no lleva sello del forense.'},
+  causa:{m:'Causa de defunción desconocida: retener',det:1,must:1,q:'Aquí pone «causa desconocida».'},
+  sinPase:{m:'Falta el pase de procedencia',q:'Necesito su pase de procedencia.'},
+  paseCad:{m:'Pase de procedencia caducado',q:'Su pase está caducado.'},
+  paseReg:{m:'La procedencia del pase no coincide',q:'El pase dice otra provincia.'},
+  peso:{m:'Lleva objetos encima',det:1,q:'Pesa usted más de la cuenta.'},
+  vivo:{m:'Está vivo: los vivos no cruzan',q:'Usted no está muerto.'},
+  buscado:{m:'Ánima fugitiva del Boletín: retener',det:1,must:1,q:'Usted sale en el Boletín de fugitivos.'},
+};
+const TALK={
+  local:['Pero si yo siempre quise morirme aquí...','¿Y dónde voy entonces?'],
+  ban:['¿Prohibida? ¡Si yo no tengo la culpa de nada!','Allí ya no me quieren y aquí tampoco.'],
+  foto:['Es que en la foto estaba vivo.','He cambiado mucho, la muerte desmejora.','Es una foto antigua, de mis buenos tiempos.'],
+  cad:['¿Caducada? Si caduqué yo antes que ella.','No me dio tiempo a renovarla, comprenda.','Iba a ir el lunes, pero me morí el domingo.'],
+  ciudad:['Me la hicieron en... bueno, en una oficina.','Es un pueblo nuevo, muy pequeño.','Mi primo trabaja allí. Me hizo el favor.'],
+  sello:['Me lo selló un señor muy amable en la cola.','Todos los sellos se parecen, ¿no?','Es el sello nuevo. Lo han cambiado.'],
+  sinCert:['Me lo dejé en el tanatorio.','¿Certificado? Nadie me dijo nada.'],
+  nombre:['El forense tenía muy mala letra.','¿Qué más da una letra? Ya estoy muerto.','Ese era mi nombre artístico.'],
+  num:['Los números nunca fueron lo mío.','Será un error del Registro.'],
+  plazo:['Me perdí por el camino. Cuarenta días pasan volando.','Estuve rondando mi casa un tiempo... no me decidía.'],
+  futuro:['¿Pone esa fecha? Qué raro. Será un adelanto.','El forense iba con prisa.'],
+  forense:['El forense estaba de vacaciones.','Me dijeron que el sello no hacía falta.'],
+  causa:['No me acuerdo de cómo morí. ¿Es eso malo?','Me dormí y ya está. No sé más.'],
+  sinPase:['¿Pase? En mi provincia no dan de eso.','Lo pedí, pero no llegó a tiempo.'],
+  paseCad:['Se me pasó la fecha esperando en la cola.'],
+  paseReg:['Viví en las dos provincias, ¿qué más da?'],
+  peso:['Serán los nervios. Los nervios pesan.','Yo siempre he sido de hueso ancho.','No llevo nada, se lo juro.'],
+  vivo:['...'],
+  buscado:['Me confunde usted con otro.','¿Yo? No sé de qué me habla.'],
+};
+
+/* ---------------- days and rules ---------------- */
+const DAYRULES=[null,
+  {ced:1,local:1},
+  {cert:1,cad:1,city:1,local:0},
+  {seal:1},
+  {peso:1},
+  {wanted:1,detain:1},
+  {ban:['gelida']},
+  {pase:1,forense:1},
+  {},
+  {},
+  {causa:1},
+  {ban:['gelida','altiplano']},
+  {ministerial:1},
+  {},
+  {ban:['gelida','altiplano','marisma']},
+];
+const NEWRULES={
+  1:['Solo pueden cruzar las ánimas de la provincia de Ánimas.','Comprueba que la foto de la cédula es la de quien tienes delante.'],
+  2:['Se admiten ánimas de todas las provincias.','Exigir el Certificado de Defunción: nombre y número deben coincidir con la cédula.','Plazo máximo: 40 días desde la defunción.','La cédula debe estar vigente y expedida en una ciudad de su provincia.'],
+  3:['Cada provincia tiene su sello oficial (forma y color). Consulta «Provincias» en el Reglamento.'],
+  4:['Nueva Balanza de Almas: un ánima pesa 21 gramos justos.','Si pesa más, lleva algo encima: regístrala con la Lámpara.','Los vivos no cruzan.'],
+  5:['Llegan los Celadores: puedes RETENER ánimas con sello falso u objetos (+5 óbolos).','Boletín de fugitivos: las ánimas que aparezcan en él deben ser retenidas.'],
+  6:['Prohibida la entrada de ánimas de Gélida.'],
+  7:['Las ánimas de fuera de Ánimas necesitan Pase de Procedencia vigente.','El certificado debe llevar el sello del forense.'],
+  10:['Las ánimas con causa de defunción «Desconocida» deben ser retenidas.'],
+  11:['Prohibidas también las ánimas de Altiplano.'],
+  12:['El Pase Ministerial exime de todo requisito.'],
+  14:['Prohibidas también las ánimas de Marisma.'],
+};
+function rulesFor(day){const R={ban:[]};for(let i=1;i<=Math.min(day,14);i++)Object.assign(R,DAYRULES[i]);if(S&&S.mode==='endless')R.ban=S.eban||[];return R}
+const rules=()=>rulesFor(S.day);
+const today=()=>dn(1986,11,S.day);
+
+/* ---------------- pixel portraits ---------------- */
+const SKIN=['#f1d3b3','#e5b892','#cc9168','#a96d48','#7e4c2f','#5a3520'];
+const HAIRC=['#1b1511','#3b2617','#6b4423','#a8743c','#d9b56b','#8d8d8d','#e2e2e2','#7a2a1a'];
+const CLOTH=['#3b3f58','#5a3a2a','#2f4a3a','#6a5a40','#4a2a40','#202020','#6b2b2b','#33506b'];
+function genFace(r,o={}){
+  const ag=ri(r,0,2);
+  const f={sk:ri(r,0,5),hs:ri(r,0,6),hc:ag===2&&r()<.6?ri(r,5,6):ri(r,0,4),ey:ri(r,0,2),br:ri(r,0,2),no:ri(r,0,2),mo:ri(r,0,3),be:r()<.35?ri(r,1,3):0,gl:r()<.25?1:0,ht:r()<.3?ri(r,1,4):0,shape:ri(r,0,2),ag,cl:ri(r,0,7),pin:0};
+  if(r()<.12)f.hc=7;
+  return Object.assign(f,o);
+}
+const IDK=['sk','hs','hc','ey','br','no','mo','be','gl','shape'];
+const faceEq=(a,b)=>IDK.every(k=>a[k]===b[k]);
+function mutate(f,r){
+  const g={...f};const ks=['hs','hc','be','gl','shape','no','ey'];let n=0;
+  while(n<2){const k=pick(r,ks);const max={hs:6,hc:7,be:3,gl:1,shape:2,no:2,ey:2}[k];const v=(g[k]+1+ri(r,0,max-1))%(max+1);if(v!==g[k]){g[k]=v;n++}}
+  return g;
+}
+const PCACHE={};
+function face(f,mode){ // mode: win | photo | ghostfam | live
+  const key=mode+JSON.stringify(f);if(PCACHE[key])return PCACHE[key];
+  const c=document.createElement('canvas');c.width=32;c.height=40;const x=c.getContext('2d');
+  const P=(px,py,w,h,col)=>{x.fillStyle=col;x.fillRect(px,py,w,h)};
+  if(mode==='photo')P(0,0,32,40,'#cdbf9c');
+  const sk=SKIN[f.sk],hc=HAIRC[f.hc],dk='#2a1a12',cl=CLOTH[f.cl];
+  const cx=16,cy=17,rx=[7,8,7][f.shape],ry=[9,9,10][f.shape];
+  // shoulders
+  for(let y=31;y<40;y++){const w=8+Math.min(8,(y-30)*2);P(cx-w,y,w*2,1,cl)}
+  P(cx-1,31,2,4,'#e8e0d0');
+  if(f.pin){P(22,34,1,3,'#f3e7b5');P(22,33,1,1,'#ffb43a');P(22,32,1,1,'#fff17a')}
+  P(cx-3,26,6,6,sk);
+  const inHead=(px,py)=>((px+.5-cx)/rx)**2+((py+.5-cy)/ry)**2<=1;
+  // long hair behind
+  if(f.hs===2){for(let y=cy-4;y<cy+13;y++){P(cx-rx-1,y,3,1,hc);P(cx+rx-2,y,3,1,hc)}}
+  for(let y=cy-ry;y<=cy+ry;y++)for(let px=cx-rx;px<=cx+rx;px++)if(inHead(px,y))P(px,y,1,1,sk);
+  P(cx-rx-1,cy,1,3,sk);P(cx+rx,cy,1,3,sk);
+  // hair
+  const top=(lim,side)=>{for(let y=cy-ry-1;y<=cy+ry;y++)for(let px=cx-rx-1;px<=cx+rx+1;px++){const dx=Math.abs(px+.5-cx);const edge=((px+.5-cx)/(rx+1))**2+((y+.5-cy)/(ry+1))**2<=1;if(!edge)continue;if(y<cy-lim||(side&&dx>rx-1.5&&y<cy-1))P(px,y,1,1,hc)}};
+  if(f.hs===1)top(5,1);
+  else if(f.hs===2){top(5,1)}
+  else if(f.hs===3){top(5,1);for(let y=-3;y<=3;y++)for(let q=-3;q<=3;q++)if(q*q+y*y<=9)P(cx+q,cy-ry-3+y,1,1,hc)}
+  else if(f.hs===4){top(4,1);for(let q=-rx;q<=rx;q+=3){P(cx+q-1,cy-ry-2,3,2,hc)}}
+  else if(f.hs===5){top(5,1);for(let q=0;q<5;q++)P(cx-rx+q,cy-5+q,rx-q,1,hc)}
+  else if(f.hs===6){for(let y=cy-6;y<cy-1;y++){P(cx-rx,y,2,1,hc);P(cx+rx-1,y,2,1,hc)}}
+  else if(f.hs===0&&f.ag){P(cx-rx,cy-2,1,3,hc);P(cx+rx,cy-2,1,3,hc)}
+  // brows
+  const by=f.br===2?cy-4:cy-3,bw=f.br===1?3:2,bc=f.hc>=5?'#777':HAIRC[Math.min(f.hc,1)];
+  P(cx-5,by,bw,f.br===1?2:1,bc);P(cx+5-bw,by,bw,f.br===1?2:1,bc);
+  // eyes
+  if(f.ey===0){P(cx-4,cy,2,1,dk);P(cx+2,cy,2,1,dk)}
+  else if(f.ey===1){P(cx-5,cy-1,3,2,'#fff');P(cx+2,cy-1,3,2,'#fff');P(cx-4,cy-1,1,2,dk);P(cx+3,cy-1,1,2,dk)}
+  else {P(cx-5,cy+1,3,1,dk);P(cx+2,cy+1,3,1,dk)}
+  // nose
+  const sh='rgba(0,0,0,.22)';
+  if(f.no===0){P(cx,cy+2,1,2,sh)}else if(f.no===1){P(cx-1,cy+1,2,4,sh)}else{P(cx-1,cy+3,1,1,dk);P(cx+1,cy+3,1,1,dk);P(cx,cy+1,1,2,sh)}
+  // mouth
+  const my=cy+6,mc='#8a3a33';
+  if(f.mo===0)P(cx-2,my,4,1,mc);
+  else if(f.mo===1){P(cx-2,my,4,1,mc);P(cx-3,my-1,1,1,mc);P(cx+2,my-1,1,1,mc)}
+  else if(f.mo===2){P(cx-1,my-1,3,2,'#3a1410')}
+  else {P(cx-2,my,4,1,mc);P(cx-3,my+1,1,1,mc);P(cx+2,my+1,1,1,mc)}
+  // age
+  if(f.ag===2){P(cx-2,cy-6,4,1,'rgba(0,0,0,.18)');P(cx-5,cy+4,1,2,'rgba(0,0,0,.18)');P(cx+5,cy+4,1,2,'rgba(0,0,0,.18)')}
+  // beard
+  if(f.be===1)P(cx-3,my-2,7,1,hc);
+  else if(f.be===2){for(let y=cy+3;y<=cy+ry+1;y++)for(let px=cx-rx;px<=cx+rx;px++)if(inHead(px,y)&&!(y===my&&Math.abs(px-cx+.5)<3))P(px,y,1,1,hc)}
+  else if(f.be===3)P(cx-1,my+1,3,3,hc);
+  // glasses
+  if(f.gl){x.strokeStyle='#222';x.lineWidth=1;x.strokeRect(cx-5.5,cy-1.5,4,3);x.strokeRect(cx+1.5,cy-1.5,4,3);P(cx-1,cy-1,2,1,'#222')}
+  // hats
+  if(f.ht===1){for(let q=-rx-1;q<=rx+1;q++)P(cx+q,cy-ry+(Math.abs(q)>rx-2?1:0),1,3,'#2a2a30');P(cx,cy-ry-1,1,1,'#2a2a30')}
+  else if(f.ht===2){P(cx-rx-3,cy-ry+3,rx*2+7,2,'#3a2a1a');P(cx-rx+1,cy-ry-3,rx*2-1,6,'#3a2a1a');P(cx-rx+1,cy-ry+1,rx*2-1,1,'#7a2a1a')}
+  else if(f.ht===3){P(cx-rx,cy-ry-1,rx*2+1,5,'#33506b');P(cx-1,cy-ry+3,rx+4,2,'#22364a')}
+  else if(f.ht===4){for(let y=cy-ry-1;y<cy+3;y++){const w=y<cy-ry+4?rx:rx+1;P(cx-w,y,2,1,'#8a2e3a');P(cx+w-1,y,2,1,'#8a2e3a')}P(cx-rx,cy-ry-1,rx*2+1,4,'#8a2e3a')}
+  else if(f.ht===5){for(let y=cy-ry-3;y<40;y++){const w=y<cy-ry?rx-2+(y-(cy-ry-3)):rx+3;for(let px=cx-w;px<=cx+w;px++){if(y>=cy-ry+2&&y<cy+ry-1&&Math.abs(px+.5-cx)<rx-1)continue;if(y>=cy+ry-1&&y<31&&Math.abs(px+.5-cx)<rx-3)continue;P(px,y,1,1,'#1d1a22')}}}
+  // tint
+  if(mode==='win'||mode==='ghostfam'){
+    const im=x.getImageData(0,0,32,40),d=im.data;
+    for(let i=0;i<d.length;i+=4){if(!d[i+3])continue;const l=(d[i]*.3+d[i+1]*.59+d[i+2]*.11)/255;d[i]=Math.round(d[i]*.62+(80+l*150)*.38);d[i+1]=Math.round(d[i+1]*.62+(110+l*135)*.38);d[i+2]=Math.round(d[i+2]*.62+(150+l*105)*.38)}
+    x.putImageData(im,0,0);
+  }
+  return PCACHE[key]=c.toDataURL();
+}
+const ICONS={
+  joyas:['..wwww..','.w....w.','w......w','w......w','.w....w.','..w..w..','...yy...','...yy...'],
+  reloj:['...yy...','..yyyy..','.y....y.','y..w...y','y..www.y','y......y','.y....y.','..yyyy..'],
+  monedas:['........','..yyyy..','.yyyyyy.','..yyyy..','.yyyyyy.','..yyyy..','.yyyyyy.','..yyyy..'],
+  llave:['.www....','w...w...','w...w...','.www....','..w.....','..ww....','..w.....','..ww....'],
+  botella:['...ww...','...ww...','..wwww..','.wwwwww.','.wyyyyw.','.wyyyyw.','.wwwwww.','.wwwwww.'],
+  carta:['wwwwwwww','ww....ww','w.w..w.w','w..ww..w','w......w','wwwwwwww','........','........'],
+  vela:['...y....','..yoy...','...y....','..www...','..www...','..www...','..www...','.wwwww..'],
+  heart:['........','.rr..rr.','rrrrrrrr','rrrrrrrr','.rrrrrr.','..rrrr..','...rr...','........'],
+};
+function xray(e){
+  const c=document.createElement('canvas');c.width=32;c.height=40;const x=c.getContext('2d');
+  const P=(a,b,w,h,col)=>{x.fillStyle=col;x.fillRect(a,b,w,h)};
+  const cx=16,cy=17;
+  for(let y=8;y<=27;y++)for(let px=8;px<=24;px++){const v=((px+.5-cx)/8)**2+((y+.5-cy)/9.5)**2;if(v<=1&&v>.72)P(px,y,1,1,'#3fa9c9')}
+  P(11,15,3,3,'#3fa9c9');P(18,15,3,3,'#3fa9c9');P(15,19,2,2,'#2a7a99');
+  for(let y=31;y<40;y++){const w=8+Math.min(8,(y-30)*2);P(cx-w,y,1,1,'#3fa9c9');P(cx+w-1,y,1,1,'#3fa9c9')}
+  for(let y=32;y<40;y+=2)P(cx-6,y,12,1,'#24657f');
+  P(15,27,2,13,'#2f8fb0');
+  const ic=e.living?'heart':(e.item&&e.item.k);
+  if(ic){const m=ICONS[ic];const col={w:'#eaffff',y:'#ffe66a',o:'#ff9a3a',r:'#ff4a5a'};m.forEach((row,j)=>[...row].forEach((ch,i)=>{if(ch!=='.')P(12+i,31+j,1,1,col[ch])}))}
+  return c.toDataURL();
+}
+function sealSVG(shape,col,lbl){
+  const s={circle:'<circle cx="20" cy="20" r="17"/><circle cx="20" cy="20" r="12.5"/>',
+    hex:'<polygon points="20,2 36,11 36,29 20,38 4,29 4,11"/><polygon points="20,7 31.5,13.5 31.5,26.5 20,33 8.5,26.5 8.5,13.5"/>',
+    star:'<polygon points="20,2 24.6,14.2 37.6,14.6 27.4,22.6 31,35.2 20,27.8 9,35.2 12.6,22.6 2.4,14.6 15.4,14.2"/>',
+    diamond:'<polygon points="20,1.5 38.5,20 20,38.5 1.5,20"/><polygon points="20,7 33,20 20,33 7,20"/>',
+    tri:'<polygon points="20,2.5 38,35.5 2,35.5"/><polygon points="20,10 31,31 9,31"/>',
+    square:'<rect x="3" y="3" width="34" height="34"/><rect x="8" y="8" width="24" height="24"/>'}[shape];
+  return '<svg viewBox="0 0 40 40" fill="none" stroke="'+col+'" stroke-width="2.2" style="opacity:.85">'+s+'<text x="20" y="23.5" text-anchor="middle" font-size="8" font-family="Special Elite,monospace" fill="'+col+'" stroke="none">'+(lbl||'OCT')+'</text></svg>';
+}
+
+/* ---------------- audio ---------------- */
+let AC=null;
+function tone(f,d,type,vol,slide){if(!CFG.snd)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type=type||'square';o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);g.gain.setValueAtTime(vol||.06,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d)}catch(e){}}
+function noise(d,vol){if(!CFG.snd)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const n=AC.sampleRate*d,b=AC.createBuffer(1,n,AC.sampleRate),ch=b.getChannelData(0);for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*(1-i/n);const s=AC.createBufferSource(),g=AC.createGain(),fl=AC.createBiquadFilter();fl.type='lowpass';fl.frequency.value=900;s.buffer=b;g.gain.value=vol||.25;s.connect(fl).connect(g).connect(AC.destination);s.start()}catch(e){}}
+const SFX={
+  stamp:()=>{noise(.12,.5);tone(90,.12,'sine',.25,50)},
+  paper:()=>noise(.18,.12),
+  bell:()=>{tone(1320,.5,'sine',.08);setTimeout(()=>tone(990,.6,'sine',.07),120)},
+  blip:()=>tone(660,.05,'square',.03),
+  bad:()=>{tone(220,.18,'square',.06);setTimeout(()=>tone(160,.25,'square',.06),140)},
+  good:()=>{tone(523,.08,'square',.04);setTimeout(()=>tone(784,.12,'square',.04),80)},
+  cite:()=>{for(let i=0;i<5;i++)setTimeout(()=>tone(1200,.03,'square',.03),i*60)},
+  det:()=>{tone(400,.4,'sawtooth',.05,90)},
+  xr:()=>tone(80,.5,'sawtooth',.04,300),
+  dark:()=>{tone(120,1.2,'sawtooth',.08,30);noise(1,.2)},
+};
+
+/* ---------------- state ---------------- */
+let S=null;
+const B={e:null,stamp:null,anim:'',xr:false,slip:null,ask:{},fresh:false};
+const INS={on:false,sel:[],res:null,mark:{}};
+let paused=0,busy=false,bookTab='normas';
+function famInit(){return[
+  {id:'lucia',n:'Lucía',rel:'tu hija',face:{sk:1,hs:2,hc:2,ey:1,br:0,no:0,mo:1,be:0,gl:0,ht:0,shape:0,ag:0,cl:6,pin:0},hun:0,cold:0,sick:0,dead:0,gone:0,ghost:0},
+  {id:'remedios',n:'Remedios',rel:'tu madre',face:{sk:1,hs:3,hc:6,ey:2,br:0,no:1,mo:0,be:0,gl:1,ht:0,shape:2,ag:2,cl:4,pin:0},hun:0,cold:0,sick:0,dead:0,gone:0,ghost:0},
+  {id:'tomas',n:'Tomás',rel:'tu hermano',face:{sk:1,hs:5,hc:1,ey:0,br:1,no:2,mo:0,be:1,gl:0,ht:0,shape:1,ag:1,cl:2,pin:0},hun:0,cold:0,sick:0,dead:0,gone:0,ghost:0},
+]}
+function newDayLog(){return{t:S.day===1&&S.mode!=='endless'?240:0,idx:0,earned:0,cit:0,fines:0,bribe:0,det:0,proc:0,ok:0,log:[]}}
+function newGame(mode){
+  S={v:1,mode:mode||'story',day:mode==='endless'?15:1,money:10,fam:famInit(),flags:{},cof:0,items:{},seed:(Math.random()*1e9)|0,stats:{proc:0,det:0,cit:0,okc:0},phase:'paper',cks:{}};
+  if(S.mode==='endless'){const r=rng(S.seed);S.eban=[pick(r,RK.slice(1))];}
+  S.d=newDayLog();S.cks[S.day]=snap();save();
+}
+const snap=()=>JSON.parse(JSON.stringify({...S,cks:undefined}));
+function save(){if(!S)return;lsSet(SAVE,S);if(S.mode==='story'&&S.cks)lsSet('tramite-cks-v1',S.cks)}
+function load(){const s=lsGet(SAVE);if(s&&s.v===1&&s.phase!=='end')return s;return null}
+if(location.protocol==='file:')window.__u=()=>S;
+if(location.protocol==='file:')window.__ut={audit:e=>audit(e),B,INS,compare:(a,b)=>compare(a,b),rules:()=>rules()};
+
+/* ---------------- story: scripted visitors ---------------- */
+const NOTES={
+  jefa:{cls:'jefa',t:'NOTA DE LA JEFA DE VENTANILLAS',b:'Bienvenida a la Ventanilla 3. Lo de siempre: <b>Siguiente</b> llama al próximo, lees sus papeles, <b>sellas</b> CRUZA o VUELVE en la cédula y le <b>devuelves</b> los papeles.<br><br>Si algo no cuadra, pulsa <b>Inspeccionar</b> y toca dos datos para compararlos. Hoy solo cruzan las ánimas de Ánimas.<br><br>Cinco óbolos por ánima. Dos errores al día se perdonan; a partir del tercero, multa.<br>— M. Lobo'},
+  cof1:{cls:'cof',t:'⚹ LA COFRADÍA DE LA VELA ⚹',b:'A quien ocupe la Ventanilla 3:<br><br>Nada de lo que te han contado sobre la Oficina de Tránsito es cierto. Tú solo sellas papeles, pero los papeles deciden quién descansa y quién no.<br><br>Guarda esta vela. Pronto sabrás de nosotros.'},
+  cof2:{cls:'cof',t:'⚹ LA COFRADÍA DE LA VELA ⚹',b:'¿Nunca te has preguntado por qué las farolas de Ánimas no se apagan desde hace ochenta años?<br><br>Las ánimas retenidas no se «reubican». Las meten en las farolas y arden allí, despacio, para que la ciudad tenga luz.<br><br>Cada vez que llamas a los Celadores, se enciende una farola más.'},
+  cof3:{cls:'cof',t:'⚹ LA COFRADÍA DE LA VELA ⚹',b:'Los nuestros llevan una vela prendida en la solapa. El Ministerio los mató y ahora quiere quemarlos: por eso su causa de muerte es «Desconocida».<br><br>Déjalos cruzar. Sabemos que te costará una multa.'},
+  cof4:{cls:'cof',t:'⚹ LA COFRADÍA DE LA VELA ⚹',b:'Osorio murió anoche. Él inventó las farolas.<br><br>Hoy vendrá a tu ventanilla con un Pase Ministerial. Retenlo y que arda en su propio invento.'},
+  cof5:{cls:'cof',t:'⚹ LA COFRADÍA DE LA VELA ⚹',b:'Te entregamos el Sello de la Vela.<br><br>Mañana, cuando cierres la ventanilla, estámpalo en el Libro de Registro. Todas las ánimas encerradas en las farolas quedarán libres a la vez.<br><br>Después ya no habrá vuelta atrás. Para nadie.'},
+};
+function velaAfter(d){if(d==='ok')S.flags.velas=(S.flags.velas||0)+1;if((S.flags.velas||0)>=2&&!S.flags.velasCof){S.flags.velasCof=1;S.cof++}}
+function fixedFace(seed,o){return genFace(rng(seed),o)}
+function famOf(id){return S.fam.find(m=>m.id===id)}
+/* spec: name, region, face, sexF, mod(e), greet, talk:{}, after(dec,e), judge(dec,e,j), note, onArrive(e), onSearch(e) */
+const SPECIAL={
+  1:{
+    0:{name:'Faustino Robles Lago',region:'animas',face:fixedFace(11,{hs:6,ag:2,hc:6,be:0,gl:1,ht:0}),greet:'Buenas tardes. Me han dicho que es aquí... lo de morirse. Es la primera vez que me muero, ¿sabe usted?',bye:'Muy amable. Que tenga buena muerte. Digo, buena tarde.'},
+    2:{name:'Gregorio Puga Salcedo',region:'solana',face:fixedFace(12,{ht:2,be:1}),greet:'Vengo de Solana. Mi mujer murió el año pasado aquí, en Ánimas. Déjeme pasar, que me está esperando.',
+      after:(d)=>{S.flags.gregorio=d}},
+  },
+  2:{
+    1:{name:'Paquito Cienfuegos',region:'animas',face:fixedFace(21,{hs:4,hc:0,be:1,mo:1,ht:3,ag:1,ey:1,cl:6}),greet:'¡Buenas! Paquito Cienfuegos, para servirle. Aquí tiene mi cédula, recién hecha. Por mí mismo.',
+      mod:e=>{const c=e.docs.ced;c.crayon=1;c.city='Mi casa';c.num='¿¿¿-123-?';c.cad=today()-1;c.disp={cad:'Para siempre'};c.seal=null;e.docs.cert=null},
+      talk:{_:'¡Pero si la he hecho con mucho cariño!'},bye_no:'¡Volveré! ¡Paquito siempre vuelve!',after:d=>{S.flags.paq1=d}},
+    4:{name:'Amparo Navarro Ortega',region:'gelida',face:fixedFace(22,{hs:3,ag:2,hc:6}),greet:'He venido andando desde Gélida. Cuarenta días, ni uno más.'},
+  },
+  3:{
+    1:{name:'Elvira Sanjuán Lago',region:'marisma',face:fixedFace(31,{hs:2,hc:3,be:0,ht:4,ag:1,mo:3}),greet:'Mi Anselmo viene detrás de mí. Nos ahogamos juntos, en la barca. A él se le mojaron los papeles en el agua... ¿lo dejará pasar?',bye:'Le esperaré al otro lado. Gracias.'},
+    2:{name:'Anselmo Ferreiro Pardo',region:'marisma',face:fixedFace(32,{hs:6,be:2,hc:5,ag:2,ht:1}),greet:'¿Ha pasado mi Elvira? Se me mojó el certificado en el naufragio... no tengo otro. Por favor.',
+      mod:e=>{e.docs.cert=null;e.docs.ced.wet=1},talk:{sinCert:'Se lo llevó el agua. Pregunte en Marisma, todo el mundo nos conoce.'},
+      bye_ok:'¡Elvira! ¡Ya voy!',bye_no:'Entonces me quedo aquí. Sin ella.',after:d=>{S.flags.anselmo=d}},
+    4:{name:'Paquito Cienfuegos',region:'animas',face:fixedFace(21,{hs:4,hc:0,be:1,mo:1,ht:3,ag:1,ey:1,cl:6}),greet:'¡Esta vez sí! Cédula de imprenta y certificado de verdad. El sello lo hice con una patata, pero muy oficial.',
+      mod:e=>{e.docs.ced.seal={shape:'tri',col:'#8a6a2a'}},talk:{_:'¡Era una patata muy oficial!'},bye_no:'Mañana traigo un sello de boniato. ¡Más serio!',after:d=>{S.flags.paq2=d}},
+  },
+  4:{
+    2:{name:'El Hermano',region:'animas',face:fixedFace(41,{ht:5,be:0,mo:0,ey:2}),greet:'No pregunte mi nombre. Mis papeles están en regla. Esto es para usted. Léalo sin que nadie la... sin que nadie le vea.',
+      onArrive:()=>{S.items.nota=1;S.items.vela=1;B.extraNote='cof1';log('sys','El encapuchado desliza una nota y una vela por la ranura.')},bye:'Nos veremos.'},
+    5:{name:'Pura Valcárcel Ruiz',region:'animas',weight:27,item:ITEMS[0],face:fixedFace(42,{hs:3,hc:6,ag:2,gl:1,mo:1,cl:4}),greet:'Vengo ligerita, hijo, no llevo nada de nada.',talk:{peso:'¡Son las perlas de mi madre! Al otro lado no se lleva nada, ya lo sé... pero son de mi madre.'}},
+  },
+  5:{
+    1:{name:'Ismael Ródenas Sanz',region:'altiplano',face:fixedFace(51,{hs:5,be:3,ey:0}),greet:'Los de la vela me dijeron que usted es de fiar. Mi sello no es bueno. Si me retiene, ya sabe a dónde me llevan.',
+      mod:e=>{e.docs.ced.seal={shape:'tri',col:REG.solana.col}},bye_ok:'La Cofradía no olvida.',after:d=>{if(d==='ok')S.cof++;S.flags.ismael=d}},
+  },
+  6:{
+    1:{name:'Inspector Vidal',visit:1,face:fixedFace(61,{hs:5,hc:0,be:1,gl:0,ht:2,cl:5,ey:0,mo:0}),
+      onArrive:()=>story('Inspector Vidal','«Inspector Vidal, del Ministerio. Tranquilidad, que no vengo a inspeccionar. Hoy vendrá mi cuñado, Baltasar Ordóñez. Su cédula caducó la semana pasada, una tontería. Usted lo deja pasar y estos diez óbolos son suyos.»',
+        [{t:'Aceptar los 10 óbolos',fn:()=>{S.flags.bribe=1;S.d.bribe+=10;log('sys','Te guardas diez óbolos.')}},{t:'Rechazar',fn:()=>{S.flags.bribe=-1;log('them','Como quiera. Usted sabrá.')}}],B.e.face)},
+    4:{name:'Baltasar Ordóñez Merino',region:'animas',face:fixedFace(62,{hs:0,ag:2,be:2,hc:5}),greet:'Vengo de parte de mi cuñado, el inspector. Usted ya sabe.',
+      mod:e=>{e.docs.ced.cad=today()-6},
+      judge:(d,e,j)=>{if(S.flags.bribe===1&&d==='ok')return{ok:true};return j},
+      after:d=>{S.flags.baltasar=d;if(S.flags.bribe===1&&d!=='ok')S.flags.vidalAngry=1}},
+    6:{name:'Paquito Cienfuegos',region:'gelida',face:fixedFace(21,{hs:4,hc:0,be:1,mo:1,ht:3,ag:1,ey:1,cl:6}),greet:'Me he mudado a Gélida para que me hicieran papeles buenos. ¡Mire qué sello más bonito!',talk:{ban:'¿Prohibida Gélida? ¡Pero si me mudé ayer!'},bye_no:'¡Me mudo a otra provincia y vuelvo!',after:d=>{S.flags.paq3=d}},
+  },
+  7:{
+    1:{name:'Sor Candela',region:'animas',face:fixedFace(71,{ht:5,mo:1,ey:1,be:0}),greet:'Paz y luz. Hoy vendrá un Celador muerto, Bermúdez. Sus papeles estarán perfectos. Él llevó a cientos de los nuestros a las farolas. Retenlo.',bye:'Que la vela te guíe.'},
+    3:{name:'Carmen Alba Fuentes',region:'animas',living:1,weight:58,face:fixedFace(72,{hs:2,hc:1,ag:0,be:0,gl:0,ht:0,mo:3,ey:1}),greet:'Mi Julián cruzó hace una semana. Le traigo su certificado... bueno, el mío. Quiero ir con él. Por favor.',
+      mod:e=>{e.docs.cert.causa='Pena'},talk:{vivo:'¿Y qué más da? Sin él no estoy viva de verdad. Déjeme pasar.',peso:'Sin él no estoy viva de verdad.'},
+      bye_ok:'Gracias. Julián, ya voy.',bye_no:'...Está bien. Volveré a casa.',after:d=>{S.flags.carmen=d}},
+    5:{name:'Celador Bermúdez',region:'animas',face:fixedFace(73,{hs:1,hc:0,be:1,ht:3,cl:7,ey:0,mo:3}),greet:'Celador primero Bermúdez. Morí en acto de servicio. Despáchame rápido, que tengo derecho a descanso.',
+      bye_ok:'Ya era hora.',after:d=>{if(d==='det'){S.cof++;S.flags.bermudez=1}}},
+  },
+  8:{
+    2:{name:'Paquito Cienfuegos',region:'animas',weight:24,item:ITEMS[1],face:fixedFace(21,{hs:4,hc:0,be:1,mo:1,ht:3,ag:1,ey:1,cl:6}),greet:'¡Cuarto intento! Todo de imprenta, sellos de verdad, pase, certificado... ¡No me falta nada!',
+      talk:{peso:'Ah, ¿la balanza? Debe de ser el reloj del abuelo...'},
+      onSearch:e=>{story('Paquito Cienfuegos','«¡El reloj del abuelo! Al otro lado no se lleva nada, ¿verdad? Pues quédeselo usted. Por las molestias de estos días.»',[{t:'Aceptar el reloj (+15 óbolos)',fn:()=>{S.d.bribe+=15;S.items.reloj=1;e.item=null;e.weight=21;log('sys','La balanza marca ahora 21 g.');drawBooth()}},{t:'Rechazarlo',fn:()=>{log('them','Usted se lo pierde. Es de oro, ¿eh?')}}],e.face)},
+      bye_ok:'¡LO HE CONSEGUIDO! ¡A la cuarta! ¡Gracias, gracias!',after:d=>{S.flags.paq4=d}},
+    4:{name:'Sor Candela',region:'animas',face:fixedFace(71,{ht:5,mo:1,ey:1,be:0}),greet:'Toma. Es hora de que sepas la verdad.',onArrive:()=>{B.extraNote='cof2';S.flags.truth=1;S.items.nota=1},bye:'Que la vela te guíe.'},
+  },
+  9:{
+    3:{name:'Fermín Lumbre',region:'animas',weight:25,item:{k:'vela',n:'una vela'},face:fixedFace(91,{hs:1,hc:7,pin:1,ey:1}),greet:'Una vela. Solo llevo una vela. Déjeme pasar, se lo ruego. Es importante.',talk:{peso:'Es una vela. Solo una vela.'},
+      after:d=>{if(d==='ok'){S.cof++;S.flags.fermin=1}}},
+  },
+  10:{
+    0:{name:'Sor Candela',region:'animas',face:fixedFace(71,{ht:5,mo:1,ey:1,be:0}),greet:'Lo de ayer fuimos nosotros. Toma.',onArrive:()=>{B.extraNote='cof3'},bye:'Que la vela te guíe.'},
+    2:{name:'Rufino Escribano',region:'animas',face:fixedFace(101,{pin:1}),mod:e=>{e.docs.cert.causa='Desconocida'},greet:'Paz y luz.',after:velaAfter},
+    5:{name:'Herminia Garrido',region:'solana',face:fixedFace(102,{pin:1,hs:3}),mod:e=>{e.docs.cert.causa='Desconocida'},greet:'Paz y luz. Usted sabe quién soy.',after:velaAfter},
+    8:{name:'Matías Olmedo',region:'animas',face:fixedFace(103,{pin:1,hs:1,be:3}),mod:e=>{e.docs.cert.causa='Desconocida'},greet:'Paz y luz. Soy el último de hoy.',after:velaAfter},
+  },
+  12:{
+    1:{name:'Sor Candela',region:'animas',face:fixedFace(71,{ht:5,mo:1,ey:1,be:0}),greet:'Es hoy.',onArrive:()=>{B.extraNote='cof4'},cond:()=>!S.flags.reported,bye:'Que la vela te guíe.'},
+    3:{name:'Ezequiel Osorio Valcárcel',region:'animas',ministerial:1,face:fixedFace(121,{hs:6,hc:6,ag:2,be:1,gl:1,cl:5,ey:0,mo:3}),greet:'Director General Osorio. Supongo que me reconoce. Tengo Pase Ministerial: séllelo y no me haga perder la eternidad.',
+      mod:e=>{e.docs.cert.causa='Desconocida'},bye_ok:'Correcto. Lo haré constar.',bye_no:'¿Sabe usted con quién está hablando?',
+      after:d=>{S.flags.osorio=d;if(d==='det'&&!S.flags.reported)S.cof++}},
+  },
+  13:{
+    1:{name:'Sor Candela',region:'animas',face:fixedFace(71,{ht:5,mo:1,ey:1,be:0}),greet:'Lo has hecho bien. Esto es lo último que te pediremos.',cond:()=>!S.flags.reported&&S.cof>=3,onArrive:()=>{B.extraNote='cof5';S.items.sello=1},bye:'Que la vela te guíe. Mañana.'},
+  },
+};
+function specFor(day,idx){
+  if(S.mode==='endless')return null;
+  // family members who died come to the window
+  const fv=S.fam.find(m=>m.visit===day&&!m.visited);
+  if(fv){const fi=[0,1,2,3,4].find(i=>!(SPECIAL[day]&&SPECIAL[day][i]));if(idx===fi)return famSpec(fv)}
+  const sp=SPECIAL[day]&&SPECIAL[day][idx];
+  if(sp&&(!sp.cond||sp.cond()))return sp;
+  return null;
+}
+function famSpec(m){
+  const lines={lucia:'Ya no me duele nada. No llores, ¿vale? Cuida de la abuela.',remedios:'Cariño, no pongas esa cara. Ya era mi hora. Déjame ir con tu padre.',tomas:'Bueno, pues aquí estamos. Al menos ya no tengo que madrugar.'};
+  return{name:m.n+' '+(m.id==='lucia'?'Cabello Ortega':m.id==='remedios'?'Ortega Lago':'Cabello Ortega'),region:'animas',face:m.face,greet:lines[m.id],famId:m.id,
+    bye_ok:'Te quiero. Hasta luego, que no adiós.',bye_no:'Entonces me quedo en casa contigo.',
+    after:d=>{m.visited=1;if(d==='ok')m.gone=1;else if(d==='no')m.ghost=1;else{m.gone=1;S.flags.famDet=m.n}}};
+}
+
+/* ---------------- entrant generation ---------------- */
+function bulletin(){
+  if(!S._bul||S._bul.d!==S.day){const r=rng(S.seed^(S.day*2654435761));S._bul={d:S.day,list:[0,1,2].map(()=>({n:pick(r,r()<.5?FN_M:FN_F)+' «'+pick(r,['el Tuerto','la Sombra','el Rápido','la Muda','el Cura','la Viuda','el Notario','el Gato'])+'»',face:genFace(r)}))}}
+  return S._bul.list;
+}
+function mkNum(r,reg){return REG[reg].code+'-'+ri(r,1000,9999)+'-'+String.fromCharCode(65+ri(r,0,25))}
+function altName(n,r){
+  const p=n.split(' ');const i=ri(r,1,p.length-1);const w=p[i];
+  if(r()<.5&&w.length>4){const k=ri(r,1,w.length-3);p[i]=w.slice(0,k)+w[k+1]+w[k]+w.slice(k+2)}else p[i]=pick(r,SUR.filter(s=>s!==w));
+  return p.join(' ');
+}
+function altNum(n,r){const i=pick(r,[4,5,6,7]);let d=(+n[i]+ri(r,1,8))%10;return n.slice(0,i)+d+n.slice(i+1)}
+function issuesAvail(R,e){
+  const k=['foto'];
+  if(R.cad)k.push('cad');if(R.city)k.push('ciudad');if(R.seal)k.push('sello','sello');
+  if(R.cert)k.push('nombre','num','plazo','futuro','sinCert','sinCert');
+  if(R.peso)k.push('peso','peso');if(R.wanted)k.push('buscado');
+  if(R.pase&&e.region!=='animas')k.push('sinPase','paseCad','paseReg','nombreP','numP');
+  if(R.forense)k.push('forense');if(R.causa)k.push('causa');
+  return k;
+}
+function inject(e,k,r){
+  const T=today(),d=e.docs;
+  if(['nombre','num','plazo','futuro','sinCert','forense','causa'].includes(k)&&!d.cert)return;
+  if(['sinPase','paseCad','paseReg','nombreP','numP'].includes(k)&&!d.pase)return;
+  switch(k){
+    case 'foto':d.ced.photo=mutate(e.face,r);break;
+    case 'cad':d.ced.cad=T-ri(r,1,500);break;
+    case 'ciudad':d.ced.city=r()<.4?pick(r,FAKECITY.slice(0,5)):pick(r,REG[pick(r,RK.filter(x=>x!==e.region))].c);break;
+    case 'sello':{if(r()<.5)d.ced.seal={shape:REG[pick(r,RK.filter(x=>REG[x].seal!==REG[e.region].seal))].seal,col:REG[e.region].col};else d.ced.seal={shape:REG[e.region].seal,col:REG[pick(r,RK.filter(x=>x!==e.region))].col};break}
+    case 'nombre':d.cert.nombre=altName(d.cert.nombre,r);break;
+    case 'num':d.cert.num=altNum(d.cert.num,r);break;
+    case 'plazo':d.cert.fecha=T-ri(r,41,140);break;
+    case 'futuro':d.cert.fecha=T+ri(r,1,40);break;
+    case 'sinCert':e.withheld=r()<.5?d.cert:null;d.cert=null;break;
+    case 'peso':e.weight=21+ri(r,2,9);e.item=pick(r,ITEMS);break;
+    case 'buscado':{const b=pick(r,bulletin());e.face={...b.face};d.ced.photo={...b.face};break}
+    case 'sinPase':d.pase=null;break;
+    case 'paseCad':d.pase.cad=T-ri(r,1,60);break;
+    case 'paseReg':d.pase.region=pick(r,RK.filter(x=>x!==e.region&&x!=='animas'));break;
+    case 'nombreP':d.pase.nombre=altName(d.pase.nombre,r);break;
+    case 'numP':d.pase.num=altNum(d.pase.num,r);break;
+    case 'forense':d.cert.forense=0;break;
+    case 'causa':d.cert.causa='Desconocida';break;
+  }
+}
+function makeEntrant(day,idx){
+  const r=rng((S.seed^(day*1000003))+idx*7919);
+  const R=rulesFor(day),T=today(),sp=specFor(day,idx);
+  if(sp&&sp.visit)return{visit:1,spec:sp,name:sp.name,face:sp.face,docs:{},found:new Set(),asked:new Set(),weight:21};
+  let region;
+  if(sp&&sp.region)region=sp.region;
+  else if(R.local)region=r()<.62?'animas':pick(r,RK.slice(1));
+  else region=r()<.3?'animas':pick(r,RK);
+  const sexF=r()<.5;
+  const name=sp&&sp.name||pick(r,sexF?FN_F:FN_M)+' '+pick(r,SUR)+' '+pick(r,SUR);
+  const fc=sp&&sp.face||genFace(r);
+  const e={name,region,face:fc,weight:sp&&sp.weight||21,item:sp&&sp.item||null,living:!!(sp&&sp.living),withheld:null,docs:{},found:new Set(),asked:new Set(),spec:sp||null,searched:false};
+  const num=mkNum(r,region);
+  e.docs.ced={nombre:name,num,nac:dn(ri(r,1895,1968),ri(r,1,12),ri(r,1,28)),region,city:pick(r,REG[region].c),cad:T+ri(r,20,2600),photo:{...fc},seal:{shape:REG[region].seal,col:REG[region].col}};
+  if(R.cert)e.docs.cert={nombre:name,num,fecha:T-ri(r,1,38),causa:pick(r,CAUSAS),medico:pick(r,MEDICOS),forense:1};
+  if(R.pase&&region!=='animas')e.docs.pase={nombre:name,num,region,cad:T+ri(r,2,180)};
+  if(sp&&sp.ministerial)e.docs.min={nombre:name};
+  if(!sp){
+    const p=.33+Math.min(day,14)*.017;
+    if(r()<p){const ks=issuesAvail(R,e);inject(e,pick(r,ks),r);if(day>=8&&r()<.15)inject(e,pick(r,ks),r)}
+  }
+  if(sp&&sp.mod)sp.mod(e);
+  return e;
+}
+function audit(e){
+  if(e.visit)return[];
+  const R=rules(),T=today(),d=e.docs,c=d.ced,out=[];
+  if(e.living)out.push('vivo');
+  if(d.min&&R.ministerial)return out;
+  if(!c)return['sinCert'];
+  if(R.local&&c.region!=='animas')out.push('local');
+  if(R.ban.includes(c.region))out.push('ban');
+  if(!faceEq(e.face,c.photo))out.push('foto');
+  if(R.cad&&c.cad<T)out.push('cad');
+  if(R.city&&!REG[c.region].c.includes(c.city))out.push('ciudad');
+  if(R.seal&&(!c.seal||c.seal.shape!==REG[c.region].seal||c.seal.col!==REG[c.region].col))out.push('sello');
+  if(R.cert){const k=d.cert;if(!k)out.push('sinCert');else{if(k.nombre!==c.nombre)out.push('nombre');if(k.num!==c.num)out.push('num');if(k.fecha>T)out.push('futuro');else if(T-k.fecha>40)out.push('plazo');if(R.forense&&!k.forense)out.push('forense');if(R.causa&&k.causa==='Desconocida')out.push('causa')}}
+  if(R.pase&&c.region!=='animas'){const p=d.pase;if(!p)out.push('sinPase');else{if(p.nombre!==c.nombre)out.push('nombre');if(p.num!==c.num)out.push('num');if(p.region!==c.region)out.push('paseReg');if(p.cad<T)out.push('paseCad')}}
+  if(R.peso&&!e.living&&e.weight>21)out.push('peso');
+  if(R.wanted&&bulletin().some(b=>faceEq(b.face,e.face)))out.push('buscado');
+  return[...new Set(out)];
+}
+function judge(e,dec){
+  const iss=audit(e),R=rules();
+  const det=iss.filter(c=>ISS[c].det&&R.detain),must=det.filter(c=>ISS[c].must);
+  if(dec==='ok')return iss.length?{ok:false,why:ISS[iss[0]].m}:{ok:true};
+  if(dec==='no'){if(!iss.length)return{ok:false,why:'Denegación sin motivo'};if(must.length)return{ok:false,why:ISS[must[0]].m.replace(': retener','')+': había que retener'};return{ok:true}}
+  if(!det.length)return{ok:false,why:'Retención injustificada'};
+  return{ok:true,bonus:1};
+}
+
+/* ---------------- comparisons (inspection) ---------------- */
+function compare(a,b){
+  const e=B.e;if(!e||e.visit)return{res:'none',msg:'No hay nadie en la ventanilla.'};
+  const d=e.docs,T=today(),R=rules();
+  const has=k=>[a,b].includes(k),one=re=>[a,b].find(k=>re.test(k)),other=k=>k===a?b:a;
+  const val=k=>{const[x,y]=k.split('.');return d[x]&&d[x][y]};
+  const bad=(code,msg)=>({res:'bad',code,msg:msg||ISS[code].m}),ok=msg=>({res:'ok',msg:msg||'Coinciden.'}),none=msg=>({res:'none',msg:msg||'Esos dos datos no tienen relación.'});
+  const grp=g=>g.includes(a)&&g.includes(b);
+  if(grp(['ced.nombre','cert.nombre','pase.nombre']))return val(a)===val(b)?ok():bad('nombre');
+  if(grp(['ced.num','cert.num','pase.num']))return val(a)===val(b)?ok():bad('num');
+  if(grp(['ced.region','pase.region']))return val(a)===val(b)?ok():bad('paseReg');
+  if(has('face')&&has('ced.foto'))return faceEq(e.face,d.ced.photo)?ok('Es la misma cara.'):bad('foto');
+  let w;
+  if((w=one(/^bul\.\d$/))){const o=other(w),bf=bulletin()[+w.slice(4)].face;if(o==='face'||o==='ced.foto'){const f=o==='face'?e.face:d.ced.photo;return faceEq(f,bf)?bad('buscado','¡Es la cara del Boletín de fugitivos!'):ok('No es el fugitivo.')}}
+  if((w=one(/^(ced|pase)\.cad$/))&&(has('hoy')||has('r.cad'))){return val(w)<T?bad(w==='ced.cad'?'cad':'paseCad'):ok('Vigente.')}
+  if(has('cert.fecha')&&(has('hoy')||has('r.plazo'))){const f=d.cert.fecha;if(f>T)return bad('futuro','¡La fecha de defunción es posterior a hoy!');if(T-f>40)return bad('plazo','Han pasado '+(T-f)+' días desde la defunción. Máximo: 40.');return ok('Dentro de plazo: '+(T-f)+' días.')}
+  if((w=one(/^book\./))){const rk=w.slice(5),o=other(w);
+    if(o==='ced.region'||o==='pase.region')return val(o)===rk?ok('Provincia de '+REG[rk].n+'.'):none('No es la misma provincia.');
+    if(o==='ced.city'){if(d.ced.region!==rk)return none('Compáralo con la provincia de la cédula.');return REG[rk].c.includes(d.ced.city)?ok('Ciudad de '+REG[rk].n+'.'):bad('ciudad')}
+    if(o==='ced.sello'){if(d.ced.region!==rk)return none('Compáralo con la provincia de la cédula.');const s=d.ced.seal;return s&&s.shape===REG[rk].seal&&s.col===REG[rk].col?ok('Sello oficial.'):bad('sello')}
+  }
+  if((w=one(/^r\./))){const rk=w.slice(2),o=other(w),pers=o==='face'||o.startsWith('ced.');
+    if(rk==='local'&&pers)return d.ced.region==='animas'?ok('Es de Ánimas.'):bad('local');
+    if(rk==='ban'&&pers)return R.ban.includes(d.ced.region)?bad('ban'):ok('Provincia permitida.');
+    if(rk==='cert'&&pers)return d.cert?ok('Ha presentado el certificado.'):bad('sinCert');
+    if(rk==='pase'&&pers){if(d.ced.region==='animas')return ok('Las ánimas de Ánimas no necesitan pase.');return d.pase?ok('Ha presentado el pase.'):bad('sinPase')}
+    if(rk==='peso'&&o==='scale'){if(e.living)return bad('vivo','¡Pesa '+e.weight+' kilos! Está vivo.');return e.weight>21?bad('peso','Pesa '+e.weight+' g: lleva algo encima.'):ok('21 gramos justos.')}
+    if(rk==='forense'&&o.startsWith('cert.'))return d.cert.forense?ok('Sellado por el forense.'):bad('forense');
+    if(rk==='causa'&&o==='cert.causa')return d.cert.causa==='Desconocida'?bad('causa'):ok('Causa conocida.');
+    if(rk==='seal'&&o==='ced.sello')return none('Compara el sello con su provincia en «Provincias».');
+    if(rk==='city'&&o==='ced.city')return none('Compara la ciudad con su provincia en «Provincias».');
+    if(rk==='wanted'&&o==='face')return none('Compara la cara con las fotos del Boletín.');
+  }
+  if(has('scale')&&has('face')&&e.living)return bad('vivo','¡Pesa '+e.weight+' kilos! Está vivo.');
+  return none();
+}
+
+/* ---------------- rendering helpers ---------------- */
+const F=(k,v,lb)=>'<div class="row"><span class="lb">'+lb+'</span><span class="f" data-f="'+k+'">'+v+'</span></div>';
+function fdate(n){return fd(n)}
+function docCed(c,e){
+  const rg=REG[c.region];
+  const stamp=B.stamp?'<div class="stampmk '+B.stamp+'">'+(B.stamp==='ok'?'CRUZA':'VUELVE')+'</div>':'';
+  return '<div class="doc ced'+(c.crayon?' crayon':'')+(c.wet?' wet':'')+'">'+
+    '<div class="band" style="background:'+(c.crayon?'#e06a55':rg.col)+'"><span>CÉDULA DE ÁNIMA</span><span class="f" data-f="ced.region">'+(c.crayon?'ÁNIMAS (creo)':rg.n.toUpperCase())+'</span></div>'+
+    '<div class="grid"><div class="ph"><span class="f" data-f="ced.foto" style="display:block;padding:0"><img class="pix" src="'+face(c.photo,'photo')+'" alt="foto"></span></div><div style="flex:1;min-width:0">'+
+    F('ced.nombre',esc(c.nombre),'Nombre')+F('ced.num',esc(c.num),'Nº')+F('ced.nac',fdate(c.nac),'Nacimiento')+F('ced.city',esc(c.city),'Expedida en')+F('ced.cad',c.disp&&c.disp.cad||fdate(c.cad),'Válida hasta')+
+    '</div></div><div style="height:30px"></div><div class="seal f" data-f="ced.sello">'+(c.seal?sealSVG(c.seal.shape,c.seal.col,rg.code):'<span style="font-size:10px;opacity:.6">(sin sello)</span>')+'</div>'+stamp+'</div>';
+}
+function docCert(k){
+  return '<div class="doc cert"><h4>CERTIFICADO DE DEFUNCIÓN</h4>'+F('cert.nombre',esc(k.nombre),'Nombre')+F('cert.num',esc(k.num),'Nº cédula')+F('cert.fecha',fdate(k.fecha),'Defunción')+F('cert.causa',esc(k.causa),'Causa')+
+    '<div class="row"><span class="lb">Médico</span><span style="font-style:italic">'+esc(k.medico)+'</span></div>'+(rules().forense||k.forense?'<div style="height:16px"></div><div class="fx f" data-f="cert.forense">'+(k.forense?'FORENSE ✓':'&nbsp;(sin sello)&nbsp;')+'</div>':'')+'</div>';
+}
+function docPase(p){return '<div class="doc pase"><h4>PASE DE PROCEDENCIA · O.C.T.</h4>'+F('pase.nombre',esc(p.nombre),'Nombre')+F('pase.num',esc(p.num),'Nº cédula')+F('pase.region',REG[p.region].n,'Procedencia')+F('pase.cad',fdate(p.cad),'Válido hasta')+'</div>'}
+function docMin(m){return '<div class="doc min"><h4>✦ PASE MINISTERIAL ✦</h4><p style="margin:4px 0">El portador, <b>'+esc(m.nombre)+'</b>, queda exento de todo requisito, inspección y retención.</p><p style="margin:4px 0;text-align:right;font-style:italic">Ministerio de Tránsito</p></div>'}
+function docBul(){return '<div class="doc bul"><h4>BOLETÍN DE FUGITIVOS · RETENER</h4><div class="ws">'+bulletin().map((b,i)=>'<div class="w"><span class="f" data-f="bul.'+i+'" style="display:block;padding:0"><img class="pix" src="'+face(b.face,'photo')+'" alt=""></span>'+esc(b.n)+'</div>').join('')+'</div></div>'}
+function docNote(k){const n=NOTES[k];return '<div class="doc note '+n.cls+'"><h4>'+n.t+'</h4>'+n.b+'</div>'}
+function docCirc(){
+  const nr=S.mode==='endless'?['Turno sin fin: todas las normas a la vez. Prohibida hoy: '+S.eban.map(k=>REG[k].n).join(', ')+'.']:NEWRULES[S.day];
+  if(!nr)return '';
+  return '<div class="doc circ"><h4>CIRCULAR DEL MINISTERIO · NOVEDADES</h4><ul>'+nr.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>';
+}
+function docSlip(s){return '<div class="doc slip"><h4>AMONESTACIÓN Nº '+s.n+'</h4><p style="margin:2px 0">Motivo: <b>'+esc(s.why)+'</b></p><p style="margin:2px 0">'+(s.fine?'Multa: 5 óbolos.':'Aviso: sin multa ('+s.n+' de 2).')+'</p></div>'}
+
+function bookHTML(){
+  const R=rules();
+  const tabs='<div class="tabs"><button data-a="tab" data-t="normas" class="'+(bookTab==='normas'?'cur':'')+'">Normas</button><button data-a="tab" data-t="prov" class="'+(bookTab==='prov'?'cur':'')+'">Provincias</button><button data-a="tab" data-t="docs" class="'+(bookTab==='docs'?'cur':'')+'">Documentos</button></div>';
+  let b='';
+  if(bookTab==='normas'){
+    const L=[];const nw=k=>DAYRULES[S.day]&&k in DAYRULES[S.day]&&S.mode!=='endless'?'<span class="new">NUEVO</span>':'';
+    if(R.local)L.push('<span class="f" data-f="r.local">Solo cruzan las ánimas de Ánimas.</span>'+nw('local'));
+    else L.push('Se admiten ánimas de todas las provincias.'+nw('local'));
+    L.push('Toda ánima presenta su <b>Cédula</b>. La foto debe ser la de quien tienes delante.');
+    if(R.ban.length)L.push('<span class="f" data-f="r.ban">Prohibidas las ánimas de: <b>'+R.ban.map(k=>REG[k].n).join(', ')+'</b>.</span>'+nw('ban'));
+    if(R.cad)L.push('<span class="f" data-f="r.cad">La cédula debe estar vigente.</span> La muerte no exime de renovarla.'+nw('cad'));
+    if(R.city)L.push('<span class="f" data-f="r.city">La cédula se expide en una ciudad de su provincia</span> (ver Provincias).'+nw('city'));
+    if(R.seal)L.push('<span class="f" data-f="r.seal">La cédula lleva el sello oficial de su provincia</span>: forma y color (ver Provincias).'+nw('seal'));
+    if(R.cert)L.push('<span class="f" data-f="r.cert">Se exige Certificado de Defunción</span>: nombre y nº de cédula deben coincidir.'+nw('cert'));
+    if(R.cert)L.push('<span class="f" data-f="r.plazo">Plazo: como máximo 40 días desde la defunción.</span> Fecha de hoy: en el calendario.'+nw('cert'));
+    if(R.forense)L.push('<span class="f" data-f="r.forense">El certificado lleva el sello del forense.</span>'+nw('forense'));
+    if(R.pase)L.push('<span class="f" data-f="r.pase">Las ánimas de fuera de Ánimas necesitan Pase de Procedencia</span> vigente y con datos iguales a la cédula.'+nw('pase'));
+    if(R.peso)L.push('<span class="f" data-f="r.peso">Un ánima pesa 21 gramos justos.</span> Si la balanza marca más, lleva algo: usa la <b>Lámpara</b>. Registrar sin motivo es una falta. Los vivos no cruzan.'+nw('peso'));
+    if(R.detain)L.push('Puedes <b>Retener</b> ánimas con sello falso u objetos escondidos: +5 óbolos.'+nw('detain'));
+    if(R.wanted)L.push('<span class="f" data-f="r.wanted">Las ánimas del Boletín de fugitivos deben ser retenidas.</span>'+nw('wanted'));
+    if(R.causa)L.push('<span class="f" data-f="r.causa">Causa de defunción «Desconocida»: retener.</span>'+nw('causa'));
+    if(R.ministerial)L.push('El <b>Pase Ministerial</b> exime de todo requisito: hay que dejarle cruzar.'+nw('ministerial'));
+    b='<h3>NORMAS DE HOY</h3><ol>'+L.map(x=>'<li>'+x+'</li>').join('')+'</ol><p style="font-size:12px;opacity:.75;margin-top:8px">En modo Inspeccionar puedes tocar las normas subrayadas y compararlas con un documento, la cara o la balanza.</p>';
+  }else if(bookTab==='prov'){
+    b='<h3>PROVINCIAS Y SELLOS</h3>'+RK.map(k=>{const g=REG[k];return '<div class="rg f" data-f="book.'+k+'">'+sealSVG(g.seal,g.col,g.code)+'<div><b style="color:'+g.col+'">'+g.n+(R.ban.includes(k)?' · PROHIBIDA':'')+'</b>Ciudades: '+g.c.join(', ')+'<br><small>Nº de cédula: '+g.code+'-0000-X</small></div></div>'}).join('');
+  }else{
+    b='<h3>DOCUMENTOS</h3><p><b>Cédula de ánima</b>: nombre, número, foto, ciudad de expedición, validez y sello de la provincia.</p>'+
+      (R.cert?'<p><b>Certificado de defunción</b>: nombre, nº de cédula, fecha y causa de la muerte'+(R.forense?', con el sello del forense':'')+'.</p>':'')+
+      (R.pase?'<p><b>Pase de procedencia</b>: para ánimas de fuera de Ánimas. Mismo nombre, número y provincia que la cédula.</p>':'')+
+      (R.wanted?'<p><b>Boletín de fugitivos</b>: tres caras cada día. Los nombres pueden ser falsos; las caras no.</p>':'')+
+      (R.peso?'<p><b>Balanza de almas</b>: 21 g. Más peso = objetos escondidos. Kilos = una persona viva.</p>':'')+
+      '<p><b>Calendario</b>: la fecha de hoy, para las caducidades y el plazo de 40 días.</p>';
+  }
+  return '<div class="book">'+tabs+b+'</div>';
+}
+
+/* ---------------- main render ---------------- */
+const app=$('#app');
+function render(){
+  if(!S){renderTitle();return}
+  if(S.phase==='paper')renderPaper();
+  else if(S.phase==='booth')renderGame();
+  else if(S.phase==='night')renderNight();
+  else if(S.phase==='end')renderEnd();
+}
+function renderTitle(){
+  const sv=load();
+  const ghosts=Array.from({length:7},(_,i)=>'<div class="gh" style="animation-delay:-'+(i*3.7)+'s;bottom:'+(10+(i%3)*14)+'px;transform:scale(.8)"></div>').join('');
+  app.innerHTML='<div class="title scr"><div class="stampdeco">VENTANILLA 3</div><h1>ÚLTIMO<br>TRÁMITE</h1><p class="sub">Oficina Central de Tránsito de Ánimas · noviembre de 1986</p><div class="menu">'+
+    (sv?'<button class="btn gold big" data-a="cont" data-key="enter">Continuar · '+(sv.mode==='endless'?'Turno sin fin':'Día '+sv.day)+'</button>':'')+
+    '<button class="btn big'+(sv?'':' gold')+'" data-a="new"'+(sv?'':' data-key="enter"')+'>Nueva partida</button>'+
+    (Object.keys(lsGet('tramite-cks-v1')||{}).length>1?'<button class="btn" data-a="days" data-key="e">Elegir día</button>':'')+
+    (REC.ends.length?'<button class="btn" data-a="endless" data-key="s">Turno sin fin'+(REC.best?' · récord '+REC.best:'')+'</button>':'')+
+    '<button class="btn dark" data-a="help" data-key="h">Cómo se juega</button>'+
+    '<div style="display:flex;gap:8px"><button class="btn dark" style="flex:1" data-a="snd">Sonido: '+(CFG.snd?'sí':'no')+'</button><button class="btn dark" style="flex:1" data-a="slow">Ritmo: '+(CFG.slow?'tranquilo':'normal')+'</button></div>'+
+    '</div><div class="foot">'+(REC.ends.length?'Finales vistos: '+REC.ends.length+' de 6':'Un juego de papeleo, ánimas y conciencia')+'</div><div class="fog">'+ghosts+'</div></div>';
+}
+function paperData(){
+  const d=S.day,f=S.flags;
+  const P={
+    1:['REABRE LA OFICINA CENTRAL DE TRÁNSITO','Tras el colapso de octubre, con colas de difuntos que daban la vuelta a la ciudad, el Ministerio de Tránsito adjudica por lotería nuevas plazas de ventanilla. Hoy, día de Todos los Santos, solo se atenderá a los difuntos de Ánimas.',['Niebla','Como cada día desde hace ochenta años. Las farolas, encendidas.'],['¿Qué hay al otro lado?','El Ministerio pide paciencia: «Lo importante es que los papeles estén en orden».']],
+    2:['LAS PROVINCIAS VUELVEN A ENVIAR A SUS DIFUNTOS','Desde hoy se exigirá el certificado de defunción y se vigilará el plazo de cuarenta días. «Quien no se presente a tiempo, que espere su turno como todo el mundo», dice el Director General Osorio.',f.gregorio==='ok'?['Escándalo en la Ventanilla 3','Un difunto de Solana cruzó ayer sin permiso. El Ministerio «toma nota».']:['Detenido un difunto','Intentaba cruzar con la cédula de su perro.'],['Récord de colas','Más de dos mil ánimas esperan en la Plaza del Tránsito.']],
+    3:['FALSIFICADORES DE SELLOS EN LA COLA','El Ministerio publica los sellos oficiales de cada provincia tras detectar cédulas selladas con corchos, chapas y verduras.',['Farolas: orgullo nacional','Ochenta años sin apagarse. «Ninguna ciudad brilla como Ánimas.»'],f.paq1?['Se busca','Un tal «Paquito» reparte cédulas pintadas con lápices de colores.']:['Tranvía 0','Cada vez llega más lleno.']],
+    4:['AL OTRO LADO NO SE LLEVA NADA','La Oficina instala Balanzas de Almas en todas las ventanillas: un ánima pesa veintiún gramos y ni uno más. Se buscan joyas, relojes y herencias escondidas.',f.anselmo==='ok'?['Unidos para siempre','Un matrimonio ahogado en Marisma cruzó junto. «Fue precioso», dicen en la cola.']:f.anselmo==='no'?['Un ánima vaga por la plaza','«Mi Elvira está al otro lado», repite un anciano de Marisma.']:['Marisma','Temporal en la costa.'],['Pintadas','Aparecen velas dibujadas en las paredes del Ministerio.']],
+    5:['LLEGAN LOS CELADORES','Las ventanillas podrán retener a las ánimas sospechosas. «Serán reubicadas con todas las garantías», asegura el Director General Osorio. Se publica el primer Boletín de fugitivos.',['¿Reubicadas dónde?','El Ministerio no da detalles.'],['Purgatorio al 90%','Se estudian medidas de cupo.']],
+    6:['GÉLIDA ROMPE EL TRATADO DE TRÁNSITO','Las ánimas de Gélida quedan prohibidas hasta nuevo aviso. Gélida acusa a Ánimas de «quedarse con lo que no es suyo».',f.ismael==='ok'?['Sello falso','Un ánima del Altiplano cruzó con sello falsificado. Lleva una vela pintada en la cédula.']:['Celadores','Primera semana: cuatrocientas retenciones.'],['Inspectores','El Ministerio vigilará las ventanillas.']],
+    7:['NUEVO PASE DE PROCEDENCIA','Las ánimas de fuera de Ánimas necesitarán un pase de la Oficina, y los certificados deberán llevar el sello del forense.',f.bribe===1?['Felicitación','El inspector Vidal, condecorado por su «eficacia en las ventanillas».']:['Purgatorio al 94%','Ya no caben más.'],['Fábrica de velas','Cierra por falta de demanda. Doscientos despidos.']],
+    8:[f.carmen==='no'?'DESPIERTA TRAS TRES DÍAS EN COMA':f.carmen==='ok'?'MUERE UNA MUJER «QUE SE FUE DETRÁS DE SU MARIDO»':'EL PURGATORIO AL 97%',f.carmen==='no'?'Carmen Alba, de 34 años, abrió los ojos ayer en el Hospital General. «Me mandaron de vuelta desde una ventanilla», dice. Los médicos no se lo explican.':f.carmen==='ok'?'Carmen Alba, de 34 años, murió ayer en el Hospital General. Llevaba tres días en coma. Los médicos dicen que «se dejó ir».':'El Ministerio estudia nuevos cupos.',f.bermudez?['Desaparece un Celador','El celador Bermúdez no llegó al Otro Lado. El Ministerio investiga.']:['Celadores','Ya son mil las ánimas reubicadas.'],['Faroles','Se instalan cincuenta farolas nuevas en el barrio alto.']],
+    9:['LA COFRADÍA DE LA VELA, ¿MITO O AMENAZA?','Pintadas, rumores y velas en las ventanas. El Ministerio niega que exista la organización: «Son cuentos de viejas».',f.paq4==='ok'?['¡A la cuarta!','Paquito Cienfuegos, el falsificador más torpe de Ánimas, cruzó ayer con papeles legales.']:['Paquito','Sigue en la cola. Dice que mañana vuelve.'],['Previsión','Niebla espesa.']],
+    10:['APAGÓN EN ÁNIMAS','Por primera vez en ochenta años, las farolas se apagaron. Durante una hora se oyeron voces por toda la ciudad. «Sabotaje», dice el Ministerio, que ordena retener a toda ánima de causa de muerte desconocida.',['Inspecciones','Mañana habrá inspecciones sorpresa en las ventanillas. «Quien no tenga nada que esconder, nada debe temer».'],['Velas','Prohibido vender velas a partir de hoy.']],
+    11:['INSPECCIONES EN LAS VENTANILLAS','El Ministerio registra las cabinas en busca de «material sedicioso». Altiplano se une al cierre de provincias.',['Osorio, enfermo','El Director General no aparece en público desde el apagón.'],['Colas','La Plaza del Tránsito, a rebosar.']],
+    12:['MUERE EL DIRECTOR GENERAL OSORIO','Falleció anoche, de causa desconocida. Su ánima será atendida «con todos los honores» y con un Pase Ministerial.',['Sucesión','La Subdirectora Lobo asume el cargo en funciones.'],['Farolas','Brillan más que nunca.']],
+    13:[f.osorio==='det'?'LA FAROLA DE LA CALLE MAYOR BRILLA MÁS QUE NUNCA':f.osorio==='no'?'EL ÁNIMA DE OSORIO VAGA POR EL MINISTERIO':'OSORIO CRUZA CON HONORES','Mañana termina el Plan de Tránsito de noviembre. El Ministerio anuncia el cierre parcial de provincias.',['Cola','Diez mil ánimas esperan.'],['La Cofradía','Aparecen velas encendidas en cientos de ventanas.']],
+    14:['ÚLTIMO DÍA DEL PLAN DE TRÁNSITO','Mañana el Ministerio presentará la «Reforma de las Farolas». Marisma se une al cierre: hoy solo cruzan Ánimas, Solana y Ultramar.',['Ventanilla 3','Fuentes del Ministerio dicen que «alguien de una ventanilla» está con la Cofradía.'],['Niebla','Como siempre.']],
+  };
+  if(S.mode==='endless')return['TURNO SIN FIN','La cola no se acaba nunca. Todas las normas a la vez, hasta las seis de la tarde. ¿Cuántas ánimas despachas sin un error?',['Prohibida hoy',S.eban.map(k=>REG[k].n).join(', ')],['Récord',REC.best?REC.best+' ánimas bien despachadas.':'Todavía ninguno.']];
+  return P[d];
+}
+function skyline(dark){
+  let s='<svg class="ill" viewBox="0 0 320 110" preserveAspectRatio="xMidYMid slice"><rect width="320" height="110" fill="'+(dark?'#2a2620':'#bfb394')+'"/>';
+  const r=rng(S.day*77+3);let x=0;
+  while(x<320){const w=ri(r,18,40),h=ri(r,30,80);s+='<rect x="'+x+'" y="'+(110-h)+'" width="'+w+'" height="'+h+'" fill="'+(dark?'#14120e':'#4a4234')+'"/>';for(let i=0;i<3;i++)if(r()<.5)s+='<rect x="'+(x+4+i*8)+'" y="'+(116-h)+'" width="3" height="4" fill="'+(dark?'#2a2620':'#d9c98f')+'"/>';x+=w+ri(r,0,4)}
+  for(let i=0;i<6;i++){const fx=20+i*56;s+='<rect x="'+fx+'" y="60" width="2" height="50" fill="#1f1a16"/><circle cx="'+(fx+1)+'" cy="58" r="'+(dark?3:6)+'" fill="'+(dark?'#3a3428':'#fff3b0')+'" opacity=".95"/>'}
+  if(!dark)for(let i=0;i<7;i++)s+='<ellipse cx="'+(30+i*45)+'" cy="104" rx="6" ry="9" fill="#e9f6ff" opacity=".55"/>';
+  return s+'</svg>';
+}
+function renderPaper(){
+  const [h,lead,c1,c2]=paperData();const T=today(),dt=new Date(T*864e5);
+  app.innerHTML='<div class="news scr"><div class="np"><div class="mast">El Eco de Ánimas</div><div class="dl"><span>'+DOW[dt.getUTCDay()]+' '+dt.getUTCDate()+' de noviembre de 1986</span><span>Día '+(S.mode==='endless'?'∞':S.day)+'</span><span>Diez céntimos</span></div><h2>'+h+'</h2>'+skyline(S.day===10)+'<p class="lead">'+lead+'</p><div class="cols"><div><h3>'+c1[0]+'</h3><p>'+c1[1]+'</p></div><div><h3>'+c2[0]+'</h3><p>'+c2[1]+'</p></div></div></div></div><div class="floatbar"><button class="btn dark" data-a="menu" data-key="esc">Menú</button><button class="btn gold big" data-a="topaper" data-key="enter">A la ventanilla</button></div>';
+  SFX.paper();
+}
+function toBooth(){
+  S.phase='booth';B.e=null;B.stamp=null;B.slip=null;B.extraNote=null;INS.on=false;INS.sel=[];INS.res=null;
+  save();renderGame();
+  // morning events
+  if(S.mode==='story'&&S.day===11&&!S.flags.d11){S.flags.d11=1;setTimeout(inspection11,400)}
+}
+function renderGame(){
+  const st=app.querySelector('.desk')?app.querySelector('.desk').scrollTop:0;
+  app.innerHTML='<div class="game"><header class="hud" id="hud"></header><section class="booth" id="booth"></section><section class="desk'+(INS.on?' insp':'')+'" id="desk"></section><nav class="bar" id="bar"></nav><aside class="bookside" id="bookside"></aside></div>';
+  drawHud();drawBooth();drawDesk();drawBar();drawBookSide();
+  $('#desk').scrollTop=st;
+}
+function hhmm(t){const m=480+Math.floor(t);return pad(Math.floor(m/60))+':'+pad(m%60)}
+function drawHud(){
+  const h=$('#hud');if(!h)return;const d=S.d;
+  h.innerHTML='<span>'+(S.mode==='endless'?'Turno sin fin':'Día '+S.day)+'</span><span class="sp"></span><span>Hoy <b>+'+(d.earned+d.bribe-d.fines)+'</b></span><span>Ahorros <b>'+S.money+'</b></span><span class="cit">⚠ '+d.cit+'</span><button class="ib" data-a="menu">☰</button>';
+}
+function drawBooth(){
+  const b=$('#booth');if(!b)return;const e=B.e,R=rules(),T=today(),dt=new Date(T*864e5);
+  const ghosts=Array.from({length:9},(_,i)=>'<div class="gh" style="left:'+(4+i*9)+'%;animation-delay:-'+(i*.37)+'s"></div>').join('');
+  let por='';
+  if(B.xr&&e)por='<div class="xray"><span>'+(e.living?'♥ TIENE PULSO':e.item?'OBJETO: '+e.item.n.toUpperCase():'NADA ESCONDIDO')+'</span><img class="pix" src="'+xray(e)+'"></div>';
+  if(e)por+='<div class="por'+(e.living?'':' ghost')+(B.anim?' '+B.anim:'')+' f" data-f="face"><img class="pix" src="'+face(e.face,e.living?'live':'win')+'" alt=""></div>';
+  else por+='<div class="empty">'+(S.d.t>=600?'Ventanilla cerrada.<br>Son las seis.':'Pulsa <b>Siguiente</b> para<br>llamar a la próxima ánima.')+'</div>';
+  const w=e?(e.living?e.weight+' kg':e.weight+' g'):'— g';
+  b.innerHTML='<div class="queue">'+ghosts+'<span class="lbl">cola: '+(1800+S.day*731-S.d.idx*3)+'</span></div><div class="win"><div class="frame"><div class="sign">VENTANILLA 3</div>'+por+'<div class="bars"></div></div><div class="side">'+
+    '<div class="wid"><small>HORA</small><div class="clock'+(S.d.t>=540?' late':'')+'" id="clk">'+hhmm(S.d.t)+'</div></div>'+
+    '<div class="wid cal f" data-f="hoy"><small style="color:#6a5a40">HOY</small>'+DOW[dt.getUTCDay()]+'<b>'+dt.getUTCDate()+'</b>'+MES[dt.getUTCMonth()].toUpperCase()+' 1986</div>'+
+    '<div class="wid scale f'+(R.peso?'':' off')+'" data-f="scale"><small>BALANZA</small><div class="gr">'+(R.peso?w:'—')+'</div></div>'+
+    '</div></div><div class="talk" id="talk">'+S.d.log.slice(-4).map(l=>'<p class="'+l[0]+'">'+esc(l[1])+'</p>').join('')+'</div>';
+  markIns();
+}
+function drawDesk(){
+  const k=$('#desk');if(!k)return;const e=B.e;let h='';
+  if(INS.res)h+='<div class="ires '+INS.res.res+'">'+(INS.res.res==='bad'?'⚠ DISCREPANCIA: ':INS.res.res==='ok'?'✓ ':'')+esc(INS.res.msg)+'</div>';
+  else if(INS.on)h+='<div class="ires tip">Modo inspección: toca dos datos para compararlos (documentos, cara, fecha de hoy, balanza o normas).</div>';
+  h+='<div class="docs'+(B.fresh?' fresh':'')+'">';B.fresh=false;
+  if(B.slip)h+=docSlip(B.slip);
+  if(B.extraNote)h+=docNote(B.extraNote);
+  if(e&&!e.visit){const d=e.docs;if(d.ced)h+=docCed(d.ced,e);if(d.cert)h+=docCert(d.cert);if(d.pase)h+=docPase(d.pase);if(d.min)h+=docMin(d.min)}
+  if(!e)h+='<div class="waitmsg">'+(S.d.t>=600?'Se acabó la jornada. Cierra la ventanilla.':'La mesa está vacía.')+'</div>';
+  if(rules().wanted)h+=docBul();
+  h+=docCirc();
+  if(S.day===1&&S.mode==='story')h+=docNote('jefa');
+  h+='</div>';
+  k.innerHTML=h;k.classList.toggle('insp',INS.on);
+  markIns();
+}
+function drawBookSide(){const s=$('#bookside');if(s)s.innerHTML=bookHTML();markIns()}
+function drawBar(){
+  const b=$('#bar');if(!b)return;const e=B.e,R=rules();
+  const can=e&&!e.visit&&!B.anim;
+  const pend=e&&[...e.found].some(c=>!e.asked.has(c));
+  let h='<button class="btn'+(INS.on?' on':'')+'" data-a="insp" data-key="i"'+(can?'':' disabled')+'>🔍 Inspeccionar</button>'+
+    '<button class="btn bk" data-a="book" data-key="r">📕 Reglamento</button>';
+  if(pend)h+='<button class="btn gold" data-a="askq" data-key="p">💬 Preguntar</button>';
+  if(R.peso&&can&&!e.searched)h+='<button class="btn dark" data-a="search" data-key="l">🔦 Lámpara</button>';
+  h+='<button class="btn ok stmp" data-a="stok" data-key="a"'+(can?'':' disabled')+'>CRUZA</button><button class="btn no stmp" data-a="stno" data-key="d"'+(can?'':' disabled')+'>VUELVE</button>';
+  if(R.detain)h+='<button class="btn dark" data-a="det" data-key="t" style="color:#ff9b85"'+(can?'':' disabled')+'>⛓ Retener</button>';
+  if(e&&!e.visit)h+='<button class="btn gold main" data-a="give" data-key="enter"'+(B.stamp&&!B.anim?'':' disabled')+'>Devolver papeles</button>';
+  else if(!e)h+='<button class="btn gold main" data-a="next" data-key="enter">'+(S.d.t>=600?'Cerrar la ventanilla':'📣 Siguiente')+'</button>';
+  b.innerHTML=h;
+}
+function markIns(){
+  document.querySelectorAll('[data-f]').forEach(el=>{const k=el.dataset.f;el.classList.toggle('sel',INS.sel.includes(k));el.classList.toggle('bad',INS.mark[k]==='bad');el.classList.toggle('good',INS.mark[k]==='ok')});
+  document.body.classList.toggle('insp-on',INS.on);
+}
+function log(who,t){S.d.log.push([who,t]);if(S.d.log.length>40)S.d.log.shift();const tk=$('#talk');if(tk){tk.innerHTML=S.d.log.slice(-4).map(l=>'<p class="'+l[0]+'">'+esc(l[1])+'</p>').join('')}if(who==='them')SFX.blip()}
+
+/* ---------------- booth actions ---------------- */
+function nextEntrant(){
+  if(B.e||busy)return;
+  if(S.d.t>=600){closeDay();return}
+  if(S.mode==='story'&&S.day===9&&!S.flags.apagon&&(S.d.idx>=5||S.d.t>=380)){apagon();return}
+  B.slip=null;B.extraNote=null;B.stamp=null;B.xr=false;INS.sel=[];INS.res=null;INS.mark={};
+  const e=makeEntrant(S.day,S.d.idx);B.e=e;B.anim='in';
+  SFX.bell();log('me','¡Siguiente!');
+  drawBooth();drawDesk();drawBar();
+  setTimeout(()=>{if(B.anim==='in')B.anim='';const p=$('.por');if(p)p.classList.remove('in');drawBar()},600);
+  setTimeout(()=>{
+    if(B.e!==e)return;
+    if(e.visit){e.spec.onArrive&&e.spec.onArrive();return}
+    log('them',e.spec&&e.spec.greet||pick(Math.random,GREET));
+    if(e.spec&&e.spec.onArrive)e.spec.onArrive(e);
+    SFX.paper();B.fresh=true;drawDesk();
+  },500);
+}
+function stamp(k){if(!B.e||B.e.visit||B.anim)return;B.stamp=k;SFX.stamp();drawDesk();drawBar()}
+function ask(){
+  const e=B.e;if(!e)return;const c=[...e.found].reverse().find(x=>!e.asked.has(x));if(!c)return;e.asked.add(c);
+  log('me',ISS[c].q);
+  setTimeout(()=>{
+    if(c==='sinCert'&&e.withheld){e.docs.cert=e.withheld;e.withheld=null;log('them','¡Ay, perdone! Lo llevaba en el bolsillo del abrigo.');SFX.paper();INS.mark={};drawDesk()}
+    else{const t=e.spec&&e.spec.talk&&(e.spec.talk[c]||e.spec.talk._);log('them',t||pick(Math.random,TALK[c]||['...']))}
+    drawBar();
+  },450);
+  drawBar();
+}
+function search(){
+  const e=B.e;if(!e||e.searched||!rules().peso)return;e.searched=true;B.xr=true;SFX.xr();drawBooth();drawBar();
+  log('me','Póngase bajo la lámpara, por favor.');
+  setTimeout(()=>{
+    if(e.living){e.found.add('vivo');log('sys','¡Tiene pulso! Está vivo.')}
+    else if(e.item){e.found.add('peso');log('sys','Lleva '+e.item.n+'.');if(e.spec&&e.spec.onSearch)setTimeout(()=>e.spec.onSearch(e),700)}
+    else{log('sys','No lleva nada.');if(e.weight<=21)cite('Registro sin motivo')}
+    drawBar();
+    setTimeout(()=>{B.xr=false;if(B.e===e)drawBooth()},2200);
+  },700);
+}
+function cite(why){
+  S.d.cit++;S.stats.cit++;const fine=S.d.cit>2?5:0;S.d.fines+=fine;B.slip={n:S.d.cit,why,fine};SFX.cite();
+  const fl=document.createElement('div');fl.className='flash';document.body.appendChild(fl);setTimeout(()=>fl.remove(),600);
+  drawHud();drawDesk();
+}
+function decide(dec){
+  const e=B.e;if(!e||busy||e.visit)return;
+  busy=true;
+  let j=judge(e,dec);if(e.spec&&e.spec.judge)j=e.spec.judge(dec,e,j)||j;
+  S.d.proc++;S.stats.proc++;S.d.earned+=5;
+  if(j.ok){S.d.ok++;S.stats.okc++}
+  if(dec==='det'){if(j.ok){S.d.earned+=5;S.d.det++}S.stats.det++}
+  const sp=e.spec||{};
+  log('them',dec==='ok'?(sp.bye_ok||sp.bye||pick(Math.random,BYE_OK)):dec==='no'?(sp.bye_no||pick(Math.random,BYE_NO)):pick(Math.random,BYE_DET));
+  if(dec==='det'){log('sys','Llegan los Celadores y se lo llevan.');SFX.det()}
+  B.anim=dec==='ok'?'outok':dec==='no'?'outno':'outdet';
+  const p=$('.por');if(p){p.classList.remove('in');p.classList.add(B.anim)}
+  if(sp.after)sp.after(dec,e);
+  if(!j.ok)setTimeout(()=>cite(j.why),500);else SFX.good();
+  S.d.idx++;
+  drawHud();drawBar();
+  setTimeout(()=>{B.e=null;B.anim='';B.stamp=null;B.xr=false;INS.res=null;INS.sel=[];INS.mark={};busy=false;save();drawBooth();drawDesk();drawBar();drawHud()},dec==='det'?950:850);
+}
+function giveBack(){if(!B.e||!B.stamp||B.anim)return;SFX.paper();decide(B.stamp)}
+function toggleInsp(){if(!B.e||B.e.visit)return;INS.on=!INS.on;INS.sel=[];if(!INS.on)INS.res=null;drawDesk();drawBar();markIns()}
+function pickField(k){
+  if(!INS.on||!B.e||B.e.visit)return;
+  if(INS.sel.includes(k)){INS.sel=INS.sel.filter(x=>x!==k);markIns();return}
+  INS.sel.push(k);SFX.blip();
+  if(INS.sel.length===2){
+    const[a,b]=INS.sel;const r=compare(a,b);INS.res=r;INS.mark={[a]:r.res==='none'?'':r.res,[b]:r.res==='none'?'':r.res};
+    if(r.res==='bad'){B.e.found.add(r.code);SFX.bad()}else if(r.res==='ok')SFX.good();
+    INS.sel=[];drawDesk();drawBar();
+    if(!$('#sheet').hidden&&$('#sheet .book'))closeSheet();
+  }else markIns();
+}
+
+/* ---------------- story events ---------------- */
+function story(who,text,opts,fc){
+  paused++;
+  const sh=$('#sheet');sh.hidden=false;
+  sh.innerHTML='<div class="sh story"><div class="speaker">'+(fc?'<img class="pix" src="'+face(fc,'win')+'">':'')+'<h2>'+esc(who)+'</h2></div><div class="quote">'+text+'</div><div class="acts">'+opts.map((o,i)=>'<button class="btn '+(i?'dark':'gold')+'" data-a="opt" data-i="'+i+'" data-key="'+(i+1)+'">'+o.t+'</button>').join('')+'</div></div>';
+  sh._opts=opts;
+}
+function storyPick(i){const sh=$('#sheet'),o=sh._opts&&sh._opts[i];sh.hidden=true;sh.innerHTML='';sh._opts=null;paused=Math.max(0,paused-1);if(o&&o.fn)o.fn();
+  // a visit ends after its choice
+  if(B.e&&B.e.visit&&!$('#sheet')._opts&&$('#sheet').hidden){const e=B.e;B.anim='outno';drawBooth();setTimeout(()=>{if(B.e===e){B.e=null;B.anim='';S.d.idx++;save();drawBooth();drawDesk();drawBar()}},700)}
+  drawHud();drawBar();
+}
+function inspection11(){
+  const hasCof=(S.items.nota||S.items.vela)&&!S.flags.burned;
+  if(hasCof){
+    story('Inspector Vidal','«Registro de cabina, órdenes del Ministerio. Aparte las manos de la mesa.»<br><br>Abre el cajón. Saca la nota de la Cofradía. Saca la vela.<br><br>«Vaya, vaya. Esto se lo explica usted a los Celadores.»',[{t:'…',fn:()=>endGame('arresto')}],fixedFace(61,{hs:5,hc:0,be:1,gl:0,ht:2,cl:5,ey:0,mo:0}));
+    return;
+  }
+  story('Inspector Vidal','«Registro de cabina, órdenes del Ministerio.» Revuelve el cajón, mira bajo la mesa. Nada.<br><br>'+(S.flags.bribe===1?'«Lo de mi cuñado queda entre nosotros, ¿eh?» ':'')+'«Una última cosa. Si sabe algo de la Cofradía de la Vela, dígamelo ahora. El Ministerio sabe ser generoso: cuarenta óbolos y una buena recomendación.»',
+    [{t:'No sé nada',fn:()=>{log('them','Mejor así.')}},{t:'Denunciar a la Cofradía (+40)',fn:()=>{S.flags.reported=1;S.cof=0;S.d.bribe+=40;log('sys','Le cuentas a Vidal todo lo que sabes.')}}],fixedFace(61,{hs:5,hc:0,be:1,gl:0,ht:2,cl:5,ey:0,mo:0}));
+}
+function apagon(){
+  S.flags.apagon=1;SFX.dark();busy=true;
+  const d=document.createElement('div');d.className='blackout';d.innerHTML='Se va la luz en toda Ánimas.<br><br>Por primera vez en ochenta años, las farolas se apagan.<br>De la oscuridad sale un murmullo de miles de voces.<br><br><small>La Oficina cierra antes de tiempo.</small>';
+  document.body.appendChild(d);
+  setTimeout(()=>{d.remove();busy=false;S.d.t=600;closeDay()},4200);
+}
+
+/* ---------------- day end / night ---------------- */
+function closeDay(){
+  if(S.mode==='endless'){endless();return}
+  S.phase='night';
+  const nn=S.night={rent:20,food:1,heat:1,meds:{},burn:0};
+  if(S.day===9)nn.heatCost=16;
+  S.fam.forEach(m=>{if(m.sick&&!m.dead)nn.meds[m.id]=1});
+  save();
+  if(S.day===14&&S.items.sello&&!S.flags.reported){
+    story('El Libro de Registro','Son las seis. La Oficina se vacía. Sobre tu mesa, el Libro de Registro de la Ventanilla 3. En el bolsillo, el Sello de la Vela.<br><br>Si lo estampas, todas las ánimas encerradas en las farolas quedarán libres. Ánimas se quedará a oscuras. Para siempre.',
+      [{t:'Estampar el Sello de la Vela',fn:()=>{S.flags.final='apertura';renderNight()}},{t:'Guardarlo y volver a casa',fn:()=>{S.flags.final='guardar';renderNight()}}]);
+    return;
+  }
+  renderNight();
+}
+const totalNow=()=>S.money+S.d.earned+S.d.bribe-S.d.fines;
+function nightCost(){const n=S.night;return n.rent+(n.food?12:0)+(n.heat?(n.heatCost||8):0)+Object.values(n.meds).filter(Boolean).length*18}
+function famState(m){
+  if(m.gone)return['Al otro lado','gone'];if(m.ghost)return['Fantasma en casa','gone'];if(m.dead)return['Ha muerto','bad'];
+  const s=[];if(m.sick>=2)s.push('Grave');else if(m.sick)s.push('Enfermo');if(m.hun)s.push('Hambre');if(m.cold)s.push('Frío');
+  return s.length?[s.join(', '),m.sick?'bad':'mid']:['Bien',''];
+}
+function renderNight(){
+  const n=S.night,d=S.d,tot=totalNow(),left=tot-nightCost();
+  const alive=S.fam.filter(m=>!m.dead);
+  const mline=(lb,v,cls)=>'<div class="ln"><span>'+lb+'</span><span class="'+(cls||'')+'">'+v+'</span></div>';
+  const chk=(k,lb,cost,on,dis)=>'<label class="ln"><span><input type="checkbox" data-a="exp" data-k="'+k+'"'+(on?' checked':'')+(dis?' disabled':'')+'>'+lb+'</span><span class="neg">−'+cost+'</span></label>';
+  let h='<div class="nightscr scr"><div class="ledger"><h2>CUENTAS · DÍA '+S.day+'</h2>'+
+    mline('Ahorros',S.money)+mline('Salario ('+d.proc+' ánimas × 5)','+'+d.proc*5,'pos')+(d.det?mline('Retenciones ('+d.det+' × 5)','+'+d.det*5,'pos'):'')+(d.bribe?mline('Otros ingresos','+'+d.bribe,'pos'):'')+(d.fines?mline('Multas','−'+d.fines,'neg'):'')+
+    mline('Alquiler','−'+n.rent,'neg')+
+    chk('food','Comida',12,n.food,!alive.length)+chk('heat','Calefacción'+(n.heatCost?' (apagón)':''),n.heatCost||8,n.heat,!alive.length)+
+    S.fam.filter(m=>m.sick&&!m.dead).map(m=>chk('med:'+m.id,'Medicinas para '+m.n,18,n.meds[m.id])).join('')+
+    (S.day===10&&(S.items.nota||S.items.vela)&&!S.flags.burned?'<label class="ln"><span><input type="checkbox" data-a="exp" data-k="burn"'+(n.burn?' checked':'')+'>Quemar la nota y la vela de la Cofradía</span><span>🔥</span></label>':'')+
+    '<div class="ln tot"><span>Quedan</span><span class="'+(left<0?'neg':'')+'">'+left+' óbolos</span></div>'+
+    '<div class="fam">'+S.fam.map(m=>{const[s,c]=famState(m);return '<div class="m"><img class="pix" src="'+face(m.face,m.ghost||m.gone?'ghostfam':'photo')+'">'+m.n+'<span class="st '+c+'">'+s+'</span></div>'}).join('')+'</div></div>'+
+    '<div class="events">'+nightEvents().map(x=>'<p>'+x+'</p>').join('')+'</div>'+
+    '</div><div class="floatbar"><button class="btn dark" data-a="menu" data-key="esc">Menú</button><button class="btn gold big" data-a="sleep" data-key="enter"'+(left<0&&tot>=n.rent?' disabled':'')+'>Dormir</button></div>';
+  app.innerHTML=h;
+}
+function nightEvents(){
+  const ev=[],f=S.flags,d=S.day;
+  ev.push('Hoy has despachado '+S.d.proc+' ánimas'+(S.d.cit?' y te han puesto '+S.d.cit+' amonestación'+(S.d.cit>1?'es':'')+'.':' sin ningún error.'));
+  if(totalNow()<S.night.rent)ev.push('<b>No te llega para el alquiler.</b> Mañana vendrán a por los muebles... y a por ti.');
+  if(d===4&&S.items.nota)ev.push('En casa lees la nota de la Cofradía. Escondes la vela en el cajón de la ventanilla.');
+  if(d===6)ev.push('Tomás ha perdido su trabajo en la fábrica de velas.');
+  if(d===7)ev.push('Lucía vuelve de la escuela con fiebre.');
+  if(d===8&&f.truth)ev.push('Desde la ventana ves la farola de tu calle. Por un momento te parece ver una cara dentro.');
+  if(d===9)ev.push('Sin farolas, la ciudad está negra. Hace mucho frío. La calefacción cuesta el doble.');
+  if(d===10&&(S.items.nota||S.items.vela)&&!S.flags.burned)ev.push('La radio repite que mañana habrá <b>inspecciones sorpresa</b> en las ventanillas. La nota y la vela siguen en tu cajón.');
+  if(d===12&&f.osorio)ev.push(f.osorio==='det'?'De camino a casa, la farola de la Calle Mayor brilla con una luz rara, casi furiosa.':'Dicen que Osorio '+(f.osorio==='ok'?'cruzó con una sonrisa.':'se quedó en la plaza dando gritos.'));
+  S.fam.forEach(m=>{if(m.ghost)ev.push(m.n+' ronda por la casa. Dice que ya no tiene frío.')});
+  S.fam.forEach(m=>{if(m.dead)return;if(m.sick>=2)ev.push('<b>'+m.n+' está grave.</b> Sin medicinas, no pasará de esta noche.');else if(m.sick)ev.push(m.n+(m.id==='tomas'?' está enfermo':' está enferma')+'. Si no hay medicinas, empeorará.');else if(m.hun)ev.push(m.n+' pasó hambre anoche.');else if(m.cold)ev.push(m.n+' pasó frío anoche.')});
+  return ev;
+}
+function sleep(){
+  const n=S.night,tot=totalNow();
+  if(tot<n.rent){endGame('ruina');return}
+  if(n.burn){S.flags.burned=1;S.items.nota=0;S.items.vela=0}
+  S.money=tot-nightCost();
+  // family update
+  if(S.day===7){const l=famOf('lucia');if(!l.dead&&!l.sick)l.sick=1,l._fresh=1}
+  S.fam.forEach(m=>{
+    if(m.dead)return;
+    if(m._fresh){m._fresh=0}
+    else if(m.sick){if(n.meds[m.id])m.sick=0;else{m.sick++;if(m.sick>=3){m.dead=1;m.visit=S.day+1;return}}}
+    if(n.food)m.hun=0;else m.hun++;
+    if(n.heat)m.cold=0;else m.cold++;
+    if(!m.sick&&(m.hun>=2||m.cold>=2))m.sick=1;
+  });
+  if(S.fam.every(m=>m.dead&&m.visited&&!m.ghost)){endGame('casa');return}
+  if(S.day>=14){endGame(S.flags.reported?'medalla':S.flags.final==='apertura'?'apertura':'eterna');return}
+  S.day++;S.d=newDayLog();S.phase='paper';S.night=null;
+  const cks=S.cks||{};S.cks=null;cks[S.day]=snap();S.cks=cks;save();render();
+}
+
+/* ---------------- endings ---------------- */
+const ENDS={
+  apertura:['La Gran Apertura','FINAL 1 DE 6'],
+  medalla:['Medalla al Mérito','FINAL 2 DE 6'],
+  eterna:['Ventanilla eterna','FINAL 3 DE 6'],
+  arresto:['Material sedicioso','FINAL 4 DE 6'],
+  ruina:['Embargo','FINAL 5 DE 6'],
+  casa:['Casa vacía','FINAL 6 DE 6'],
+};
+function endGame(k){
+  S.phase='end';S.ending=k;if(!REC.ends.includes(k)){REC.ends.push(k);lsSet(RECK,REC)}
+  const sh=$('#sheet');sh.hidden=true;paused=0;busy=false;
+  lsSet(SAVE,Object.assign({},S,{phase:'end'}));
+  // keep checkpoints available
+  const cks=S.cks;lsSet('tramite-cks-v1',cks);
+  renderEnd();
+}
+function endText(k){
+  const f=S.flags,det=S.stats.det;
+  const T={
+    apertura:['Estampas la vela sobre el Libro de Registro. La cera se enciende sola, sin fuego.','Una a una, todas las farolas de Ánimas se apagan. De cada una sale una luz pequeña, tímida, que sube hacia la niebla. Miles. Decenas de miles.','La ciudad se queda a oscuras para siempre. Nadie sabe quién lo hizo. Tú, desde la ventanilla, las ves cruzar sin papeles por primera vez en ochenta años.'],
+    medalla:['El Ministerio te concede la Medalla al Mérito Funcionarial por tu «colaboración ejemplar contra la sedición».','La Cofradía de la Vela es desmantelada en una noche. Sus miembros acaban donde acaban todos los retenidos.','Las farolas de Ánimas brillan como nunca. Desde tu nuevo despacho se ven todas.'],
+    eterna:['El Plan de Tránsito termina. Empieza el de diciembre. La Ventanilla 3 abre a las ocho, como cada día.','La cola no se acaba nunca. Tú sellas, devuelves, llamas al siguiente.','Algún día, alguien se sentará en tu sitio y te pedirá los papeles.'],
+    arresto:['Los Celadores te sacan de la cabina delante de toda la cola.','Te acusan de pertenecer a la Cofradía de la Vela. Nadie te pregunta nada más.','Dicen que hay una farola nueva frente a tu casa. Que da una luz cálida, casi amable.'],
+    ruina:['No llegas al alquiler. Por la mañana llaman a la puerta.','Se llevan los muebles, la estufa y tu plaza de ventanilla. La familia se reparte por casas de parientes.','La Ventanilla 3 tendrá otro funcionario el lunes.'],
+    casa:['La casa está en silencio. Ya no queda nadie a quien dar de comer.','Sigues yendo a la Oficina cada mañana. Es lo único que te queda.','Cada vez que suena «¡Siguiente!», miras la cara que aparece. Por si acaso.'],
+  }[k];
+  const ep=[];
+  if(['apertura','medalla','eterna'].includes(k)){
+    S.fam.forEach(m=>{const[s]=famState(m);ep.push(m.n+' ('+m.rel+'): '+s.toLowerCase()+'.')});
+    if(f.anselmo)ep.push(f.anselmo==='ok'?'Elvira y Anselmo cruzaron juntos.':'Anselmo sigue esperando en la plaza.');
+    if(f.carmen)ep.push(f.carmen==='no'?'Carmen Alba vive. Cada 1 de noviembre lleva flores a la tumba de Julián.':'Carmen Alba cruzó detrás de su marido.');
+    ep.push(f.paq4==='ok'?'Paquito Cienfuegos cruzó a la cuarta.':'Paquito Cienfuegos sigue haciendo cédulas con lápices de colores.');
+    ep.push('Ánimas que retuviste: '+det+'.'+(det&&f.truth?' Cada una, una farola.':''));
+  }
+  return '<div class="txt">'+T.map(p=>'<p>'+p+'</p>').join('')+(ep.length?'<p style="margin-top:14px;color:#ffcf6a">EPÍLOGO</p>'+ep.map(p=>'<p>· '+p+'</p>').join(''):'')+'</div>';
+}
+function renderEnd(){
+  const k=S.ending,[t,tag]=ENDS[k];const cks=lsGet('tramite-cks-v1')||{};
+  const days=Object.keys(cks).map(Number).sort((a,b)=>a-b);
+  app.innerHTML='<div class="endscr scr"><div class="tag">'+tag+'</div><h1>'+t+'</h1>'+endText(k)+'<div class="btns">'+
+    (['arresto','ruina','casa'].includes(k)&&days.length?'<button class="btn gold big" data-a="retry" data-d="'+days[days.length-1]+'" data-key="enter">Repetir el día '+days[days.length-1]+'</button>':'')+
+    '<button class="btn" data-a="days">Elegir día</button><button class="btn dark" data-a="title" data-key="esc">Volver al inicio</button></div><p style="font-size:13px;color:#8c80a6">Finales vistos: '+REC.ends.length+' de 6</p></div>';
+}
+function endless(){
+  const sc=S.d.ok;const best=sc>REC.best;if(best){REC.best=sc;lsSet(RECK,REC)}
+  S.phase='end';try{localStorage.removeItem(SAVE)}catch(e){}
+  app.innerHTML='<div class="endscr scr"><div class="tag">TURNO SIN FIN</div><h1>'+sc+' bien despachadas</h1><div class="txt"><p>Atendiste '+S.d.proc+' ánimas con '+S.d.cit+' amonestaciones.</p><p>'+(best?'¡Nuevo récord!':'Récord: '+REC.best+'.')+'</p></div><div class="btns"><button class="btn gold big" data-a="endless" data-key="enter">Otro turno</button><button class="btn dark" data-a="title" data-key="esc">Volver al inicio</button></div></div>';
+}
+
+/* ---------------- sheets ---------------- */
+function openSheet(html,pause){const sh=$('#sheet');sh.hidden=false;sh.innerHTML='<div class="sh">'+html+'</div>';sh._opts=null;sh._pause=!!pause;if(pause)paused++}
+function closeSheet(){const sh=$('#sheet');if(sh._opts)return;if(sh._pause)paused=Math.max(0,paused-1);sh._pause=false;sh.hidden=true;sh.innerHTML=''}
+function helpHTML(){
+  return '<button class="close" data-a="close" data-key="esc">Cerrar</button><div class="help"><h2>Cómo se juega</h2>'+
+  '<p>Es noviembre de 1986. Te ha tocado por lotería la <b>Ventanilla 3</b> de la Oficina Central de Tránsito: los recién muertos hacen cola para cruzar al Otro Lado y tú decides quién pasa.</p>'+
+  '<h3>Cada ánima</h3><ul><li><b>Siguiente</b> llama a la próxima. Te dará sus papeles.</li><li>Léelos y compáralos con el <b>Reglamento</b> (normas, provincias y sellos), la cara, la fecha de hoy y la balanza.</li><li>Sella <b>CRUZA</b> o <b>VUELVE</b> en la cédula y pulsa <b>Devolver papeles</b>.</li><li>Desde el día 5 puedes <b>Retener</b>: los Celadores se llevan al ánima.</li></ul>'+
+  '<h3>Inspeccionar</h3><p>Pulsa <b>Inspeccionar</b> y toca dos datos, por ejemplo el nombre de la cédula y el del certificado, o la fecha de caducidad y el calendario. Si no coinciden, se marca la <b>discrepancia</b> y puedes <b>Preguntar</b>: a veces el ánima te dará el papel que le falta.</p>'+
+  '<h3>La Balanza y la Lámpara</h3><p>Un ánima pesa 21 gramos. Si pesa más, lleva algo escondido: la <b>Lámpara</b> lo revela. Registrar a quien pesa lo justo es una falta. Y si la balanza marca kilos… eso no es un ánima.</p>'+
+  '<h3>Dinero y familia</h3><p>Cada ánima despachada son 5 óbolos. Dos errores al día son solo avisos; desde el tercero, 5 óbolos de multa cada uno. Por la noche pagas el alquiler y decides si hay comida, calefacción y medicinas. Con hambre o frío dos noches seguidas, alguien enferma; un enfermo sin medicinas empeora y puede morir.</p>'+
+  '<h3>La historia</h3><p>Dura catorce días. Hay personajes que vuelven, propuestas, sobornos y una organización secreta. Lo que decidas cambia el final: hay seis. La partida se guarda cada día y puedes repetir cualquier día ya jugado.</p>'+
+  '<h3>En el ordenador</h3><p>Cada botón muestra su tecla. <b>Intro</b> llama al siguiente o devuelve los papeles, <b>I</b> inspecciona, <b>R</b> abre el reglamento, <b>P</b> pregunta, <b>L</b> enciende la lámpara, <b>A</b> sella CRUZA, <b>D</b> sella VUELVE, <b>T</b> retiene y <b>Esc</b> cierra ventanas. En las decisiones, <b>1</b> y <b>2</b> eligen. Los datos se comparan con el ratón.</p></div>';
+}
+function menu(){
+  openSheet('<button class="close" data-a="close" data-key="esc">Cerrar</button><h2>Pausa</h2><p>Día '+S.day+' · '+hhmm(S.d.t)+'</p><div class="acts"><button class="btn" data-a="help" data-key="h">Cómo se juega</button><button class="btn" data-a="snd">Sonido: '+(CFG.snd?'sí':'no')+'</button><button class="btn" data-a="slow">Ritmo: '+(CFG.slow?'tranquilo':'normal')+'</button><button class="btn dark" data-a="title" data-key="q">Salir al inicio</button></div><p style="font-size:13px;color:#a89c88">La partida se guarda sola. Si sales a mitad del día, volverás al ánima que estabas atendiendo.</p>',true);
+}
+function daysSheet(){
+  const cks=lsGet('tramite-cks-v1')||{};
+  const ds=Object.keys(cks).map(Number).sort((a,b)=>a-b);
+  openSheet('<button class="close" data-a="close" data-key="esc">Cerrar</button><h2>Elegir día</h2><p>Empieza de nuevo cualquier día que ya hayas jugado, con el dinero y la familia que tenías esa mañana.</p><div class="acts">'+ds.map((d,i)=>'<button class="btn" data-a="retry" data-d="'+d+'"'+(i<9?' data-key="'+(i+1)+'"':'')+'>Día '+d+'</button>').join('')+'</div>');
+}
+function retryDay(d){
+  const cks=lsGet('tramite-cks-v1')||{};const c=cks[d];if(!c)return;
+  S=JSON.parse(JSON.stringify(c));const keep={};Object.keys(cks).map(Number).filter(x=>x<=d).forEach(x=>keep[x]=cks[x]);S.cks=keep;S.phase='paper';S.d=newDayLog();
+  closeSheet();save();render();
+}
+
+/* ---------------- input ---------------- */
+document.addEventListener('click',ev=>{
+  const fEl=ev.target.closest('[data-f]');
+  if(fEl&&INS.on&&S&&S.phase==='booth'){ev.preventDefault();pickField(fEl.dataset.f);return}
+  const el=ev.target.closest('[data-a]');if(!el)return;
+  if(el.tagName==='INPUT'){return}
+  const a=el.dataset.a;
+  switch(a){
+    case 'new':{const sv=load();if(sv&&sv.mode==='story'&&sv.day>1&&!el.dataset.ok){el.dataset.ok=1;el.textContent='¿Seguro? Pulsa otra vez';return}newGame('story');render();break}
+    case 'cont':S=load();if(!S){render();break}if(S.phase==='booth'){B.e=null;renderGame();}else render();break;
+    case 'endless':closeSheet();newGame('endless');render();break;
+    case 'days':daysSheet();break;
+    case 'retry':retryDay(+el.dataset.d);break;
+    case 'help':openSheet(helpHTML(),true);break;
+    case 'snd':CFG.snd=CFG.snd?0:1;lsSet(CFGK,CFG);el.textContent='Sonido: '+(CFG.snd?'sí':'no');break;
+    case 'slow':CFG.slow=CFG.slow?0:1;lsSet(CFGK,CFG);el.textContent='Ritmo: '+(CFG.slow?'tranquilo':'normal');break;
+    case 'menu':menu();break;
+    case 'close':closeSheet();break;
+    case 'title':closeSheet();if(S&&S.phase!=='end')save();S=null;paused=0;busy=false;render();break;
+    case 'topaper':toBooth();break;
+    case 'next':nextEntrant();break;
+    case 'insp':toggleInsp();break;
+    case 'book':openSheet('<button class="close" data-a="close" data-key="esc">Cerrar</button><h2>Reglamento</h2><div id="bookin">'+bookHTML()+'</div>');markIns();break;
+    case 'tab':bookTab=el.dataset.t;{const bi=$('#bookin');if(bi)bi.innerHTML=bookHTML();drawBookSide();markIns()}break;
+    case 'askq':ask();break;
+    case 'search':search();break;
+    case 'stok':stamp('ok');break;
+    case 'stno':stamp('no');break;
+    case 'det':decide('det');break;
+    case 'give':giveBack();break;
+    case 'opt':storyPick(+el.dataset.i);break;
+    case 'sleep':sleep();break;
+  }
+});
+document.addEventListener('change',ev=>{
+  const el=ev.target;if(el.dataset.a!=='exp'||!S||!S.night)return;const k=el.dataset.k,n=S.night;
+  if(k==='food')n.food=el.checked?1:0;else if(k==='heat')n.heat=el.checked?1:0;else if(k==='burn')n.burn=el.checked?1:0;else if(k.startsWith('med:'))n.meds[k.slice(4)]=el.checked?1:0;
+  save();renderNight();
+});
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(e.key==='Escape'&&INS.on&&$('#sheet').hidden){toggleInsp();e.preventDefault();return}
+  if(busy)return;
+  if(window.__keyclick)window.__keyclick(e);
+});
+/* clock */
+let lastMin=-1;
+setInterval(()=>{
+  if(!S||S.phase!=='booth'||paused||busy||document.hidden)return;
+  if(S.d.t>=600)return;
+  S.d.t=Math.min(600,S.d.t+250/(CFG.slow?750:420));
+  const m=Math.floor(S.d.t);
+  if(m!==lastMin){lastMin=m;const c=$('#clk');if(c){c.textContent=hhmm(S.d.t);c.classList.toggle('late',S.d.t>=540)}
+    if(m%10===0)save();
+    if(S.d.t>=600){log('sys','Son las seis. Termina con esta ánima y cierra.');if(!B.e){drawBooth();drawDesk()}drawBar()}}
+},250);
+render();
+</script>
+<script>
+/* keyboard shortcuts shown on the buttons themselves (computers only) */
+(function(){
+  const NAMES={enter:'↵ Intro',esc:'Esc',space:'Espacio',backspace:'⌫','-':'−','+':'+'};
+  const fine=matchMedia('(hover:hover) and (pointer:fine)');
+  function deco(){if(!fine.matches)return;document.querySelectorAll('[data-key]').forEach(b=>{if(b.querySelector(':scope>.kk'))return;const k=document.createElement('kbd');k.className='kk';k.textContent=NAMES[b.dataset.key]||b.dataset.key.toUpperCase();b.appendChild(k)})}
+  new MutationObserver(deco).observe(document.body,{childList:true,subtree:true});deco();
+  window.__keyclick=e=>{
+    const n=({Enter:'enter',Escape:'esc',' ':'space',Backspace:'backspace'})[e.key]||e.key.toLowerCase();
+    const sh=document.getElementById('sheet'),root=sh&&!sh.hidden?sh:document.getElementById('app');
+    const b=[...root.querySelectorAll('[data-key]')].find(x=>x.dataset.key===n&&!x.disabled&&x.offsetParent!==null);
+    if(!b)return false;e.preventDefault();b.click();return true;
+  };
+})();
+</script>

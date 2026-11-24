@@ -18,6 +18,8 @@ GAMES = {
                   "bg": "#f3ecdf", "theme": "#f3ecdf"},
     "ordago": {"src": "src/ordago.html", "name": "Órdago", "desc": "Roguelike de mus con santos, estampas y vinos.",
                "bg": "#0f2b3d", "theme": "#0f2b3d"},
+    "tramite": {"src": "src/tramite.html", "name": "Último Trámite", "desc": "Papeleo de ultratumba: decide qué ánimas cruzan al Otro Lado.",
+                "bg": "#1d1730", "theme": "#1d1730"},
 }
 
 SW = """const V='%(slug)s-%(ver)s';
@@ -40,7 +42,7 @@ WRAP_CSS = """<style>html{box-sizing:border-box;padding-top:env(safe-area-inset-
 def sync_sources():
     # when the working copies next to this folder exist, they are the newest version
     import shutil
-    for a, b in (("../farol/farol.html", "src/farol.html"), ("../ordago/ordago.html", "src/ordago.html"), ("../cripticos/cripticos.html", "src/cripticos.html")):
+    for a, b in (("../farol/farol.html", "src/farol.html"), ("../ordago/ordago.html", "src/ordago.html"), ("../cripticos/cripticos.html", "src/cripticos.html"), ("../tramite/tramite.html", "src/tramite.html")):
         if os.path.exists(os.path.join(HERE, a)):
             shutil.copyfile(os.path.join(HERE, a), os.path.join(HERE, b))
 
@@ -51,7 +53,7 @@ def build(slug, g):
     src = open(os.path.join(HERE, g["src"]), encoding="utf-8").read()
     if not os.environ.get("KEEP_TEST_HOOK"):
         src = src.replace("if(location.protocol==='file:')window.__f=()=>S;\n", "").replace("if(location.protocol==='file:')window.__o=()=>S;\n", "")
-        src = "\n".join(l for l in src.split("\n") if not l.startswith("if(location.protocol==='file:')window.__ot=") and not l.startswith("if(location.protocol==='file:')window.__ft="))
+        src = "\n".join(l for l in src.split("\n") if not l.startswith("if(location.protocol==='file:')window.__"))
     head, body = src.split("</style>", 1)
     extra = ('<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="apple-touch-icon.png">\n'
              '<link rel="icon" href="icon-192.png">\n<meta name="description" content="%s">\n' % g["desc"])
