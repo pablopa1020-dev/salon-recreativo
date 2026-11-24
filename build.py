@@ -47,7 +47,8 @@ def build(slug, g):
     out = os.path.join(HERE, slug)
     os.makedirs(out, exist_ok=True)
     src = open(os.path.join(HERE, g["src"]), encoding="utf-8").read()
-    src = src.replace("if(location.protocol==='file:')window.__f=()=>S;\n", "").replace("if(location.protocol==='file:')window.__o=()=>S;\n", "")
+    if not os.environ.get("KEEP_TEST_HOOK"):
+        src = src.replace("if(location.protocol==='file:')window.__f=()=>S;\n", "").replace("if(location.protocol==='file:')window.__o=()=>S;\n", "")
     head, body = src.split("</style>", 1)
     extra = ('<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="apple-touch-icon.png">\n'
              '<link rel="icon" href="icon-192.png">\n<meta name="description" content="%s">\n' % g["desc"])
@@ -55,7 +56,7 @@ def build(slug, g):
             "\n<!-- version " + VERSION + " -->\n</head>\n<body>\n" + body + "\n</body>\n</html>\n")
     open(os.path.join(out, "index.html"), "w", encoding="utf-8").write(html)
     manifest = {"name": g["name"], "short_name": g["name"], "description": g["desc"], "lang": "es", "start_url": "./", "scope": "./",
-                "display": "standalone", "orientation": "portrait", "background_color": g["bg"], "theme_color": g["theme"],
+                "display": "standalone", "orientation": "any", "background_color": g["bg"], "theme_color": g["theme"],
                 "icons": [{"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
                           {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}]}
     json.dump(manifest, open(os.path.join(out, "manifest.webmanifest"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
