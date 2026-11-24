@@ -18,6 +18,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=VT323&family=Pixelify+Sans:wght@400;500;600;700&display=swap">
 <style>
+/* the pixel faces draw 2 and 5 almost like an S: digits come from a clearer arcade face */
+@font-face{font-family:"FarolCifras";src:url(https://fonts.gstatic.com/s/vt323/v18/pxiKyp0ihIEF2isfFJXUdVNF.woff2) format("woff2");unicode-range:U+0030-0039;size-adjust:138%;font-display:swap}
 /* Layout: clandestine neon casino on an old CRT — dark velvet plasma, magenta/cyan/amber neon, pixel type.
    Portrait: one column. Landscape (short screens): info + score panel on the left, cards on the right. Single dark look by choice. */
 :root{
@@ -25,9 +27,9 @@
   --mag:#ff2bd6; --cyan:#22e4ff; --amber:#ffb627; --lime:#9dff4a; --red:#ff3d5a;
   --ivory:#fff6e6; --ink:#14061a; --muted:#b9a3c9;
   --sh:#ff3d6e; --sd:#ff9f1c; --sc:#24d17a; --ss:#4a8dff;
-  --display:"Silkscreen","Courier New",monospace;
+  --display:"FarolCifras","Silkscreen","Courier New",monospace;
   --digits:"VT323","Courier New",monospace;
-  --body:"Pixelify Sans",-apple-system,"Segoe UI",sans-serif;
+  --body:"FarolCifras","Pixelify Sans",-apple-system,"Segoe UI",sans-serif;
   color-scheme:dark;
 }
 [hidden]{display:none!important}
@@ -330,7 +332,7 @@ table.lv td:nth-child(n+2){text-align:right;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 <style>html{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<!-- version 4.1 -->
+<!-- version 4.2 -->
 </head>
 <body>
 
