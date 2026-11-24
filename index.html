@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Salón Recreativo</title>
+<meta name="description" content="Farol y Órdago: roguelikes de cartas para el móvil.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@500;700;900&display=swap">
+<style>
+:root{--bg:#170f33;--edge:#06031a;--y:#ffd23f;--p:#ff4f9a;--c:#19c3d6;--ink:#fff;color-scheme:dark}
+body{margin:0;background:var(--bg) repeating-conic-gradient(from 0deg at 50% 0%,#170f33 0 8deg,#22164a 8deg 16deg);color:var(--ink);font-family:Rubik,-apple-system,sans-serif;min-height:100vh}
+main{max-width:560px;margin:0 auto;padding:calc(24px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:16px}
+h1{font-family:Bungee,Impact,sans-serif;font-weight:400;font-size:clamp(34px,10vw,52px);margin:0;text-align:center;color:var(--y);text-shadow:0 4px 0 var(--p),0 8px 0 var(--edge);line-height:1.05}
+.sub{text-align:center;margin:0;font-weight:700;color:#d8d0ff}
+a.game{display:flex;gap:14px;align-items:center;text-decoration:none;color:inherit;background:#120a2c;border:3px solid var(--edge);border-radius:18px;padding:12px;box-shadow:0 5px 0 var(--edge)}
+a.game:active{transform:translateY(4px);box-shadow:0 1px 0 var(--edge)}
+a.game img{width:84px;height:84px;border-radius:20px;border:3px solid var(--edge);flex:none}
+a.game h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0 0 4px;font-size:22px;color:var(--y)}
+a.game p{margin:0;font-size:14px;line-height:1.35;color:#e4dfff}
+.how{background:#120a2c;border:3px solid var(--edge);border-radius:18px;padding:14px 16px}
+.how h3{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0 0 8px;color:var(--c);font-size:17px}
+.how ol{margin:0;padding-left:20px;line-height:1.55;font-size:14px}
+.how p{margin:8px 0 0;font-size:13px;color:#bdb4e8;line-height:1.45}
+</style>
+</head>
+<body>
+<main>
+  <h1>Salón<br>Recreativo</h1>
+  <p class="sub">Dos roguelikes de cartas para el móvil</p>
+  <a class="game" href="farol/"><img src="farol/icon-192.png" alt=""><div><h2>Farol</h2><p>Póker con amuletos, pergaminos y licores. Supera ocho noches de mesas y rivales.</p></div></a>
+  <a class="game" href="ordago/"><img src="ordago/icon-192.png" alt=""><div><h2>Órdago</h2><p>Mus a ocho reyes con santos, estampas y vinos. Gana las fiestas de seis pueblos.</p></div></a>
+  <div class="how">
+    <h3>Instalar en iPhone</h3>
+    <ol>
+      <li>Abre esta página en <b>Safari</b>.</li>
+      <li>Entra en el juego que quieras.</li>
+      <li>Pulsa <b>Compartir</b> (el cuadrado con la flecha).</li>
+      <li>Elige <b>Añadir a pantalla de inicio</b> y luego <b>Añadir</b>.</li>
+    </ol>
+    <p>Se abre a pantalla completa con su propio icono, funciona sin conexión y se actualiza solo cuando hay versión nueva. En Android, Chrome ofrece «Instalar aplicación».</p>
+  </div>
+</main>
+</body>
+</html>
